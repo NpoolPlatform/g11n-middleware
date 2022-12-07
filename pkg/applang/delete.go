@@ -5,7 +5,7 @@ import (
 
 	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/applang"
 
-	applangmgrcli "github.com/NpoolPlatform/g11n-middleware/pkg/client/applang"
+	applangmgrcli "github.com/NpoolPlatform/g11n-manager/pkg/client/applang"
 )
 
 func DeleteLang(ctx context.Context, id string) (*npool.Lang, error) {

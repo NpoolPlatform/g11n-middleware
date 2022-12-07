@@ -6,7 +6,7 @@ import (
 	applangmgrpb "github.com/NpoolPlatform/message/npool/g11n/mgr/v1/applang"
 	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/applang"
 
-	applangmgrcli "github.com/NpoolPlatform/g11n-middleware/pkg/client/applang"
+	applangmgrcli "github.com/NpoolPlatform/g11n-manager/pkg/client/applang"
 )
 
 func UpdateLang(ctx context.Context, in *applangmgrpb.LangReq) (*npool.Lang, error) {
