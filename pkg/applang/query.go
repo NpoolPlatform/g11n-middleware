@@ -130,6 +130,8 @@ func join(stm *ent.AppLangQuery) *ent.AppLangSelect {
 			entapplang.FieldAppID,
 			entapplang.FieldLangID,
 			entapplang.FieldMain,
+			entapplang.FieldCreatedAt,
+			entapplang.FieldUpdatedAt,
 		).
 		Modify(func(s *sql.Selector) {
 			t1 := sql.Table(entlang.Table)

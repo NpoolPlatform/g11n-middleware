@@ -145,6 +145,8 @@ func join(stm *ent.MessageQuery) *ent.MessageSelect {
 			entmessage.FieldMessage,
 			entmessage.FieldGetIndex,
 			entmessage.FieldDisabled,
+			entmessage.FieldCreatedAt,
+			entmessage.FieldUpdatedAt,
 		).
 		Modify(func(s *sql.Selector) {
 			t1 := sql.Table(entlang.Table)

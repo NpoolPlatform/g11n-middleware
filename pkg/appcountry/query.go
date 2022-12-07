@@ -101,9 +101,9 @@ func GetCountries(ctx context.Context, conds *appcountrymgrpb.Conds, offset, lim
 func GetManyCountries(ctx context.Context, ids []string) ([]*npool.Country, error) {
 	infos := []*npool.Country{}
 
-	langIDs := []uuid.UUID{}
+	countryIDs := []uuid.UUID{}
 	for _, id := range ids {
-		langIDs = append(langIDs, uuid.MustParse(id))
+		countryIDs = append(countryIDs, uuid.MustParse(id))
 	}
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
@@ -111,7 +111,7 @@ func GetManyCountries(ctx context.Context, ids []string) ([]*npool.Country, erro
 			AppCountry.
 			Query().
 			Where(
-				entappcountry.IDIn(langIDs...),
+				entappcountry.IDIn(countryIDs...),
 			)
 		return join(stm).
 			Scan(_ctx, &infos)
@@ -129,6 +129,8 @@ func join(stm *ent.AppCountryQuery) *ent.AppCountrySelect {
 			entappcountry.FieldID,
 			entappcountry.FieldAppID,
 			entappcountry.FieldCountryID,
+			entappcountry.FieldCreatedAt,
+			entappcountry.FieldUpdatedAt,
 		).
 		Modify(func(s *sql.Selector) {
 			t1 := sql.Table(entcountry.Table)
@@ -139,7 +141,7 @@ func join(stm *ent.AppCountryQuery) *ent.AppCountrySelect {
 					t1.C(entcountry.FieldID),
 				).
 				AppendSelect(
-					sql.As(t1.C(entcountry.FieldCountry), "lang"),
+					sql.As(t1.C(entcountry.FieldCountry), "country"),
 					sql.As(t1.C(entcountry.FieldFlag), "flag"),
 					sql.As(t1.C(entcountry.FieldCode), "code"),
 					sql.As(t1.C(entcountry.FieldShort), "short"),

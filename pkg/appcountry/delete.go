@@ -5,7 +5,7 @@ import (
 
 	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/appcountry"
 
-	appcountrymgrcli "github.com/NpoolPlatform/g11n-middleware/pkg/client/appcountry"
+	appcountrymgrcli "github.com/NpoolPlatform/g11n-manager/pkg/client/appcountry"
 )
 
 func DeleteCountry(ctx context.Context, id string) (*npool.Country, error) {
