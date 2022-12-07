@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: g11n-middleware-config
+  namespace: kube-system
+data:
+  service-conf: |
+    config:
+      hostname: "g11n-middleware.npool.top"
+      http_port: 50600
+      grpc_port: 50601
+      healthz_port: 50602
+      prometheus_port: 50603
+      appid: "89089012783789789719823798127398"
+      serviceid: "f4292056-75e8-11ed-a3f2-1e0b0807e20c"
+      logdir: "./"
+      apolloAccessKey: "0147fb70b815403790e8634b899fac07"
