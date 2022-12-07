@@ -16,3 +16,17 @@ func CreateLang(ctx context.Context, in *applangmgrpb.LangReq) (*npool.Lang, err
 	}
 	return GetLang(ctx, info.ID)
 }
+
+func CreateLangs(ctx context.Context, in []*applangmgrpb.LangReq) ([]*npool.Lang, error) {
+	infos, err := applangmgrcli.CreateLangs(ctx, in)
+	if err != nil {
+		return nil, err
+	}
+
+	ids := []string{}
+	for _, info := range infos {
+		ids = append(ids, info.ID)
+	}
+
+	return GetManyLangs(ctx, ids)
+}

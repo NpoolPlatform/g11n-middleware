@@ -98,6 +98,31 @@ func GetLangs(ctx context.Context, conds *applangmgrpb.Conds, offset, limit int3
 	return infos, total, nil
 }
 
+func GetManyLangs(ctx context.Context, ids []string) ([]*npool.Lang, error) {
+	infos := []*npool.Lang{}
+
+	langIDs := []uuid.UUID{}
+	for _, id := range ids {
+		langIDs = append(langIDs, uuid.MustParse(id))
+	}
+
+	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
+		stm := cli.
+			AppLang.
+			Query().
+			Where(
+				entapplang.IDIn(langIDs...),
+			)
+		return join(stm).
+			Scan(_ctx, &infos)
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return infos, nil
+}
+
 func join(stm *ent.AppLangQuery) *ent.AppLangSelect {
 	return stm.
 		Select(
