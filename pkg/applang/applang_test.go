@@ -66,6 +66,7 @@ func create(t *testing.T) {
 		ret.CreatedAt = info.CreatedAt
 		ret.UpdatedAt = info.UpdatedAt
 		ret.ID = info.ID
+		req.ID = &info.ID
 		assert.Equal(t, info, ret)
 	}
 }

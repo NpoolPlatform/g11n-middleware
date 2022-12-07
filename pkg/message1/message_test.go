@@ -87,10 +87,21 @@ func update(t *testing.T) {
 	}
 }
 
+func delete1(t *testing.T) {
+	info, err := DeleteMessage(context.Background(), ret.ID)
+	if assert.Nil(t, err) {
+		assert.Equal(t, info, ret)
+	}
+
+	_, err = GetMessage(context.Background(), ret.ID)
+	assert.NotNil(t, err)
+}
+
 func TestLang(t *testing.T) {
 	if runByGithubAction, err := strconv.ParseBool(os.Getenv("RUN_BY_GITHUB_ACTION")); err == nil && runByGithubAction {
 		return
 	}
 	t.Run("create", create)
 	t.Run("update", update)
+	t.Run("delete", delete1)
 }
