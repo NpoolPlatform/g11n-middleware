@@ -43,8 +43,59 @@ func GetLang(ctx context.Context, id string) (*npool.Lang, error) {
 	return infos[0], nil
 }
 
-func GetLangs(ctx context.Context, in *applangmgrpb.Conds, offset, limit int32) ([]*npool.Lang, uint32, error) {
-	return nil, 0, nil
+func GetLangs(ctx context.Context, conds *applangmgrpb.Conds, offset, limit int32) ([]*npool.Lang, uint32, error) {
+	infos := []*npool.Lang{}
+	total := uint32(0)
+
+	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
+		stm := cli.
+			AppLang.
+			Query()
+
+		if conds.ID != nil {
+			stm.
+				Where(
+					entapplang.ID(uuid.MustParse(conds.GetID().GetValue())),
+				)
+		}
+		if conds.AppID != nil {
+			stm.
+				Where(
+					entapplang.AppID(uuid.MustParse(conds.GetAppID().GetValue())),
+				)
+		}
+		if conds.LangID != nil {
+			stm.
+				Where(
+					entapplang.LangID(uuid.MustParse(conds.GetLangID().GetValue())),
+				)
+		}
+
+		_total, err := stm.Count(_ctx)
+		if err != nil {
+			return err
+		}
+
+		total = uint32(_total)
+
+		stm.
+			Offset(int(offset)).
+			Limit(int(limit))
+
+		return join(stm).
+			Scan(_ctx, &infos)
+	})
+	if err != nil {
+		return nil, 0, err
+	}
+	if len(infos) == 0 {
+		return nil, 0, fmt.Errorf("no record")
+	}
+	if len(infos) > 1 {
+		return nil, 0, fmt.Errorf("too many record")
+	}
+
+	return infos, total, nil
 }
 
 func join(stm *ent.AppLangQuery) *ent.AppLangSelect {
