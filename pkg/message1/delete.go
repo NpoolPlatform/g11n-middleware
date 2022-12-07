@@ -5,7 +5,7 @@ import (
 
 	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/message"
 
-	messagemgrcli "github.com/NpoolPlatform/g11n-middleware/pkg/client/message"
+	messagemgrcli "github.com/NpoolPlatform/g11n-manager/pkg/client/message"
 )
 
 func DeleteMessage(ctx context.Context, id string) (*npool.Message, error) {

@@ -153,7 +153,7 @@ func join(stm *ent.MessageQuery) *ent.MessageSelect {
 			s.
 				LeftJoin(t1).
 				On(
-					s.C(entmessage.FieldMessageID),
+					s.C(entmessage.FieldLangID),
 					t1.C(entlang.FieldID),
 				).
 				AppendSelect(
