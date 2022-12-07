@@ -70,9 +70,34 @@ func create(t *testing.T) {
 	}
 }
 
+func update(t *testing.T) {
+	main1 := true
+
+	ret.Main = main1
+	req.Main = &main1
+
+	info, err := UpdateLang(context.Background(), req)
+	if assert.Nil(t, err) {
+		ret.UpdatedAt = info.UpdatedAt
+		assert.Equal(t, info, ret)
+	}
+}
+
+func delete1(t *testing.T) {
+	info, err := DeleteLang(context.Background(), ret.ID)
+	if assert.Nil(t, err) {
+		assert.Equal(t, info, ret)
+	}
+
+	_, err = GetLang(context.Background(), ret.ID)
+	assert.NotNil(t, err)
+}
+
 func TestLang(t *testing.T) {
 	if runByGithubAction, err := strconv.ParseBool(os.Getenv("RUN_BY_GITHUB_ACTION")); err == nil && runByGithubAction {
 		return
 	}
 	t.Run("create", create)
+	t.Run("update", update)
+	t.Run("delete", delete1)
 }

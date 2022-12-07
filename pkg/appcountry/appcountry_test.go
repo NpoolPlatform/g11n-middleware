@@ -70,9 +70,20 @@ func create(t *testing.T) {
 	}
 }
 
+func delete1(t *testing.T) {
+	info, err := DeleteCountry(context.Background(), ret.ID)
+	if assert.Nil(t, err) {
+		assert.Equal(t, info, ret)
+	}
+
+	_, err = GetCountry(context.Background(), ret.ID)
+	assert.NotNil(t, err)
+}
+
 func TestCountry(t *testing.T) {
 	if runByGithubAction, err := strconv.ParseBool(os.Getenv("RUN_BY_GITHUB_ACTION")); err == nil && runByGithubAction {
 		return
 	}
 	t.Run("create", create)
+	t.Run("delete", delete1)
 }
