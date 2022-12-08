@@ -3,7 +3,7 @@ package api
 import (
 	"context"
 
-	g11n "github.com/NpoolPlatform/message/npool/g11n/gw/v1"
+	g11n "github.com/NpoolPlatform/message/npool/g11n/mw/v1"
 
 	"github.com/NpoolPlatform/g11n-middleware/api/appcountry"
 	"github.com/NpoolPlatform/g11n-middleware/api/applang"

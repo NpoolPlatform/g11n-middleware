@@ -10,6 +10,8 @@ import (
 	"github.com/NpoolPlatform/g11n-manager/pkg/db"
 	"github.com/NpoolPlatform/g11n-manager/pkg/db/ent"
 
+	crud "github.com/NpoolPlatform/g11n-manager/pkg/crud/message"
+
 	entlang "github.com/NpoolPlatform/g11n-manager/pkg/db/ent/lang"
 	entmessage "github.com/NpoolPlatform/g11n-manager/pkg/db/ent/message"
 
@@ -48,46 +50,15 @@ func GetMessages(ctx context.Context, conds *messagemgrpb.Conds, offset, limit i
 	total := uint32(0)
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		stm := cli.
-			Message.
-			Query()
-
-		if conds.ID != nil {
-			stm.
-				Where(
-					entmessage.ID(uuid.MustParse(conds.GetID().GetValue())),
-				)
-		}
-		if conds.AppID != nil {
-			stm.
-				Where(
-					entmessage.AppID(uuid.MustParse(conds.GetAppID().GetValue())),
-				)
-		}
-		if conds.LangID != nil {
-			stm.
-				Where(
-					entmessage.LangID(uuid.MustParse(conds.GetLangID().GetValue())),
-				)
-		}
-		if conds.MessageID != nil {
-			stm.
-				Where(
-					entmessage.MessageID(conds.GetMessageID().GetValue()),
-				)
-		}
-		if conds.Disabled != nil {
-			stm.
-				Where(
-					entmessage.Disabled(conds.GetDisabled().GetValue()),
-				)
+		stm, err := crud.SetQueryConds(conds, cli)
+		if err != nil {
+			return err
 		}
 
 		_total, err := stm.Count(_ctx)
 		if err != nil {
 			return err
 		}
-
 		total = uint32(_total)
 
 		stm.
