@@ -71,9 +71,6 @@ func GetMessages(ctx context.Context, conds *messagemgrpb.Conds, offset, limit i
 	if err != nil {
 		return nil, 0, err
 	}
-	if len(infos) > 1 {
-		return nil, 0, fmt.Errorf("too many record")
-	}
 
 	return infos, total, nil
 }

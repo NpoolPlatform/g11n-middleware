@@ -88,9 +88,6 @@ func GetLangs(ctx context.Context, conds *applangmgrpb.Conds, offset, limit int3
 	if err != nil {
 		return nil, 0, err
 	}
-	if len(infos) > 1 {
-		return nil, 0, fmt.Errorf("too many record")
-	}
 
 	return infos, total, nil
 }

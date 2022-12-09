@@ -88,12 +88,6 @@ func GetCountries(ctx context.Context, conds *appcountrymgrpb.Conds, offset, lim
 	if err != nil {
 		return nil, 0, err
 	}
-	if len(infos) == 0 {
-		return nil, 0, fmt.Errorf("no record")
-	}
-	if len(infos) > 1 {
-		return nil, 0, fmt.Errorf("too many record")
-	}
 
 	return infos, total, nil
 }
