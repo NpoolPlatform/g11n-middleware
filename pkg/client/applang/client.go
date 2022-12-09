@@ -84,7 +84,7 @@ func UpdateLang(ctx context.Context, in *applangmgrpb.LangReq) (*npool.Lang, err
 	return info.(*npool.Lang), nil
 }
 
-func GetLangs(ctx context.Context, conds *applangmgrpb.Conds, limit, offset int32) ([]*npool.Lang, uint32, error) {
+func GetLangs(ctx context.Context, conds *applangmgrpb.Conds, offset, limit int32) ([]*npool.Lang, uint32, error) {
 	var total uint32
 	infos, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.GetLangs(ctx, &npool.GetLangsRequest{

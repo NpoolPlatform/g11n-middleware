@@ -84,7 +84,7 @@ func UpdateMessage(ctx context.Context, in *messagemgrpb.MessageReq) (*npool.Mes
 	return info.(*npool.Message), nil
 }
 
-func GetMessages(ctx context.Context, conds *messagemgrpb.Conds, limit, offset int32) ([]*npool.Message, uint32, error) {
+func GetMessages(ctx context.Context, conds *messagemgrpb.Conds, offset, limit int32) ([]*npool.Message, uint32, error) {
 	var total uint32
 	infos, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.GetMessages(ctx, &npool.GetMessagesRequest{

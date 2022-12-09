@@ -67,7 +67,7 @@ func CreateCountries(ctx context.Context, in []*appcountrymgrpb.CountryReq) ([]*
 	return infos.([]*npool.Country), nil
 }
 
-func GetCountries(ctx context.Context, conds *appcountrymgrpb.Conds, limit, offset int32) ([]*npool.Country, uint32, error) {
+func GetCountries(ctx context.Context, conds *appcountrymgrpb.Conds, offset, limit int32) ([]*npool.Country, uint32, error) {
 	var total uint32
 	infos, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.GetCountries(ctx, &npool.GetCountriesRequest{
