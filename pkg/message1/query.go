@@ -62,6 +62,7 @@ func GetMessages(ctx context.Context, conds *messagemgrpb.Conds, offset, limit i
 		total = uint32(_total)
 
 		stm.
+			Order(ent.Asc(entmessage.FieldGetIndex)).
 			Offset(int(offset)).
 			Limit(int(limit))
 
