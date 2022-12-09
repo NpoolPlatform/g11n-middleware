@@ -44,7 +44,7 @@ func CreateLang(ctx context.Context, in *applangmgrpb.LangReq) (*npool.Lang, err
 		if err != nil {
 			return nil, fmt.Errorf("fail create applang: %v", err)
 		}
-		return resp.GetInfo(), nil
+		return resp.Info, nil
 	})
 	if err != nil {
 		return nil, fmt.Errorf("fail create applang: %v", err)
@@ -60,7 +60,7 @@ func CreateLangs(ctx context.Context, in []*applangmgrpb.LangReq) ([]*npool.Lang
 		if err != nil {
 			return nil, fmt.Errorf("fail create applangs: %v", err)
 		}
-		return resp.GetInfos(), nil
+		return resp.Infos, nil
 	})
 	if err != nil {
 		return nil, fmt.Errorf("fail create applangs: %v", err)
@@ -76,7 +76,7 @@ func UpdateLang(ctx context.Context, in *applangmgrpb.LangReq) (*npool.Lang, err
 		if err != nil {
 			return nil, fmt.Errorf("fail update applang: %v", err)
 		}
-		return resp.GetInfo(), nil
+		return resp.Info, nil
 	})
 	if err != nil {
 		return nil, fmt.Errorf("fail update applang: %v", err)
@@ -95,8 +95,8 @@ func GetLangs(ctx context.Context, conds *applangmgrpb.Conds, limit, offset int3
 		if err != nil {
 			return nil, fmt.Errorf("fail get applangs: %v", err)
 		}
-		total = resp.GetTotal()
-		return resp.GetInfos(), nil
+		total = resp.Total
+		return resp.Infos, nil
 	})
 	if err != nil {
 		return nil, 0, fmt.Errorf("fail get applangs: %v", err)
@@ -112,7 +112,7 @@ func DeleteLang(ctx context.Context, id string) (*npool.Lang, error) {
 		if err != nil {
 			return nil, fmt.Errorf("fail delete applang: %v", err)
 		}
-		return resp.GetInfo(), nil
+		return resp.Info, nil
 	})
 	if err != nil {
 		return nil, fmt.Errorf("fail delete applang: %v", err)

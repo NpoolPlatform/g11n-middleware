@@ -70,7 +70,7 @@ func (s *Server) GetMessages(ctx context.Context, in *npool.GetMessagesRequest) 
 		}
 	}
 
-	infos, total, err := message1.GetMessages(ctx, in.GetConds(), in.GetOffset(), limit)
+	infos, total, err := message1.GetMessages(ctx, conds, in.GetOffset(), limit)
 	if err != nil {
 		logger.Sugar().Errorw("GetMessages", "error", err)
 		return &npool.GetMessagesResponse{}, status.Error(codes.Internal, err.Error())

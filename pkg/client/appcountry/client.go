@@ -95,7 +95,7 @@ func DeleteCountry(ctx context.Context, id string) (*npool.Country, error) {
 		if err != nil {
 			return nil, fmt.Errorf("fail delete appcountry: %v", err)
 		}
-		return resp.GetInfo(), nil
+		return resp.Info, nil
 	})
 	if err != nil {
 		return nil, fmt.Errorf("fail delete appcountry: %v", err)

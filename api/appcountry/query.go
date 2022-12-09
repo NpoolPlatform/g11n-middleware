@@ -70,7 +70,7 @@ func (s *Server) GetCountries(ctx context.Context, in *npool.GetCountriesRequest
 		}
 	}
 
-	infos, total, err := appcountry1.GetCountries(ctx, in.GetConds(), in.GetOffset(), limit)
+	infos, total, err := appcountry1.GetCountries(ctx, conds, in.GetOffset(), limit)
 	if err != nil {
 		logger.Sugar().Errorw("GetCountries", "error", err)
 		return &npool.GetCountriesResponse{}, status.Error(codes.Internal, err.Error())

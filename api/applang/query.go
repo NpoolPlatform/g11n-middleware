@@ -70,7 +70,7 @@ func (s *Server) GetLangs(ctx context.Context, in *npool.GetLangsRequest) (*npoo
 		}
 	}
 
-	infos, total, err := applang1.GetLangs(ctx, in.GetConds(), in.GetOffset(), limit)
+	infos, total, err := applang1.GetLangs(ctx, conds, in.GetOffset(), limit)
 	if err != nil {
 		logger.Sugar().Errorw("GetLangs", "error", err)
 		return &npool.GetLangsResponse{}, status.Error(codes.Internal, err.Error())
