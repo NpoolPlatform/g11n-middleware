@@ -1,3 +1,4 @@
+//nolint:dupl
 package appcountry
 
 import (
@@ -57,12 +58,12 @@ func CreateCountries(ctx context.Context, in []*appcountrymgrpb.CountryReq) ([]*
 			Infos: in,
 		})
 		if err != nil {
-			return nil, fmt.Errorf("fail create appcountrys: %v", err)
+			return nil, fmt.Errorf("fail create appcountries: %v", err)
 		}
 		return resp.Infos, nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("fail create appcountrys: %v", err)
+		return nil, fmt.Errorf("fail create appcountries: %v", err)
 	}
 	return infos.([]*npool.Country), nil
 }
@@ -76,15 +77,31 @@ func GetCountries(ctx context.Context, conds *appcountrymgrpb.Conds, offset, lim
 			Offset: offset,
 		})
 		if err != nil {
-			return nil, fmt.Errorf("fail get appcountrys: %v", err)
+			return nil, fmt.Errorf("fail get appcountries: %v", err)
 		}
 		total = resp.Total
 		return resp.Infos, nil
 	})
 	if err != nil {
-		return nil, 0, fmt.Errorf("fail get appcountrys: %v", err)
+		return nil, 0, fmt.Errorf("fail get appcountries: %v", err)
 	}
 	return infos.([]*npool.Country), total, nil
+}
+
+func GetCountryOnly(ctx context.Context, conds *appcountrymgrpb.Conds) (*npool.Country, error) {
+	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+		resp, err := cli.GetCountryOnly(ctx, &npool.GetCountryOnlyRequest{
+			Conds: conds,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("fail get appcountryonly: %v", err)
+		}
+		return resp.Info, nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("fail get appcountryonly: %v", err)
+	}
+	return info.(*npool.Country), nil
 }
 
 func DeleteCountry(ctx context.Context, id string) (*npool.Country, error) {

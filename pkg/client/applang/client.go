@@ -104,6 +104,22 @@ func GetLangs(ctx context.Context, conds *applangmgrpb.Conds, offset, limit int3
 	return infos.([]*npool.Lang), total, nil
 }
 
+func GetLangOnly(ctx context.Context, conds *applangmgrpb.Conds) (*npool.Lang, error) {
+	infos, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+		resp, err := cli.GetLangOnly(ctx, &npool.GetLangOnlyRequest{
+			Conds: conds,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("fail get applangonly: %v", err)
+		}
+		return resp.Info, nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("fail get applangonly: %v", err)
+	}
+	return infos.(*npool.Lang), nil
+}
+
 func DeleteLang(ctx context.Context, id string) (*npool.Lang, error) {
 	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.DeleteLang(ctx, &npool.DeleteLangRequest{
