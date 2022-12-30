@@ -10,6 +10,8 @@ import (
 	"github.com/NpoolPlatform/g11n-manager/pkg/db"
 	"github.com/NpoolPlatform/g11n-manager/pkg/db/ent"
 
+	crud "github.com/NpoolPlatform/g11n-manager/pkg/crud/appcountry"
+
 	entappcountry "github.com/NpoolPlatform/g11n-manager/pkg/db/ent/appcountry"
 	entcountry "github.com/NpoolPlatform/g11n-manager/pkg/db/ent/country"
 
@@ -48,27 +50,9 @@ func GetCountries(ctx context.Context, conds *appcountrymgrpb.Conds, offset, lim
 	total := uint32(0)
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		stm := cli.
-			AppCountry.
-			Query()
-
-		if conds.ID != nil {
-			stm.
-				Where(
-					entappcountry.ID(uuid.MustParse(conds.GetID().GetValue())),
-				)
-		}
-		if conds.AppID != nil {
-			stm.
-				Where(
-					entappcountry.AppID(uuid.MustParse(conds.GetAppID().GetValue())),
-				)
-		}
-		if conds.CountryID != nil {
-			stm.
-				Where(
-					entappcountry.CountryID(uuid.MustParse(conds.GetCountryID().GetValue())),
-				)
+		stm, err := crud.SetQueryConds(conds, cli)
+		if err != nil {
+			return err
 		}
 
 		_total, err := stm.Count(_ctx)
@@ -115,6 +99,31 @@ func GetManyCountries(ctx context.Context, ids []string) ([]*npool.Country, erro
 	}
 
 	return infos, nil
+}
+
+func GetCountryOnly(ctx context.Context, conds *appcountrymgrpb.Conds) (*npool.Country, error) {
+	infos := []*npool.Country{}
+
+	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
+		stm, err := crud.SetQueryConds(conds, cli)
+		if err != nil {
+			return err
+		}
+
+		return join(stm).
+			Scan(_ctx, &infos)
+	})
+	if err != nil {
+		return nil, err
+	}
+	if len(infos) == 0 {
+		return nil, nil
+	}
+	if len(infos) > 1 {
+		return nil, fmt.Errorf("too many record")
+	}
+
+	return infos[0], nil
 }
 
 func join(stm *ent.AppCountryQuery) *ent.AppCountrySelect {

@@ -24,6 +24,29 @@ import (
 	"github.com/google/uuid"
 )
 
+func ValidateConds(ctx context.Context, conds *applangmgrpb.Conds) error {
+	if conds.ID != nil {
+		if _, err := uuid.Parse(conds.GetID().GetValue()); err != nil {
+			logger.Sugar().Errorw("GetLangs", "ID", conds.GetID().GetValue(), "error", err)
+			return err
+		}
+	}
+	if conds.AppID != nil {
+		if _, err := uuid.Parse(conds.GetAppID().GetValue()); err != nil {
+			logger.Sugar().Errorw("GetLangs", "AppID", conds.GetAppID().GetValue(), "error", err)
+			return err
+		}
+	}
+	if conds.LangID != nil {
+		if _, err := uuid.Parse(conds.GetLangID().GetValue()); err != nil {
+			logger.Sugar().Errorw("GetLangs", "LangID", conds.GetLangID().GetValue(), "error", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (s *Server) GetLangs(ctx context.Context, in *npool.GetLangsRequest) (*npool.GetLangsResponse, error) {
 	var err error
 
@@ -51,23 +74,8 @@ func (s *Server) GetLangs(ctx context.Context, in *npool.GetLangsRequest) (*npoo
 		conds = &applangmgrpb.Conds{}
 	}
 
-	if conds.ID != nil {
-		if _, err := uuid.Parse(conds.GetID().GetValue()); err != nil {
-			logger.Sugar().Errorw("GetLangs", "ID", conds.GetID().GetValue(), "error", err)
-			return &npool.GetLangsResponse{}, status.Error(codes.InvalidArgument, err.Error())
-		}
-	}
-	if conds.AppID != nil {
-		if _, err := uuid.Parse(conds.GetAppID().GetValue()); err != nil {
-			logger.Sugar().Errorw("GetLangs", "AppID", conds.GetAppID().GetValue(), "error", err)
-			return &npool.GetLangsResponse{}, status.Error(codes.InvalidArgument, err.Error())
-		}
-	}
-	if conds.LangID != nil {
-		if _, err := uuid.Parse(conds.GetLangID().GetValue()); err != nil {
-			logger.Sugar().Errorw("GetLangs", "LangID", conds.GetLangID().GetValue(), "error", err)
-			return &npool.GetLangsResponse{}, status.Error(codes.InvalidArgument, err.Error())
-		}
+	if err := ValidateConds(ctx, conds); err != nil {
+		return &npool.GetLangsResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	infos, total, err := applang1.GetLangs(ctx, conds, in.GetOffset(), limit)
@@ -79,5 +87,41 @@ func (s *Server) GetLangs(ctx context.Context, in *npool.GetLangsRequest) (*npoo
 	return &npool.GetLangsResponse{
 		Infos: infos,
 		Total: total,
+	}, nil
+}
+
+func (s *Server) GetLangOnly(ctx context.Context, in *npool.GetLangOnlyRequest) (*npool.GetLangOnlyResponse, error) {
+	var err error
+
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetLangOnly")
+	defer span.End()
+
+	defer func() {
+		if err != nil {
+			span.SetStatus(scodes.Error, err.Error())
+			span.RecordError(err)
+		}
+	}()
+
+	span = tracer.TraceConds(span, in.GetConds())
+	span = commontracer.TraceInvoker(span, "applang", "crud", "Rows")
+
+	conds := in.GetConds()
+	if conds == nil {
+		conds = &applangmgrpb.Conds{}
+	}
+
+	if err := ValidateConds(ctx, conds); err != nil {
+		return &npool.GetLangOnlyResponse{}, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	info, err := applang1.GetLangOnly(ctx, conds)
+	if err != nil {
+		logger.Sugar().Errorw("GetLangOnly", "error", err)
+		return &npool.GetLangOnlyResponse{}, status.Error(codes.Internal, err.Error())
+	}
+
+	return &npool.GetLangOnlyResponse{
+		Info: info,
 	}, nil
 }

@@ -10,6 +10,8 @@ import (
 	"github.com/NpoolPlatform/g11n-manager/pkg/db"
 	"github.com/NpoolPlatform/g11n-manager/pkg/db/ent"
 
+	crud "github.com/NpoolPlatform/g11n-manager/pkg/crud/applang"
+
 	entapplang "github.com/NpoolPlatform/g11n-manager/pkg/db/ent/applang"
 	entlang "github.com/NpoolPlatform/g11n-manager/pkg/db/ent/lang"
 
@@ -48,27 +50,9 @@ func GetLangs(ctx context.Context, conds *applangmgrpb.Conds, offset, limit int3
 	total := uint32(0)
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		stm := cli.
-			AppLang.
-			Query()
-
-		if conds.ID != nil {
-			stm.
-				Where(
-					entapplang.ID(uuid.MustParse(conds.GetID().GetValue())),
-				)
-		}
-		if conds.AppID != nil {
-			stm.
-				Where(
-					entapplang.AppID(uuid.MustParse(conds.GetAppID().GetValue())),
-				)
-		}
-		if conds.LangID != nil {
-			stm.
-				Where(
-					entapplang.LangID(uuid.MustParse(conds.GetLangID().GetValue())),
-				)
+		stm, err := crud.SetQueryConds(conds, cli)
+		if err != nil {
+			return err
 		}
 
 		_total, err := stm.Count(_ctx)
@@ -90,6 +74,31 @@ func GetLangs(ctx context.Context, conds *applangmgrpb.Conds, offset, limit int3
 	}
 
 	return infos, total, nil
+}
+
+func GetLangOnly(ctx context.Context, conds *applangmgrpb.Conds) (*npool.Lang, error) {
+	infos := []*npool.Lang{}
+
+	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
+		stm, err := crud.SetQueryConds(conds, cli)
+		if err != nil {
+			return err
+		}
+
+		return join(stm).
+			Scan(_ctx, &infos)
+	})
+	if err != nil {
+		return nil, err
+	}
+	if len(infos) == 0 {
+		return nil, nil
+	}
+	if len(infos) > 1 {
+		return nil, fmt.Errorf("too many record")
+	}
+
+	return infos[0], nil
 }
 
 func GetManyLangs(ctx context.Context, ids []string) ([]*npool.Lang, error) {
