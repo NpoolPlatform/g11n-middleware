@@ -149,5 +149,6 @@ func join(stm *ent.AppCountryQuery) *ent.AppCountrySelect {
 					sql.As(t1.C(entcountry.FieldCode), "code"),
 					sql.As(t1.C(entcountry.FieldShort), "short"),
 				)
+			s.OrderBy(t1.C(entcountry.FieldCountry))
 		})
 }
