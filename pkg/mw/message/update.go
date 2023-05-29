@@ -36,8 +36,8 @@ func (h *Handler) UpdateMessage(ctx context.Context) (*npool.Message, error) {
 				ID:        h.ID,
 				MessageID: h.MessageID,
 				Message:   h.Message,
-				GetIndex:  &h.GetIndex,
-				Disabled:  &h.Disabled,
+				GetIndex:  h.GetIndex,
+				Disabled:  h.Disabled,
 				Short:     h.Short,
 			},
 		).Save(ctx); err != nil {

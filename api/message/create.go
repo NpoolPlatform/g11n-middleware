@@ -23,8 +23,8 @@ func (s *Server) CreateMessage(ctx context.Context, in *npool.CreateMessageReque
 		message1.WithLangID(req.LangID),
 		message1.WithMessageID(req.MessageID),
 		message1.WithMessage(req.Message),
-		message1.WithGetIndex(*req.GetIndex),
-		message1.WithDisabled(*req.Disabled),
+		message1.WithGetIndex(req.GetIndex),
+		message1.WithDisabled(req.Disabled),
 	)
 
 	if err != nil {

@@ -28,9 +28,8 @@ func (h *Handler) CreateMessage(ctx context.Context) (*npool.Message, error) {
 				LangID:    h.LangID,
 				MessageID: h.MessageID,
 				Message:   h.Message,
-				GetIndex:  &h.GetIndex,
-				Disabled:  &h.Disabled,
-				Short:     h.Short,
+				GetIndex:  h.GetIndex,
+				Disabled:  h.Disabled,
 			},
 		).Save(ctx); err != nil {
 			return err
@@ -64,7 +63,6 @@ func (h *Handler) CreateMessages(ctx context.Context) ([]*npool.Message, error) 
 					Message:   req.Message,
 					GetIndex:  req.GetIndex,
 					Disabled:  req.Disabled,
-					Short:     h.Short,
 				},
 			).Save(ctx); err != nil {
 				return err

@@ -59,8 +59,8 @@ func createMessage(t *testing.T) {
 		WithLangID(&ret.LangID),
 		WithMessageID(&ret.MessageID),
 		WithMessage(&ret.Message),
-		WithGetIndex(ret.GetIndex),
-		WithDisabled(ret.Disabled),
+		WithGetIndex(&ret.GetIndex),
+		WithDisabled(&ret.Disabled),
 	)
 	assert.Nil(t, err)
 
@@ -80,8 +80,8 @@ func updateMessage(t *testing.T) {
 		WithLangID(&ret.LangID),
 		WithMessageID(&ret.MessageID),
 		WithMessage(&ret.Message),
-		WithGetIndex(ret.GetIndex),
-		WithDisabled(ret.Disabled),
+		WithGetIndex(&ret.GetIndex),
+		WithDisabled(&ret.Disabled),
 	)
 	assert.Nil(t, err)
 

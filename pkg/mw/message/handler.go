@@ -18,8 +18,8 @@ type Handler struct {
 	LangID    *uuid.UUID
 	MessageID *string
 	Message   *string
-	GetIndex  uint32
-	Disabled  bool
+	GetIndex  *uint32
+	Disabled  *bool
 	Short     *string
 	Reqs      []*npool.MessageReq
 	Conds     *messagecrud.Conds
@@ -87,14 +87,14 @@ func WithMessage(message *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithGetIndex(getindex uint32) func(context.Context, *Handler) error {
+func WithGetIndex(getindex *uint32) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		h.GetIndex = getindex
 		return nil
 	}
 }
 
-func WithDisabled(disabled bool) func(context.Context, *Handler) error {
+func WithDisabled(disabled *bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		h.Disabled = disabled
 		return nil
