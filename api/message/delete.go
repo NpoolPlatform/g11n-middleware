@@ -13,10 +13,10 @@ import (
 )
 
 func (s *Server) DeleteMessage(ctx context.Context, in *npool.DeleteMessageRequest) (*npool.DeleteMessageResponse, error) {
-	ID := in.GetID()
+	req := in.GetInfo()
 	handler, err := message1.NewHandler(
 		ctx,
-		message1.WithID(&ID),
+		message1.WithID(req.ID),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

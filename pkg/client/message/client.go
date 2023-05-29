@@ -112,10 +112,10 @@ func GetMessages(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 	return infos.([]*npool.Message), total, nil
 }
 
-func DeleteMessage(ctx context.Context, id string) (*npool.Message, error) {
+func DeleteMessage(ctx context.Context, req *npool.MessageReq) (*npool.Message, error) {
 	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.DeleteMessage(ctx, &npool.DeleteMessageRequest{
-			ID: id,
+			Info: req,
 		})
 		if err != nil {
 			return nil, err
