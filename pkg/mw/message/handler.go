@@ -20,8 +20,7 @@ type Handler struct {
 	Message   *string
 	GetIndex  *uint32
 	Disabled  *bool
-	Short     *string
-	Reqs      []*npool.MessageReq
+	Reqs      []*messagecrud.Req
 	Conds     *messagecrud.Conds
 	Offset    int32
 	Limit     int32
@@ -101,13 +100,6 @@ func WithDisabled(disabled *bool) func(context.Context, *Handler) error {
 	}
 }
 
-func WithShort(short *string) func(context.Context, *Handler) error {
-	return func(ctx context.Context, h *Handler) error {
-		h.Short = short
-		return nil
-	}
-}
-
 func WithConds(conds *npool.Conds) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		h.Conds = &messagecrud.Conds{}
@@ -164,17 +156,45 @@ func WithLimit(limit int32) func(context.Context, *Handler) error {
 
 func WithReqs(reqs []*npool.MessageReq) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
+		_reqs := []*messagecrud.Req{}
 		for _, req := range reqs {
-			if _, err := uuid.Parse(*req.AppID); err != nil {
-				return err
-			}
+			_req := &messagecrud.Req{}
 			if req.ID != nil {
-				if _, err := uuid.Parse(*req.ID); err != nil {
+				id, err := uuid.Parse(*req.ID)
+				if err != nil {
 					return err
 				}
+				_req.ID = &id
 			}
+			if req.AppID != nil {
+				id, err := uuid.Parse(*req.AppID)
+				if err != nil {
+					return err
+				}
+				_req.AppID = &id
+			}
+			if req.LangID != nil {
+				id, err := uuid.Parse(*req.LangID)
+				if err != nil {
+					return err
+				}
+				_req.LangID = &id
+			}
+			if req.MessageID != nil {
+				_req.MessageID = req.MessageID
+			}
+			if req.Message != nil {
+				_req.Message = req.Message
+			}
+			if req.GetIndex != nil {
+				_req.GetIndex = req.GetIndex
+			}
+			if req.Disabled != nil {
+				_req.Disabled = req.Disabled
+			}
+			_reqs = append(_reqs, _req)
 		}
-		h.Reqs = reqs
+		h.Reqs = _reqs
 		return nil
 	}
 }

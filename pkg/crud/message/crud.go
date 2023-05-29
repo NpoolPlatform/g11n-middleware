@@ -17,7 +17,6 @@ type Req struct {
 	Message   *string
 	GetIndex  *uint32
 	Disabled  *bool
-	Short     *string
 	DeletedAt *uint32
 }
 
@@ -43,9 +42,6 @@ func CreateSet(c *ent.MessageCreate, req *Req) *ent.MessageCreate {
 	if req.Disabled != nil {
 		c.SetDisabled(*req.Disabled)
 	}
-	if req.Short != nil {
-		c.SetShort(*req.Short)
-	}
 	if req.DeletedAt != nil {
 		c.SetDeletedAt(*req.DeletedAt)
 	}
@@ -70,9 +66,6 @@ func UpdateSet(u *ent.MessageUpdateOne, req *Req) *ent.MessageUpdateOne {
 	}
 	if req.Disabled != nil {
 		u.SetDisabled(*req.Disabled)
-	}
-	if req.Short != nil {
-		u.SetShort(*req.Short)
 	}
 	if req.DeletedAt != nil {
 		u.SetDeletedAt(*req.DeletedAt)

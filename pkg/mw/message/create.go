@@ -49,10 +49,10 @@ func (h *Handler) CreateMessages(ctx context.Context) ([]*npool.Message, error) 
 		for _, req := range h.Reqs {
 			id := uuid.New()
 			if req.ID != nil {
-				id = uuid.MustParse(*req.ID)
+				id = *req.ID
 			}
-			appID := uuid.MustParse(*req.AppID)
-			langID := uuid.MustParse(*req.LangID)
+			appID := *req.AppID
+			langID := *req.LangID
 			if _, err := messagecrud.CreateSet(
 				cli.Message.Create(),
 				&messagecrud.Req{
