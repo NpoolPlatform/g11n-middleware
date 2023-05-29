@@ -49,12 +49,6 @@ func CreateSet(c *ent.MessageCreate, req *Req) *ent.MessageCreate {
 }
 
 func UpdateSet(u *ent.MessageUpdateOne, req *Req) *ent.MessageUpdateOne {
-	if req.AppID != nil {
-		u.SetAppID(*req.AppID)
-	}
-	if req.LangID != nil {
-		u.SetLangID(*req.LangID)
-	}
 	if req.MessageID != nil {
 		u.SetMessageID(*req.MessageID)
 	}

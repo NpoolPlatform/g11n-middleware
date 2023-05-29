@@ -17,7 +17,7 @@ func (h *Handler) UpdateMessage(ctx context.Context) (*npool.Message, error) {
 	}
 
 	err := db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
-		info, err := tx.
+		_, err := tx.
 			Message.
 			Query().
 			Where(
@@ -31,7 +31,7 @@ func (h *Handler) UpdateMessage(ctx context.Context) (*npool.Message, error) {
 		}
 
 		if _, err := messagecrud.UpdateSet(
-			info.Update(),
+			tx.Message.UpdateOneID(*h.ID),
 			&messagecrud.Req{
 				ID:        h.ID,
 				MessageID: h.MessageID,
