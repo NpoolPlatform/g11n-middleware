@@ -3,6 +3,7 @@ module github.com/NpoolPlatform/g11n-middleware
 go 1.17
 
 require (
+	bou.ke/monkey v1.0.2
 	entgo.io/ent v0.11.2
 	github.com/NpoolPlatform/basal-middleware v0.0.0-20230518061816-62bd589c0f63
 	github.com/NpoolPlatform/g11n-manager v0.0.0-20230223031133-01fb857f1b94

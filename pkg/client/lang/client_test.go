@@ -1,4 +1,4 @@
-package applang
+package lang
 
 import (
 	"context"
@@ -11,14 +11,13 @@ import (
 	"github.com/NpoolPlatform/go-service-framework/pkg/config"
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
 	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
-	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/applang"
+	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/lang"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
-	applang "github.com/NpoolPlatform/g11n-middleware/pkg/mw/applang"
 	"github.com/NpoolPlatform/g11n-middleware/pkg/testinit"
 	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 )
@@ -34,38 +33,21 @@ func init() {
 
 var (
 	ret = npool.Lang{
-		ID:     uuid.NewString(),
-		AppID:  uuid.NewString(),
-		LangID: uuid.NewString(),
-		Main:   true,
+		ID:    uuid.NewString(),
+		Lang:  uuid.NewString(),
+		Logo:  uuid.NewString(),
+		Name:  uuid.NewString(),
+		Short: uuid.NewString(),
 	}
 )
 
-func setupLang(t *testing.T) func(*testing.T) {
-	ah, err := applang.NewHandler(
-		context.Background(),
-		applang.WithID(&ret.ID),
-		applang.WithAppID(ret.AppID),
-		applang.WithLangID(&ret.LangID),
-		applang.WithMain(&ret.Main),
-	)
-	assert.Nil(t, err)
-	assert.NotNil(t, ah)
-	app1, err := ah.CreateLang(context.Background())
-	assert.Nil(t, err)
-	assert.NotNil(t, app1)
-
-	return func(*testing.T) {
-		_, _ = ah.DeleteLang(context.Background())
-	}
-}
-
 func createLang(t *testing.T) {
 	req := npool.LangReq{
-		ID:     &ret.ID,
-		AppID:  &ret.AppID,
-		LangID: &ret.LangID,
-		Main:   &ret.Main,
+		ID:    &ret.ID,
+		Lang:  &ret.Lang,
+		Logo:  &ret.Logo,
+		Name:  &ret.Name,
+		Short: &ret.Short,
 	}
 	info, err := CreateLang(context.Background(), &req)
 	if assert.Nil(t, err) {
@@ -75,9 +57,16 @@ func createLang(t *testing.T) {
 }
 
 func updateLang(t *testing.T) {
+	ret.Lang = uuid.NewString()
+	ret.Short = uuid.NewString()
+	ret.Name = uuid.NewString()
+	ret.Logo = uuid.NewString()
 	req := npool.LangReq{
-		ID:   &ret.ID,
-		Main: &ret.Main,
+		ID:    &ret.ID,
+		Lang:  &ret.Lang,
+		Logo:  &ret.Logo,
+		Name:  &ret.Name,
+		Short: &ret.Short,
 	}
 	info, err := UpdateLang(context.Background(), &req)
 	if assert.Nil(t, err) {
@@ -86,9 +75,7 @@ func updateLang(t *testing.T) {
 }
 
 func getLang(t *testing.T) {
-	info, err := GetLangOnly(context.Background(), &npool.Conds{
-		ID: &basetypes.StringVal{Op: cruder.EQ, Value: ret.ID},
-	})
+	info, err := GetLang(context.Background(), ret.ID)
 	if assert.Nil(t, err) {
 		assert.Equal(t, info, &ret)
 	}
@@ -96,7 +83,7 @@ func getLang(t *testing.T) {
 
 func getLangs(t *testing.T) {
 	_, total, err := GetLangs(context.Background(), &npool.Conds{
-		AppID: &basetypes.StringVal{Op: cruder.EQ, Value: ret.AppID},
+		ID: &basetypes.StringVal{Op: cruder.EQ, Value: ret.ID},
 	}, 0, 1)
 	if assert.Nil(t, err) {
 		assert.NotEqual(t, total, 0)
@@ -111,9 +98,7 @@ func deleteLang(t *testing.T) {
 		assert.Equal(t, info, &ret)
 	}
 
-	info, err = GetLangOnly(context.Background(), &npool.Conds{
-		ID: &basetypes.StringVal{Op: cruder.EQ, Value: ret.ID},
-	})
+	info, err = GetLang(context.Background(), ret.ID)
 	assert.Nil(t, err)
 	assert.Nil(t, info)
 }
@@ -128,9 +113,6 @@ func TestMainOrder(t *testing.T) {
 	monkey.Patch(grpc2.GetGRPCConn, func(service string, tags ...string) (*grpc.ClientConn, error) {
 		return grpc.Dial(fmt.Sprintf("localhost:%v", gport), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	})
-
-	teardown := setupLang(t)
-	defer teardown(t)
 
 	t.Run("createLang", createLang)
 	t.Run("updateLang", updateLang)
