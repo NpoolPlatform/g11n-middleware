@@ -1,5 +1,5 @@
 //nolint:nolintlint,dupl
-package applang
+package lang
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
 
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/applang"
+	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/lang"
 
 	servicename "github.com/NpoolPlatform/g11n-middleware/pkg/servicename"
 )
@@ -65,6 +65,22 @@ func UpdateLang(ctx context.Context, req *npool.LangReq) (*npool.Lang, error) {
 	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.UpdateLang(ctx, &npool.UpdateLangRequest{
 			Info: req,
+		})
+		if err != nil {
+			return nil, err
+		}
+		return resp.Info, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return info.(*npool.Lang), nil
+}
+
+func GetLang(ctx context.Context, id string) (*npool.Lang, error) {
+	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+		resp, err := cli.GetLang(ctx, &npool.GetLangRequest{
+			ID: id,
 		})
 		if err != nil {
 			return nil, err

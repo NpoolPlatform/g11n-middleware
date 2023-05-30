@@ -1,11 +1,11 @@
-package applang
+package lang
 
 import (
 	"context"
 
-	applang1 "github.com/NpoolPlatform/g11n-middleware/pkg/mw/applang"
+	lang1 "github.com/NpoolPlatform/g11n-middleware/pkg/mw/lang"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
-	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/applang"
+	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/lang"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -13,10 +13,13 @@ import (
 
 func (s *Server) UpdateLang(ctx context.Context, in *npool.UpdateLangRequest) (*npool.UpdateLangResponse, error) {
 	req := in.GetInfo()
-	handler, err := applang1.NewHandler(
+	handler, err := lang1.NewHandler(
 		ctx,
-		applang1.WithID(req.ID),
-		applang1.WithMain(req.Main),
+		lang1.WithID(req.ID),
+		lang1.WithLang(req.Lang),
+		lang1.WithLogo(req.Logo),
+		lang1.WithName(req.Name),
+		lang1.WithShort(req.Short),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

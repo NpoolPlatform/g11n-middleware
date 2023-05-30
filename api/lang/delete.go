@@ -1,11 +1,11 @@
-package applang
+package lang
 
 import (
 	"context"
 
-	applang1 "github.com/NpoolPlatform/g11n-middleware/pkg/mw/applang"
+	lang1 "github.com/NpoolPlatform/g11n-middleware/pkg/mw/lang"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
-	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/applang"
+	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/lang"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -13,9 +13,9 @@ import (
 
 func (s *Server) DeleteLang(ctx context.Context, in *npool.DeleteLangRequest) (*npool.DeleteLangResponse, error) {
 	req := in.GetInfo()
-	handler, err := applang1.NewHandler(
+	handler, err := lang1.NewHandler(
 		ctx,
-		applang1.WithID(req.ID),
+		lang1.WithID(req.ID),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(
