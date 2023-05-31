@@ -126,7 +126,7 @@ func SetQueryConds(q *ent.AppLangQuery, conds *Conds) (*ent.AppLangQuery, error)
 		}
 		switch conds.LangIDs.Op {
 		case cruder.IN:
-			q.Where(entapplang.AppIDIn(ids...))
+			q.Where(entapplang.LangIDIn(ids...))
 		default:
 			return nil, fmt.Errorf("invalid langids field")
 		}
