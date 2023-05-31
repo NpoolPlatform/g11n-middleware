@@ -7,6 +7,7 @@ import (
 
 	"github.com/NpoolPlatform/g11n-middleware/api/appcountry"
 	"github.com/NpoolPlatform/g11n-middleware/api/applang"
+	"github.com/NpoolPlatform/g11n-middleware/api/country"
 	"github.com/NpoolPlatform/g11n-middleware/api/lang"
 	"github.com/NpoolPlatform/g11n-middleware/api/message"
 
@@ -23,6 +24,7 @@ func Register(server grpc.ServiceRegistrar) {
 	applang.Register(server)
 	lang.Register(server)
 	appcountry.Register(server)
+	country.Register(server)
 	message.Register(server)
 }
 
@@ -30,8 +32,6 @@ func RegisterGateway(mux *runtime.ServeMux, endpoint string, opts []grpc.DialOpt
 	if err := g11n.RegisterMiddlewareHandlerFromEndpoint(context.Background(), mux, endpoint, opts); err != nil {
 		return err
 	}
-	if err := appcountry.RegisterGateway(mux, endpoint, opts); err != nil {
-		return err
-	}
+
 	return nil
 }

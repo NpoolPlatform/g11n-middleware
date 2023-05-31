@@ -1,5 +1,5 @@
 //nolint:nolintlint,dupl
-package appcountry
+package country
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
 
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/appcountry"
+	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/country"
 
 	servicename "github.com/NpoolPlatform/g11n-middleware/pkg/servicename"
 )
@@ -59,6 +59,38 @@ func CreateCountries(ctx context.Context, reqs []*npool.CountryReq) ([]*npool.Co
 		return nil, err
 	}
 	return infos.([]*npool.Country), nil
+}
+
+func UpdateCountry(ctx context.Context, req *npool.CountryReq) (*npool.Country, error) {
+	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+		resp, err := cli.UpdateCountry(ctx, &npool.UpdateCountryRequest{
+			Info: req,
+		})
+		if err != nil {
+			return nil, err
+		}
+		return resp.Info, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return info.(*npool.Country), nil
+}
+
+func GetCountry(ctx context.Context, id string) (*npool.Country, error) {
+	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+		resp, err := cli.GetCountry(ctx, &npool.GetCountryRequest{
+			ID: id,
+		})
+		if err != nil {
+			return nil, err
+		}
+		return resp.Info, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return info.(*npool.Country), nil
 }
 
 func GetCountries(ctx context.Context, conds *npool.Conds, offset, limit int32) ([]*npool.Country, uint32, error) {

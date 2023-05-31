@@ -1,12 +1,11 @@
-//nolint:nolintlint,dupl
-package appcountry
+package country
 
 import (
 	"context"
 
-	appcountry1 "github.com/NpoolPlatform/g11n-middleware/pkg/mw/appcountry"
+	country1 "github.com/NpoolPlatform/g11n-middleware/pkg/mw/country"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
-	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/appcountry"
+	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/country"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -14,9 +13,9 @@ import (
 
 func (s *Server) DeleteCountry(ctx context.Context, in *npool.DeleteCountryRequest) (*npool.DeleteCountryResponse, error) {
 	req := in.GetInfo()
-	handler, err := appcountry1.NewHandler(
+	handler, err := country1.NewHandler(
 		ctx,
-		appcountry1.WithID(req.ID),
+		country1.WithID(req.ID),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(
