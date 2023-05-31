@@ -7,9 +7,13 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
+
 	"github.com/NpoolPlatform/g11n-middleware/pkg/testinit"
 	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/message"
 
+	lang "github.com/NpoolPlatform/g11n-middleware/pkg/mw/lang"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -36,18 +40,30 @@ var (
 )
 
 func setupMessage(t *testing.T) func(*testing.T) {
-	ah, err := NewHandler(
+	lh, err := lang.NewHandler(
 		context.Background(),
-		WithID(&ret.ID),
+		lang.WithID(&ret.LangID),
 	)
 	assert.Nil(t, err)
-	assert.NotNil(t, ah)
-	message1, err := ah.CreateMessage(context.Background())
+	assert.NotNil(t, lh)
+	lang1, err := lh.CreateLang(context.Background())
+	assert.Nil(t, err)
+	assert.NotNil(t, lang1)
+
+	mh, err := NewHandler(
+		context.Background(),
+		WithID(&ret.ID),
+		WithLangID(&ret.LangID),
+	)
+	assert.Nil(t, err)
+	assert.NotNil(t, mh)
+	message1, err := mh.CreateMessage(context.Background())
 	assert.Nil(t, err)
 	assert.NotNil(t, message1)
 
 	return func(t *testing.T) {
-		_, _ = ah.DeleteMessage(context.Background())
+		_, _ = mh.DeleteMessage(context.Background())
+		_, _ = lh.DeleteLang(context.Background())
 	}
 }
 
@@ -76,8 +92,6 @@ func updateMessage(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
 		WithID(&ret.ID),
-		WithAppID(ret.AppID),
-		WithLangID(&ret.LangID),
 		WithMessageID(&ret.MessageID),
 		WithMessage(&ret.Message),
 		WithGetIndex(&ret.GetIndex),
@@ -106,7 +120,7 @@ func getMessage(t *testing.T) {
 
 func getMessages(t *testing.T) {
 	conds := &npool.Conds{
-		// AppID: &message.StringVal{Op: cruder.EQ, Value: ret.AppID},
+		AppID: &basetypes.StringVal{Op: cruder.EQ, Value: ret.AppID},
 	}
 	handler, err := NewHandler(
 		context.Background(),

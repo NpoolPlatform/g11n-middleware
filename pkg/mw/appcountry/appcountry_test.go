@@ -1,4 +1,4 @@
-package applang
+package appcountry
 
 import (
 	"context"
@@ -9,11 +9,11 @@ import (
 
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 
-	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/applang"
+	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/appcountry"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
-	lang "github.com/NpoolPlatform/g11n-middleware/pkg/mw/lang"
+	country "github.com/NpoolPlatform/g11n-middleware/pkg/mw/country"
 	"github.com/NpoolPlatform/g11n-middleware/pkg/testinit"
 	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 )
@@ -28,90 +28,71 @@ func init() {
 }
 
 var (
-	ret = npool.Lang{
-		ID:     uuid.NewString(),
-		AppID:  uuid.NewString(),
-		LangID: uuid.NewString(),
-		Main:   true,
+	ret = npool.Country{
+		ID:        uuid.NewString(),
+		AppID:     uuid.NewString(),
+		CountryID: uuid.NewString(),
 	}
 )
 
 func setup(t *testing.T) func(*testing.T) {
-	lh, err := lang.NewHandler(
+	ch, err := country.NewHandler(
 		context.Background(),
-		lang.WithID(&ret.LangID),
+		country.WithID(&ret.CountryID),
 	)
 	assert.Nil(t, err)
-	assert.NotNil(t, lh)
-	lang1, err := lh.CreateLang(context.Background())
+	assert.NotNil(t, ch)
+	country1, err := ch.CreateCountry(context.Background())
 	assert.Nil(t, err)
-	assert.NotNil(t, lang1)
+	assert.NotNil(t, country1)
 
 	ah, err := NewHandler(
 		context.Background(),
 		WithID(&ret.ID),
-		WithLangID(&ret.LangID),
+		WithCountryID(&ret.CountryID),
 	)
 	assert.Nil(t, err)
 	assert.NotNil(t, ah)
-	applang1, err := ah.CreateLang(context.Background())
+	appcountry1, err := ah.CreateCountry(context.Background())
 	assert.Nil(t, err)
-	assert.NotNil(t, applang1)
+	assert.NotNil(t, appcountry1)
 
 	return func(*testing.T) {
-		_, _ = ah.DeleteLang(context.Background())
-		_, _ = lh.DeleteLang(context.Background())
+		_, _ = ah.DeleteCountry(context.Background())
+		_, _ = ch.DeleteCountry(context.Background())
 	}
 }
 
-func creatLang(t *testing.T) {
+func creatCountry(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
 		WithID(&ret.ID),
 		WithAppID(ret.AppID),
-		WithLangID(&ret.LangID),
-		WithMain(&ret.Main),
+		WithCountryID(&ret.CountryID),
 	)
 	assert.Nil(t, err)
 
-	info, err := handler.CreateLang(context.Background())
+	info, err := handler.CreateCountry(context.Background())
 	if assert.Nil(t, err) {
 		ret.CreatedAt = info.CreatedAt
 		assert.Equal(t, info, &ret)
 	}
 }
 
-func updateLang(t *testing.T) {
-	ret.Main = false
-	handler, err := NewHandler(
-		context.Background(),
-		WithID(&ret.ID),
-		WithAppID(ret.AppID),
-		WithLangID(&ret.LangID),
-		WithMain(&ret.Main),
-	)
-	assert.Nil(t, err)
-
-	info, err := handler.UpdateLang(context.Background())
-	if assert.Nil(t, err) {
-		assert.Equal(t, info, &ret)
-	}
-}
-
-func getLang(t *testing.T) {
+func getCountry(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
 		WithID(&ret.ID),
 	)
 	assert.Nil(t, err)
 
-	info, err := handler.GetLang(context.Background())
+	info, err := handler.GetCountry(context.Background())
 	if assert.Nil(t, err) {
 		assert.Equal(t, info, &ret)
 	}
 }
 
-func getLangs(t *testing.T) {
+func getCountries(t *testing.T) {
 	conds := &npool.Conds{
 		AppID: &basetypes.StringVal{Op: cruder.EQ, Value: ret.AppID},
 	}
@@ -124,30 +105,30 @@ func getLangs(t *testing.T) {
 	)
 	assert.Nil(t, err)
 
-	infos, _, err := handler.GetLangs(context.Background())
+	infos, _, err := handler.GetCountries(context.Background())
 	if !assert.Nil(t, err) {
 		assert.NotEqual(t, len(infos), 0)
 	}
 }
 
-func deleteLang(t *testing.T) {
+func deleteCountry(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
 		WithID(&ret.ID),
 	)
 	assert.Nil(t, err)
 
-	info, err := handler.DeleteLang(context.Background())
+	info, err := handler.DeleteCountry(context.Background())
 	if assert.Nil(t, err) {
 		assert.Equal(t, info, &ret)
 	}
 
-	info, err = handler.GetLang(context.Background())
+	info, err = handler.GetCountry(context.Background())
 	assert.Nil(t, err)
 	assert.Nil(t, info)
 }
 
-func TestLang(t *testing.T) {
+func TestCountry(t *testing.T) {
 	if runByGithubAction, err := strconv.ParseBool(os.Getenv("RUN_BY_GITHUB_ACTION")); err == nil && runByGithubAction {
 		return
 	}
@@ -155,9 +136,8 @@ func TestLang(t *testing.T) {
 	teardown := setup(t)
 	defer teardown(t)
 
-	t.Run("creatLang", creatLang)
-	t.Run("updateLang", updateLang)
-	t.Run("getLang", getLang)
-	t.Run("getLangs", getLangs)
-	t.Run("deleteLang", deleteLang)
+	t.Run("creatCountry", creatCountry)
+	t.Run("getCountry", getCountry)
+	t.Run("getCountries", getCountries)
+	t.Run("deleteCountry", deleteCountry)
 }
