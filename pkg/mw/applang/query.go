@@ -108,7 +108,7 @@ func (h *Handler) GetLang(ctx context.Context) (*npool.Lang, error) {
 	}
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		if err := handler.queryAppLang(cli.Debug()); err != nil {
+		if err := handler.queryAppLang(cli); err != nil {
 			return err
 		}
 		if err := handler.queryJoin(ctx); err != nil {

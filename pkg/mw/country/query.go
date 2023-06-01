@@ -71,7 +71,7 @@ func (h *Handler) GetCountry(ctx context.Context) (*npool.Country, error) {
 	}
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		if err := handler.queryCountry(cli.Debug()); err != nil {
+		if err := handler.queryCountry(cli); err != nil {
 			return err
 		}
 		const limit = 2
