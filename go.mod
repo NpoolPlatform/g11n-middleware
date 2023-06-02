@@ -21,7 +21,10 @@ require (
 	google.golang.org/protobuf v1.28.1
 )
 
-replace github.com/NpoolPlatform/message => github.com/NpoolPlatform/message v0.0.0-20230602062450-5c36442532c6
+replace (
+	github.com/NpoolPlatform/go-service-framework => github.com/NpoolPlatform/go-service-framework v0.0.0-20230602083207-1c0e6203556b
+	github.com/NpoolPlatform/message => github.com/NpoolPlatform/message v0.0.0-20230602062450-5c36442532c6
+)
 
 require (
 	cloud.google.com/go/compute v1.14.0 // indirect
