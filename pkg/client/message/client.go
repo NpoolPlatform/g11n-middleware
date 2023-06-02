@@ -3,6 +3,7 @@ package message
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
@@ -112,6 +113,30 @@ func GetMessages(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 	return infos.([]*npool.Message), total, nil
 }
 
+func GetMessageOnly(ctx context.Context, conds *npool.Conds) (*npool.Message, error) {
+	infos, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+		resp, err := cli.GetMessages(ctx, &npool.GetMessagesRequest{
+			Conds:  conds,
+			Offset: 0,
+			Limit:  2, //nolint
+		})
+		if err != nil {
+			return nil, err
+		}
+		return resp.Infos, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if len(infos.([]*npool.Message)) == 0 {
+		return nil, nil
+	}
+	if len(infos.([]*npool.Message)) > 1 {
+		return nil, fmt.Errorf("too many record")
+	}
+	return infos.([]*npool.Message)[0], nil
+}
+
 func DeleteMessage(ctx context.Context, req *npool.MessageReq) (*npool.Message, error) {
 	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.DeleteMessage(ctx, &npool.DeleteMessageRequest{
@@ -126,4 +151,20 @@ func DeleteMessage(ctx context.Context, req *npool.MessageReq) (*npool.Message, 
 		return nil, err
 	}
 	return info.(*npool.Message), nil
+}
+
+func ExistMessageConds(ctx context.Context, conds *npool.Conds) (bool, error) {
+	infos, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+		resp, err := cli.ExistMessageConds(ctx, &npool.ExistMessageCondsRequest{
+			Conds: conds,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("fail get message: %v", err)
+		}
+		return resp.GetInfo(), nil
+	})
+	if err != nil {
+		return false, fmt.Errorf("fail get message: %v", err)
+	}
+	return infos.(bool), nil
 }

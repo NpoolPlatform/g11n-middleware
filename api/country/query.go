@@ -42,7 +42,7 @@ func (s *Server) GetCountry(ctx context.Context, in *npool.GetCountryRequest) (*
 func (s *Server) GetCountryOnly(ctx context.Context, in *npool.GetCountryOnlyRequest) (*npool.GetCountryOnlyResponse, error) {
 	handler, err := country1.NewHandler(
 		ctx,
-		country1.WithID(&in.Conds.ID.Value),
+		country1.WithConds(in.Conds),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

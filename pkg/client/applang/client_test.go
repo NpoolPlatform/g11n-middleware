@@ -18,7 +18,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
-	applang "github.com/NpoolPlatform/g11n-middleware/pkg/mw/applang"
+	lang "github.com/NpoolPlatform/g11n-middleware/pkg/mw/lang"
 	"github.com/NpoolPlatform/g11n-middleware/pkg/testinit"
 	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 )
@@ -42,21 +42,18 @@ var (
 )
 
 func setupLang(t *testing.T) func(*testing.T) {
-	ah, err := applang.NewHandler(
+	lh, err := lang.NewHandler(
 		context.Background(),
-		applang.WithID(&ret.ID),
-		applang.WithAppID(ret.AppID),
-		applang.WithLangID(&ret.LangID),
-		applang.WithMain(&ret.Main),
+		lang.WithID(&ret.LangID),
 	)
 	assert.Nil(t, err)
-	assert.NotNil(t, ah)
-	app1, err := ah.CreateLang(context.Background())
+	assert.NotNil(t, lh)
+	lang1, err := lh.CreateLang(context.Background())
 	assert.Nil(t, err)
-	assert.NotNil(t, app1)
+	assert.NotNil(t, lang1)
 
 	return func(*testing.T) {
-		_, _ = ah.DeleteLang(context.Background())
+		_, _ = lh.DeleteLang(context.Background())
 	}
 }
 

@@ -88,7 +88,7 @@ func getCountry(t *testing.T) {
 	}
 }
 
-func getCountrys(t *testing.T) {
+func getCountries(t *testing.T) {
 	conds := &npool.Conds{
 		ID: &basetypes.StringVal{Op: cruder.EQ, Value: ret.ID},
 	}
@@ -132,6 +132,6 @@ func TestCountry(t *testing.T) {
 	t.Run("creatCountry", creatCountry)
 	t.Run("updateCountry", updateCountry)
 	t.Run("getCountry", getCountry)
-	t.Run("getCountrys", getCountrys)
+	t.Run("getCountries", getCountries)
 	t.Run("deleteCountry", deleteCountry)
 }

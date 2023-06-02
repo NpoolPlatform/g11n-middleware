@@ -7,7 +7,6 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db"
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db/ent"
-	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
 	countrycrud "github.com/NpoolPlatform/g11n-middleware/pkg/crud/country"
 	entcountry "github.com/NpoolPlatform/g11n-middleware/pkg/db/ent/country"
@@ -84,7 +83,6 @@ func (h *Handler) GetCountry(ctx context.Context) (*npool.Country, error) {
 		}
 		return nil
 	})
-	logger.Sugar().Debug("infos === ", handler.infos)
 	if err != nil {
 		return nil, err
 	}

@@ -79,7 +79,10 @@ func SetQueryConds(q *ent.LangQuery, conds *Conds) (*ent.LangQuery, error) {
 		}
 		switch conds.ID.Op {
 		case cruder.EQ:
-			q.Where(entlang.ID(id))
+			q.Where(
+				entlang.ID(id),
+				entlang.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid id field")
 		}
@@ -91,7 +94,10 @@ func SetQueryConds(q *ent.LangQuery, conds *Conds) (*ent.LangQuery, error) {
 		}
 		switch conds.IDs.Op {
 		case cruder.IN:
-			q.Where(entlang.IDIn(ids...))
+			q.Where(
+				entlang.IDIn(ids...),
+				entlang.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid ids field")
 		}
@@ -103,7 +109,10 @@ func SetQueryConds(q *ent.LangQuery, conds *Conds) (*ent.LangQuery, error) {
 		}
 		switch conds.Lang.Op {
 		case cruder.EQ:
-			q.Where(entlang.Lang(lang))
+			q.Where(
+				entlang.Lang(lang),
+				entlang.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid lang field")
 		}
@@ -115,7 +124,10 @@ func SetQueryConds(q *ent.LangQuery, conds *Conds) (*ent.LangQuery, error) {
 		}
 		switch conds.Langs.Op {
 		case cruder.IN:
-			q.Where(entlang.LangIn(langs...))
+			q.Where(
+				entlang.LangIn(langs...),
+				entlang.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid langs field")
 		}
@@ -127,7 +139,10 @@ func SetQueryConds(q *ent.LangQuery, conds *Conds) (*ent.LangQuery, error) {
 		}
 		switch conds.Logo.Op {
 		case cruder.EQ:
-			q.Where(entlang.Logo(logo))
+			q.Where(
+				entlang.Logo(logo),
+				entlang.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid logo field")
 		}
@@ -139,7 +154,10 @@ func SetQueryConds(q *ent.LangQuery, conds *Conds) (*ent.LangQuery, error) {
 		}
 		switch conds.Name.Op {
 		case cruder.EQ:
-			q.Where(entlang.Name(name))
+			q.Where(
+				entlang.Name(name),
+				entlang.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid name field")
 		}
@@ -151,7 +169,10 @@ func SetQueryConds(q *ent.LangQuery, conds *Conds) (*ent.LangQuery, error) {
 		}
 		switch conds.Short.Op {
 		case cruder.EQ:
-			q.Where(entlang.Short(short))
+			q.Where(
+				entlang.Short(short),
+				entlang.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid short field")
 		}

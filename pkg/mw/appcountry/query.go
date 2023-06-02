@@ -25,6 +25,10 @@ type queryHandler struct {
 func (h *queryHandler) selectAppCountry(stm *ent.AppCountryQuery) {
 	h.stm = stm.Select(
 		entappcountry.FieldID,
+		entappcountry.FieldAppID,
+		entappcountry.FieldCountryID,
+		entappcountry.FieldCreatedAt,
+		entappcountry.FieldUpdatedAt,
 	)
 }
 
@@ -60,41 +64,23 @@ func (h *queryHandler) queryAppCountries(ctx context.Context, cli *ent.Client) e
 
 func (h *queryHandler) queryJoinCountry(s *sql.Selector) {
 	t := sql.Table(entcountry.Table)
-	stm := s.LeftJoin(t).
+	s.LeftJoin(t).
 		On(
 			s.C(entappcountry.FieldCountryID),
 			t.C(entcountry.FieldID),
+		).
+		AppendSelect(
+			sql.As(t.C(entcountry.FieldCountry), "country"),
+			sql.As(t.C(entcountry.FieldFlag), "flag"),
+			sql.As(t.C(entcountry.FieldCode), "code"),
+			sql.As(t.C(entcountry.FieldShort), "short"),
 		)
-
-	stm.AppendSelect(
-		s.C(entappcountry.FieldAppID),
-		s.C(entappcountry.FieldCountryID),
-		s.C(entappcountry.FieldCreatedAt),
-		s.C(entappcountry.FieldUpdatedAt),
-		sql.As(t.C(entcountry.FieldCountry), "country"),
-		sql.As(t.C(entcountry.FieldFlag), "flag"),
-		sql.As(t.C(entcountry.FieldCode), "code"),
-		sql.As(t.C(entcountry.FieldShort), "short"),
-	)
 }
 
-func (h *queryHandler) queryJoinSelect() {
-	h.stm.Select(
-		entappcountry.FieldID,
-	)
-}
-
-func (h *queryHandler) queryJoin(ctx context.Context) error {
+func (h *queryHandler) queryJoin() {
 	h.stm.Modify(func(s *sql.Selector) {
-		h.queryJoinSelect()
 		h.queryJoinCountry(s)
 	})
-	total, err := h.stm.Count(ctx)
-	if err != nil {
-		return err
-	}
-	h.total = uint32(total)
-	return nil
 }
 
 func (h *queryHandler) scan(ctx context.Context) error {
@@ -110,9 +96,7 @@ func (h *Handler) GetCountry(ctx context.Context) (*npool.Country, error) {
 		if err := handler.queryAppCountry(cli); err != nil {
 			return err
 		}
-		if err := handler.queryJoin(ctx); err != nil {
-			return err
-		}
+		handler.queryJoin()
 		const limit = 2
 		handler.stm = handler.stm.
 			Offset(int(handler.Offset)).
@@ -145,9 +129,7 @@ func (h *Handler) GetCountries(ctx context.Context) ([]*npool.Country, uint32, e
 		if err := handler.queryAppCountries(ctx, cli); err != nil {
 			return err
 		}
-		if err := handler.queryJoin(ctx); err != nil {
-			return err
-		}
+		handler.queryJoin()
 		handler.stm = handler.stm.
 			Offset(int(handler.Offset)).
 			Limit(int(handler.Limit)).

@@ -78,7 +78,10 @@ func SetQueryConds(q *ent.CountryQuery, conds *Conds) (*ent.CountryQuery, error)
 		}
 		switch conds.ID.Op {
 		case cruder.EQ:
-			q.Where(entcountry.ID(id))
+			q.Where(
+				entcountry.ID(id),
+				entcountry.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid id field")
 		}
@@ -90,7 +93,10 @@ func SetQueryConds(q *ent.CountryQuery, conds *Conds) (*ent.CountryQuery, error)
 		}
 		switch conds.IDs.Op {
 		case cruder.IN:
-			q.Where(entcountry.IDIn(ids...))
+			q.Where(
+				entcountry.IDIn(ids...),
+				entcountry.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid ids field")
 		}
@@ -102,7 +108,10 @@ func SetQueryConds(q *ent.CountryQuery, conds *Conds) (*ent.CountryQuery, error)
 		}
 		switch conds.Country.Op {
 		case cruder.EQ:
-			q.Where(entcountry.Country(country))
+			q.Where(
+				entcountry.Country(country),
+				entcountry.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid country field")
 		}
@@ -114,7 +123,10 @@ func SetQueryConds(q *ent.CountryQuery, conds *Conds) (*ent.CountryQuery, error)
 		}
 		switch conds.Code.Op {
 		case cruder.EQ:
-			q.Where(entcountry.Code(code))
+			q.Where(
+				entcountry.Code(code),
+				entcountry.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid code field")
 		}
@@ -126,7 +138,10 @@ func SetQueryConds(q *ent.CountryQuery, conds *Conds) (*ent.CountryQuery, error)
 		}
 		switch conds.Short.Op {
 		case cruder.EQ:
-			q.Where(entcountry.Short(short))
+			q.Where(
+				entcountry.Short(short),
+				entcountry.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid short field")
 		}
@@ -138,7 +153,10 @@ func SetQueryConds(q *ent.CountryQuery, conds *Conds) (*ent.CountryQuery, error)
 		}
 		switch conds.Countries.Op {
 		case cruder.IN:
-			q.Where(entcountry.CountryIn(countries...))
+			q.Where(
+				entcountry.CountryIn(countries...),
+				entcountry.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid countries field")
 		}

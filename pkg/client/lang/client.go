@@ -152,3 +152,19 @@ func DeleteLang(ctx context.Context, req *npool.LangReq) (*npool.Lang, error) {
 	}
 	return info.(*npool.Lang), nil
 }
+
+func ExistLangConds(ctx context.Context, conds *npool.Conds) (bool, error) {
+	infos, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+		resp, err := cli.ExistLangConds(ctx, &npool.ExistLangCondsRequest{
+			Conds: conds,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("fail get lang: %v", err)
+		}
+		return resp.GetInfo(), nil
+	})
+	if err != nil {
+		return false, fmt.Errorf("fail get lang: %v", err)
+	}
+	return infos.(bool), nil
+}

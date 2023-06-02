@@ -89,7 +89,10 @@ func SetQueryConds(q *ent.MessageQuery, conds *Conds) (*ent.MessageQuery, error)
 		}
 		switch conds.ID.Op {
 		case cruder.EQ:
-			q.Where(entmessage.ID(id))
+			q.Where(
+				entmessage.ID(id),
+				entmessage.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid message field")
 		}
@@ -101,7 +104,10 @@ func SetQueryConds(q *ent.MessageQuery, conds *Conds) (*ent.MessageQuery, error)
 		}
 		switch conds.IDs.Op {
 		case cruder.IN:
-			q.Where(entmessage.IDIn(ids...))
+			q.Where(
+				entmessage.IDIn(ids...),
+				entmessage.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid message field")
 		}
@@ -113,7 +119,10 @@ func SetQueryConds(q *ent.MessageQuery, conds *Conds) (*ent.MessageQuery, error)
 		}
 		switch conds.AppID.Op {
 		case cruder.EQ:
-			q.Where(entmessage.AppID(id))
+			q.Where(
+				entmessage.AppID(id),
+				entmessage.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid message field")
 		}
@@ -125,7 +134,10 @@ func SetQueryConds(q *ent.MessageQuery, conds *Conds) (*ent.MessageQuery, error)
 		}
 		switch conds.LangID.Op {
 		case cruder.EQ:
-			q.Where(entmessage.LangID(id))
+			q.Where(
+				entmessage.LangID(id),
+				entmessage.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid message field")
 		}
@@ -138,7 +150,10 @@ func SetQueryConds(q *ent.MessageQuery, conds *Conds) (*ent.MessageQuery, error)
 		}
 		switch conds.Disabled.Op {
 		case cruder.EQ:
-			q.Where(entmessage.Disabled(disabled))
+			q.Where(
+				entmessage.Disabled(disabled),
+				entmessage.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid message field")
 		}
@@ -150,7 +165,10 @@ func SetQueryConds(q *ent.MessageQuery, conds *Conds) (*ent.MessageQuery, error)
 		}
 		switch conds.MessageID.Op {
 		case cruder.EQ:
-			q.Where(entmessage.MessageID(id))
+			q.Where(
+				entmessage.MessageID(id),
+				entmessage.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid message field")
 		}
@@ -162,7 +180,10 @@ func SetQueryConds(q *ent.MessageQuery, conds *Conds) (*ent.MessageQuery, error)
 		}
 		switch conds.MessageIDs.Op {
 		case cruder.IN:
-			q.Where(entmessage.MessageIDIn(ids...))
+			q.Where(
+				entmessage.MessageIDIn(ids...),
+				entmessage.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid message field")
 		}

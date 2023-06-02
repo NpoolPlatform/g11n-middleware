@@ -58,7 +58,10 @@ func SetQueryConds(q *ent.AppCountryQuery, conds *Conds) (*ent.AppCountryQuery, 
 		}
 		switch conds.ID.Op {
 		case cruder.EQ:
-			q.Where(entappcountry.ID(id))
+			q.Where(
+				entappcountry.ID(id),
+				entappcountry.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid id field")
 		}
@@ -70,7 +73,10 @@ func SetQueryConds(q *ent.AppCountryQuery, conds *Conds) (*ent.AppCountryQuery, 
 		}
 		switch conds.IDs.Op {
 		case cruder.IN:
-			q.Where(entappcountry.IDIn(ids...))
+			q.Where(
+				entappcountry.IDIn(ids...),
+				entappcountry.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid ids field")
 		}
@@ -82,7 +88,10 @@ func SetQueryConds(q *ent.AppCountryQuery, conds *Conds) (*ent.AppCountryQuery, 
 		}
 		switch conds.AppID.Op {
 		case cruder.EQ:
-			q.Where(entappcountry.AppID(id))
+			q.Where(
+				entappcountry.AppID(id),
+				entappcountry.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid appid field")
 		}
@@ -94,7 +103,10 @@ func SetQueryConds(q *ent.AppCountryQuery, conds *Conds) (*ent.AppCountryQuery, 
 		}
 		switch conds.AppIDs.Op {
 		case cruder.IN:
-			q.Where(entappcountry.AppIDIn(ids...))
+			q.Where(
+				entappcountry.AppIDIn(ids...),
+				entappcountry.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid appids field")
 		}
@@ -106,7 +118,10 @@ func SetQueryConds(q *ent.AppCountryQuery, conds *Conds) (*ent.AppCountryQuery, 
 		}
 		switch conds.CountryID.Op {
 		case cruder.EQ:
-			q.Where(entappcountry.CountryID(id))
+			q.Where(
+				entappcountry.CountryID(id),
+				entappcountry.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid langid field")
 		}
@@ -118,7 +133,10 @@ func SetQueryConds(q *ent.AppCountryQuery, conds *Conds) (*ent.AppCountryQuery, 
 		}
 		switch conds.CountryIDs.Op {
 		case cruder.IN:
-			q.Where(entappcountry.CountryIDIn(ids...))
+			q.Where(
+				entappcountry.CountryIDIn(ids...),
+				entappcountry.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid langids field")
 		}

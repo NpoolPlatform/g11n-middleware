@@ -15,7 +15,7 @@ import (
 func (s *Server) GetCountryOnly(ctx context.Context, in *npool.GetCountryOnlyRequest) (*npool.GetCountryOnlyResponse, error) {
 	handler, err := appcountry1.NewHandler(
 		ctx,
-		appcountry1.WithID(&in.Conds.ID.Value),
+		appcountry1.WithConds(in.Conds),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(
@@ -40,7 +40,7 @@ func (s *Server) GetCountryOnly(ctx context.Context, in *npool.GetCountryOnlyReq
 	}, nil
 }
 
-func (s *Server) GetCountrys(ctx context.Context, in *npool.GetCountriesRequest) (*npool.GetCountriesResponse, error) {
+func (s *Server) GetCountries(ctx context.Context, in *npool.GetCountriesRequest) (*npool.GetCountriesResponse, error) {
 	handler, err := appcountry1.NewHandler(
 		ctx,
 		appcountry1.WithConds(in.GetConds()),

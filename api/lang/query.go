@@ -42,7 +42,7 @@ func (s *Server) GetLang(ctx context.Context, in *npool.GetLangRequest) (*npool.
 func (s *Server) GetLangOnly(ctx context.Context, in *npool.GetLangOnlyRequest) (*npool.GetLangOnlyResponse, error) {
 	handler, err := lang1.NewHandler(
 		ctx,
-		lang1.WithID(&in.Conds.ID.Value),
+		lang1.WithConds(in.Conds),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

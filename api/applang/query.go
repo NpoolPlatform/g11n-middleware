@@ -14,7 +14,7 @@ import (
 func (s *Server) GetLangOnly(ctx context.Context, in *npool.GetLangOnlyRequest) (*npool.GetLangOnlyResponse, error) {
 	handler, err := applang1.NewHandler(
 		ctx,
-		applang1.WithID(&in.Conds.ID.Value),
+		applang1.WithConds(in.Conds),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

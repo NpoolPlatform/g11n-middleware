@@ -25,6 +25,11 @@ type queryHandler struct {
 func (h *queryHandler) selectAppLang(stm *ent.AppLangQuery) {
 	h.stm = stm.Select(
 		entapplang.FieldID,
+		entapplang.FieldAppID,
+		entapplang.FieldLangID,
+		entapplang.FieldMain,
+		entapplang.FieldCreatedAt,
+		entapplang.FieldUpdatedAt,
 	)
 }
 
@@ -60,42 +65,23 @@ func (h *queryHandler) queryAppLangs(ctx context.Context, cli *ent.Client) error
 
 func (h *queryHandler) queryJoinLang(s *sql.Selector) {
 	t := sql.Table(entlang.Table)
-	stm := s.LeftJoin(t).
+	s.LeftJoin(t).
 		On(
 			s.C(entapplang.FieldLangID),
 			t.C(entlang.FieldID),
+		).
+		AppendSelect(
+			sql.As(t.C(entlang.FieldLang), "lang"),
+			sql.As(t.C(entlang.FieldLogo), "logo"),
+			sql.As(t.C(entlang.FieldName), "name"),
+			sql.As(t.C(entlang.FieldShort), "short"),
 		)
-
-	stm.AppendSelect(
-		s.C(entapplang.FieldAppID),
-		s.C(entapplang.FieldLangID),
-		s.C(entapplang.FieldMain),
-		s.C(entapplang.FieldCreatedAt),
-		s.C(entapplang.FieldUpdatedAt),
-		sql.As(t.C(entlang.FieldLang), "lang"),
-		sql.As(t.C(entlang.FieldLogo), "logo"),
-		sql.As(t.C(entlang.FieldName), "name"),
-		sql.As(t.C(entlang.FieldShort), "short"),
-	)
 }
 
-func (h *queryHandler) queryJoinSelect() {
-	h.stm.Select(
-		entapplang.FieldID,
-	)
-}
-
-func (h *queryHandler) queryJoin(ctx context.Context) error {
+func (h *queryHandler) queryJoin() {
 	h.stm.Modify(func(s *sql.Selector) {
-		h.queryJoinSelect()
 		h.queryJoinLang(s)
 	})
-	total, err := h.stm.Count(ctx)
-	if err != nil {
-		return err
-	}
-	h.total = uint32(total)
-	return nil
 }
 
 func (h *queryHandler) scan(ctx context.Context) error {
@@ -111,9 +97,7 @@ func (h *Handler) GetLang(ctx context.Context) (*npool.Lang, error) {
 		if err := handler.queryAppLang(cli); err != nil {
 			return err
 		}
-		if err := handler.queryJoin(ctx); err != nil {
-			return err
-		}
+		handler.queryJoin()
 		const limit = 2
 		handler.stm = handler.stm.
 			Offset(int(handler.Offset)).
@@ -146,9 +130,7 @@ func (h *Handler) GetLangs(ctx context.Context) ([]*npool.Lang, uint32, error) {
 		if err := handler.queryAppLangs(ctx, cli); err != nil {
 			return err
 		}
-		if err := handler.queryJoin(ctx); err != nil {
-			return err
-		}
+		handler.queryJoin()
 		handler.stm = handler.stm.
 			Offset(int(handler.Offset)).
 			Limit(int(handler.Limit)).

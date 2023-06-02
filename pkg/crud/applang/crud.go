@@ -66,7 +66,10 @@ func SetQueryConds(q *ent.AppLangQuery, conds *Conds) (*ent.AppLangQuery, error)
 		}
 		switch conds.ID.Op {
 		case cruder.EQ:
-			q.Where(entapplang.ID(id))
+			q.Where(
+				entapplang.ID(id),
+				entapplang.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid id field")
 		}
@@ -78,7 +81,10 @@ func SetQueryConds(q *ent.AppLangQuery, conds *Conds) (*ent.AppLangQuery, error)
 		}
 		switch conds.IDs.Op {
 		case cruder.IN:
-			q.Where(entapplang.IDIn(ids...))
+			q.Where(
+				entapplang.IDIn(ids...),
+				entapplang.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid ids field")
 		}
@@ -90,7 +96,10 @@ func SetQueryConds(q *ent.AppLangQuery, conds *Conds) (*ent.AppLangQuery, error)
 		}
 		switch conds.AppID.Op {
 		case cruder.EQ:
-			q.Where(entapplang.AppID(id))
+			q.Where(
+				entapplang.AppID(id),
+				entapplang.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid appid field")
 		}
@@ -102,7 +111,10 @@ func SetQueryConds(q *ent.AppLangQuery, conds *Conds) (*ent.AppLangQuery, error)
 		}
 		switch conds.AppIDs.Op {
 		case cruder.IN:
-			q.Where(entapplang.AppIDIn(ids...))
+			q.Where(
+				entapplang.AppIDIn(ids...),
+				entapplang.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid appids field")
 		}
@@ -114,7 +126,10 @@ func SetQueryConds(q *ent.AppLangQuery, conds *Conds) (*ent.AppLangQuery, error)
 		}
 		switch conds.LangID.Op {
 		case cruder.EQ:
-			q.Where(entapplang.LangID(id))
+			q.Where(
+				entapplang.LangID(id),
+				entapplang.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid langid field")
 		}
@@ -126,7 +141,10 @@ func SetQueryConds(q *ent.AppLangQuery, conds *Conds) (*ent.AppLangQuery, error)
 		}
 		switch conds.LangIDs.Op {
 		case cruder.IN:
-			q.Where(entapplang.LangIDIn(ids...))
+			q.Where(
+				entapplang.LangIDIn(ids...),
+				entapplang.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid langids field")
 		}

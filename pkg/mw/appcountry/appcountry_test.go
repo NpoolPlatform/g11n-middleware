@@ -46,19 +46,7 @@ func setup(t *testing.T) func(*testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, country1)
 
-	ah, err := NewHandler(
-		context.Background(),
-		WithID(&ret.ID),
-		WithCountryID(&ret.CountryID),
-	)
-	assert.Nil(t, err)
-	assert.NotNil(t, ah)
-	appcountry1, err := ah.CreateCountry(context.Background())
-	assert.Nil(t, err)
-	assert.NotNil(t, appcountry1)
-
 	return func(*testing.T) {
-		_, _ = ah.DeleteCountry(context.Background())
 		_, _ = ch.DeleteCountry(context.Background())
 	}
 }
