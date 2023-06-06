@@ -37,6 +37,10 @@ var (
 		ID:     uuid.NewString(),
 		AppID:  uuid.NewString(),
 		LangID: uuid.NewString(),
+		Lang:   "test Lang" + uuid.NewString(),
+		Logo:   "test Logo img base64",
+		Name:   "test lang name" + uuid.NewString(),
+		Short:  "lang short info",
 		Main:   true,
 	}
 )
@@ -45,6 +49,10 @@ func setupLang(t *testing.T) func(*testing.T) {
 	lh, err := lang.NewHandler(
 		context.Background(),
 		lang.WithID(&ret.LangID),
+		lang.WithLang(&ret.Lang),
+		lang.WithName(&ret.Name),
+		lang.WithLogo(&ret.Logo),
+		lang.WithShort(&ret.Short),
 	)
 	assert.Nil(t, err)
 	assert.NotNil(t, lh)
@@ -67,6 +75,7 @@ func createLang(t *testing.T) {
 	info, err := CreateLang(context.Background(), &req)
 	if assert.Nil(t, err) {
 		ret.CreatedAt = info.CreatedAt
+		ret.UpdatedAt = info.UpdatedAt
 		assert.Equal(t, info, &ret)
 	}
 }

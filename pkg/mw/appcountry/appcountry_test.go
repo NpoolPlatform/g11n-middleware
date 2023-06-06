@@ -63,6 +63,7 @@ func creatCountry(t *testing.T) {
 	info, err := handler.CreateCountry(context.Background())
 	if assert.Nil(t, err) {
 		ret.CreatedAt = info.CreatedAt
+		ret.UpdatedAt = info.UpdatedAt
 		assert.Equal(t, info, &ret)
 	}
 }

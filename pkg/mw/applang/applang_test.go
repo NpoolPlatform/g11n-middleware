@@ -32,6 +32,10 @@ var (
 		ID:     uuid.NewString(),
 		AppID:  uuid.NewString(),
 		LangID: uuid.NewString(),
+		Lang:   "test mw lang" + uuid.NewString(),
+		Name:   "test mw lang" + uuid.NewString(),
+		Logo:   "test mw logo" + uuid.NewString(),
+		Short:  "test mw short" + uuid.NewString(),
 		Main:   true,
 	}
 )
@@ -40,6 +44,10 @@ func setup(t *testing.T) func(*testing.T) {
 	lh, err := lang.NewHandler(
 		context.Background(),
 		lang.WithID(&ret.LangID),
+		lang.WithLang(&ret.Lang),
+		lang.WithName(&ret.Name),
+		lang.WithLogo(&ret.Logo),
+		lang.WithShort(&ret.Short),
 	)
 	assert.Nil(t, err)
 	assert.NotNil(t, lh)
@@ -47,19 +55,7 @@ func setup(t *testing.T) func(*testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, lang1)
 
-	ah, err := NewHandler(
-		context.Background(),
-		WithID(&ret.ID),
-		WithLangID(&ret.LangID),
-	)
-	assert.Nil(t, err)
-	assert.NotNil(t, ah)
-	applang1, err := ah.CreateLang(context.Background())
-	assert.Nil(t, err)
-	assert.NotNil(t, applang1)
-
 	return func(*testing.T) {
-		_, _ = ah.DeleteLang(context.Background())
 		_, _ = lh.DeleteLang(context.Background())
 	}
 }
@@ -77,6 +73,7 @@ func creatLang(t *testing.T) {
 	info, err := handler.CreateLang(context.Background())
 	if assert.Nil(t, err) {
 		ret.CreatedAt = info.CreatedAt
+		ret.UpdatedAt = info.UpdatedAt
 		assert.Equal(t, info, &ret)
 	}
 }

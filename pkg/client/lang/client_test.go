@@ -34,10 +34,10 @@ func init() {
 var (
 	ret = npool.Lang{
 		ID:    uuid.NewString(),
-		Lang:  uuid.NewString(),
-		Logo:  uuid.NewString(),
-		Name:  uuid.NewString(),
-		Short: uuid.NewString(),
+		Lang:  "test lang" + uuid.NewString(),
+		Logo:  "test logo" + uuid.NewString(),
+		Name:  "test name" + uuid.NewString(),
+		Short: "test short" + uuid.NewString(),
 	}
 )
 
@@ -52,6 +52,7 @@ func createLang(t *testing.T) {
 	info, err := CreateLang(context.Background(), &req)
 	if assert.Nil(t, err) {
 		ret.CreatedAt = info.CreatedAt
+		ret.UpdatedAt = info.UpdatedAt
 		assert.Equal(t, info, &ret)
 	}
 }

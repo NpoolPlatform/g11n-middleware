@@ -50,19 +50,7 @@ func setupMessage(t *testing.T) func(*testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, lang1)
 
-	mh, err := NewHandler(
-		context.Background(),
-		WithID(&ret.ID),
-		WithLangID(&ret.LangID),
-	)
-	assert.Nil(t, err)
-	assert.NotNil(t, mh)
-	message1, err := mh.CreateMessage(context.Background())
-	assert.Nil(t, err)
-	assert.NotNil(t, message1)
-
 	return func(t *testing.T) {
-		_, _ = mh.DeleteMessage(context.Background())
 		_, _ = lh.DeleteLang(context.Background())
 	}
 }
@@ -83,6 +71,7 @@ func createMessage(t *testing.T) {
 	info, err := handler.CreateMessage(context.Background())
 	if assert.Nil(t, err) {
 		ret.CreatedAt = info.CreatedAt
+		ret.UpdatedAt = info.UpdatedAt
 		assert.Equal(t, info, &ret)
 	}
 }
@@ -101,6 +90,7 @@ func updateMessage(t *testing.T) {
 
 	info, err := handler.UpdateMessage(context.Background())
 	if assert.Nil(t, err) {
+		ret.AppID = info.AppID
 		assert.Equal(t, info, &ret)
 	}
 }

@@ -34,10 +34,10 @@ func init() {
 var (
 	ret = npool.Country{
 		ID:      uuid.NewString(),
-		Country: uuid.NewString(),
-		Flag:    uuid.NewString(),
-		Code:    uuid.NewString(),
-		Short:   uuid.NewString(),
+		Country: "test country" + uuid.NewString(),
+		Flag:    "test flag" + uuid.NewString(),
+		Code:    "test code" + uuid.NewString(),
+		Short:   "test short" + uuid.NewString(),
 	}
 )
 
@@ -52,6 +52,7 @@ func createCountry(t *testing.T) {
 	info, err := CreateCountry(context.Background(), &req)
 	if assert.Nil(t, err) {
 		ret.CreatedAt = info.CreatedAt
+		ret.UpdatedAt = info.UpdatedAt
 		assert.Equal(t, info, &ret)
 	}
 }
