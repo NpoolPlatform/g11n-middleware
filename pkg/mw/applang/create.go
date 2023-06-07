@@ -55,7 +55,7 @@ func (h *createHandler) createLang(ctx context.Context, cli *ent.Client) error {
 	if *h.Main {
 		h.Conds = &applangcrud.Conds{
 			AppID: &cruder.Cond{Op: cruder.EQ, Val: h.AppID},
-			Main:  &cruder.Cond{Op: cruder.EQ, Val: *h.Main},
+			Main:  &cruder.Cond{Op: cruder.EQ, Val: true},
 		}
 		exist, err := h.ExistAppLangConds(ctx)
 		if err != nil {
