@@ -107,10 +107,17 @@ func (h *Handler) CreateMessages(ctx context.Context) ([]*npool.Message, error) 
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
 		for _, req := range h.Reqs {
+			handler.ID = nil
+			handler.AppID = *req.AppID
+			handler.LangID = req.LangID
+			handler.MessageID = req.MessageID
+			handler.Message = req.Message
+			handler.GetIndex = req.GetIndex
+			handler.Disabled = req.Disabled
 			if err := handler.createMessage(ctx, cli); err != nil {
 				return err
 			}
-			ids = append(ids, *req.ID)
+			ids = append(ids, *h.ID)
 		}
 		return nil
 	})

@@ -98,10 +98,13 @@ func (h *Handler) CreateCountries(ctx context.Context) ([]*npool.Country, error)
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
 		for _, req := range h.Reqs {
+			handler.ID = nil
+			handler.AppID = *req.AppID
+			handler.CountryID = req.CountryID
 			if err := handler.createCountry(ctx, cli); err != nil {
 				return err
 			}
-			ids = append(ids, *req.ID)
+			ids = append(ids, *h.ID)
 		}
 		return nil
 	})

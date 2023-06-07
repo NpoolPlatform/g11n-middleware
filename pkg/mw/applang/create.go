@@ -115,10 +115,14 @@ func (h *Handler) CreateLangs(ctx context.Context) ([]*npool.Lang, error) {
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
 		for _, req := range h.Reqs {
+			handler.ID = nil
+			handler.AppID = *req.AppID
+			handler.LangID = req.LangID
+			handler.Main = req.Main
 			if err := handler.createLang(ctx, cli); err != nil {
 				return err
 			}
-			ids = append(ids, *req.ID)
+			ids = append(ids, *h.ID)
 		}
 		return nil
 	})
