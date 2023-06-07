@@ -149,5 +149,17 @@ func SetQueryConds(q *ent.AppLangQuery, conds *Conds) (*ent.AppLangQuery, error)
 			return nil, fmt.Errorf("invalid langids field")
 		}
 	}
+	if conds.Main != nil {
+		main, ok := conds.Main.Val.(bool)
+		if !ok {
+			return nil, fmt.Errorf("invalid main")
+		}
+		switch conds.Main.Op {
+		case cruder.EQ:
+			q.Where(entapplang.Main(main))
+		default:
+			return nil, fmt.Errorf("invalid main field")
+		}
+	}
 	return q, nil
 }
