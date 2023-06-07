@@ -95,10 +95,15 @@ func (h *Handler) CreateLangs(ctx context.Context) ([]*npool.Lang, error) {
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
 		for _, req := range h.Reqs {
+			handler.ID = nil
+			handler.Lang = req.Lang
+			handler.Logo = req.Logo
+			handler.Name = req.Name
+			handler.Short = req.Short
 			if err := handler.createLang(ctx, cli); err != nil {
 				return err
 			}
-			ids = append(ids, *req.ID)
+			ids = append(ids, *h.ID)
 		}
 		return nil
 	})
@@ -107,7 +112,7 @@ func (h *Handler) CreateLangs(ctx context.Context) ([]*npool.Lang, error) {
 	}
 
 	h.Conds = &langcrud.Conds{
-		IDs: &cruder.Cond{Op: cruder.EQ, Val: ids},
+		IDs: &cruder.Cond{Op: cruder.IN, Val: ids},
 	}
 	h.Offset = 0
 	h.Limit = int32(len(ids))

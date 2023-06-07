@@ -95,10 +95,15 @@ func (h *Handler) CreateCountries(ctx context.Context) ([]*npool.Country, error)
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
 		for _, req := range h.Reqs {
+			handler.ID = nil
+			handler.Country = req.Country
+			handler.Flag = req.Flag
+			handler.Code = req.Code
+			handler.Short = req.Short
 			if err := handler.createCountry(ctx, cli); err != nil {
 				return err
 			}
-			ids = append(ids, *req.ID)
+			ids = append(ids, *h.ID)
 		}
 		return nil
 	})
@@ -107,7 +112,7 @@ func (h *Handler) CreateCountries(ctx context.Context) ([]*npool.Country, error)
 	}
 
 	h.Conds = &countrycrud.Conds{
-		IDs: &cruder.Cond{Op: cruder.EQ, Val: ids},
+		IDs: &cruder.Cond{Op: cruder.IN, Val: ids},
 	}
 	h.Offset = 0
 	h.Limit = int32(len(ids))
