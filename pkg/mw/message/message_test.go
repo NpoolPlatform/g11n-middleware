@@ -31,6 +31,7 @@ var (
 	ret = npool.Message{
 		ID:        uuid.NewString(),
 		AppID:     uuid.NewString(),
+		Lang:      "test lang" + uuid.NewString(),
 		LangID:    uuid.NewString(),
 		MessageID: uuid.NewString(),
 		Message:   uuid.NewString(),
@@ -43,6 +44,7 @@ func setupMessage(t *testing.T) func(*testing.T) {
 	lh, err := lang.NewHandler(
 		context.Background(),
 		lang.WithID(&ret.LangID),
+		lang.WithLang(&ret.Lang),
 	)
 	assert.Nil(t, err)
 	assert.NotNil(t, lh)
@@ -70,6 +72,7 @@ func createMessage(t *testing.T) {
 
 	info, err := handler.CreateMessage(context.Background())
 	if assert.Nil(t, err) {
+		ret.Lang = info.Lang
 		ret.CreatedAt = info.CreatedAt
 		ret.UpdatedAt = info.UpdatedAt
 		assert.Equal(t, info, &ret)

@@ -32,6 +32,10 @@ var (
 		ID:        uuid.NewString(),
 		AppID:     uuid.NewString(),
 		CountryID: uuid.NewString(),
+		Country:   "test country" + uuid.NewString(),
+		Flag:      "test flag" + uuid.NewString(),
+		Code:      "test code" + uuid.NewString(),
+		Short:     "test short" + uuid.NewString(),
 	}
 )
 
@@ -39,6 +43,10 @@ func setup(t *testing.T) func(*testing.T) {
 	ch, err := country.NewHandler(
 		context.Background(),
 		country.WithID(&ret.CountryID),
+		country.WithCountry(&ret.Country),
+		country.WithFlag(&ret.Flag),
+		country.WithCode(&ret.Code),
+		country.WithShort(&ret.Short),
 	)
 	assert.Nil(t, err)
 	assert.NotNil(t, ch)

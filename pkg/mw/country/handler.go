@@ -124,15 +124,7 @@ func WithConds(conds *npool.Conds) func(context.Context, *Handler) error {
 			h.Conds.Short = &cruder.Cond{Op: conds.GetShort().GetOp(), Val: conds.GetShort().GetValue()}
 		}
 		if len(conds.GetCountries().GetValue()) > 0 {
-			_ids := []uuid.UUID{}
-			for _, id := range conds.GetCountries().GetValue() {
-				_id, err := uuid.Parse(id)
-				if err != nil {
-					return err
-				}
-				_ids = append(_ids, _id)
-			}
-			h.Conds.Countries = &cruder.Cond{Op: conds.GetCountries().GetOp(), Val: _ids}
+			h.Conds.Countries = &cruder.Cond{Op: conds.GetCountries().GetOp(), Val: conds.GetCountries().GetValue()}
 		}
 		return nil
 	}
