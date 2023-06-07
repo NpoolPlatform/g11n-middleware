@@ -22,6 +22,12 @@ type createHandler struct {
 }
 
 func (h *createHandler) createMessage(ctx context.Context, cli *ent.Client) error {
+	if h.LangID == nil {
+		return fmt.Errorf("langid invalid")
+	}
+	if h.MessageID == nil {
+		return fmt.Errorf("messageid invalid")
+	}
 	lockKey := fmt.Sprintf(
 		"%v:%v:%v:%v",
 		basetypes.Prefix_PrefixCreateAppCountry,

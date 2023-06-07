@@ -22,6 +22,9 @@ type createHandler struct {
 }
 
 func (h *createHandler) createLang(ctx context.Context, cli *ent.Client) error {
+	if h.LangID == nil {
+		return fmt.Errorf("langid invalid")
+	}
 	lockKey := fmt.Sprintf(
 		"%v:%v:%v",
 		basetypes.Prefix_PrefixCreateAppLang,
@@ -45,6 +48,22 @@ func (h *createHandler) createLang(ctx context.Context, cli *ent.Client) error {
 	}
 	if exist {
 		return fmt.Errorf("applang exist")
+	}
+	if h.Main == nil {
+		return fmt.Errorf("main invalid")
+	}
+	if *h.Main {
+		h.Conds = &applangcrud.Conds{
+			AppID: &cruder.Cond{Op: cruder.EQ, Val: h.AppID},
+			Main:  &cruder.Cond{Op: cruder.EQ, Val: *h.Main},
+		}
+		exist, err := h.ExistAppLangConds(ctx)
+		if err != nil {
+			return err
+		}
+		if exist {
+			return fmt.Errorf("applang main exist")
+		}
 	}
 
 	id := uuid.New()

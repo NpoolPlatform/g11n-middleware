@@ -22,6 +22,9 @@ type createHandler struct {
 }
 
 func (h *createHandler) createCountry(ctx context.Context, cli *ent.Client) error {
+	if h.CountryID == nil {
+		return fmt.Errorf("countryid invalid")
+	}
 	lockKey := fmt.Sprintf(
 		"%v:%v:%v",
 		basetypes.Prefix_PrefixCreateAppCountry,
