@@ -126,7 +126,7 @@ func (h *Handler) CreateMessages(ctx context.Context) ([]*npool.Message, error) 
 	}
 
 	h.Conds = &messagecrud.Conds{
-		IDs: &cruder.Cond{Op: cruder.EQ, Val: ids},
+		IDs: &cruder.Cond{Op: cruder.IN, Val: ids},
 	}
 	h.Offset = 0
 	h.Limit = int32(len(ids))

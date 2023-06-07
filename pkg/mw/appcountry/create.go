@@ -113,7 +113,7 @@ func (h *Handler) CreateCountries(ctx context.Context) ([]*npool.Country, error)
 	}
 
 	h.Conds = &appcountrycrud.Conds{
-		IDs: &cruder.Cond{Op: cruder.EQ, Val: ids},
+		IDs: &cruder.Cond{Op: cruder.IN, Val: ids},
 	}
 	h.Offset = 0
 	h.Limit = int32(len(ids))

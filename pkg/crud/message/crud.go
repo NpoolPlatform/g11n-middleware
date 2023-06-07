@@ -94,7 +94,7 @@ func SetQueryConds(q *ent.MessageQuery, conds *Conds) (*ent.MessageQuery, error)
 				entmessage.DeletedAt(0),
 			)
 		default:
-			return nil, fmt.Errorf("invalid message field")
+			return nil, fmt.Errorf("invalid message id field")
 		}
 	}
 	if conds.IDs != nil {
@@ -109,7 +109,7 @@ func SetQueryConds(q *ent.MessageQuery, conds *Conds) (*ent.MessageQuery, error)
 				entmessage.DeletedAt(0),
 			)
 		default:
-			return nil, fmt.Errorf("invalid message field")
+			return nil, fmt.Errorf("invalid message ids field")
 		}
 	}
 	if conds.AppID != nil {
@@ -124,7 +124,7 @@ func SetQueryConds(q *ent.MessageQuery, conds *Conds) (*ent.MessageQuery, error)
 				entmessage.DeletedAt(0),
 			)
 		default:
-			return nil, fmt.Errorf("invalid message field")
+			return nil, fmt.Errorf("invalid message appids field")
 		}
 	}
 	if conds.LangID != nil {
@@ -139,7 +139,7 @@ func SetQueryConds(q *ent.MessageQuery, conds *Conds) (*ent.MessageQuery, error)
 				entmessage.DeletedAt(0),
 			)
 		default:
-			return nil, fmt.Errorf("invalid message field")
+			return nil, fmt.Errorf("invalid message langid field")
 		}
 	}
 
@@ -155,7 +155,7 @@ func SetQueryConds(q *ent.MessageQuery, conds *Conds) (*ent.MessageQuery, error)
 				entmessage.DeletedAt(0),
 			)
 		default:
-			return nil, fmt.Errorf("invalid message field")
+			return nil, fmt.Errorf("invalid message disabled field")
 		}
 	}
 	if conds.MessageID != nil {
@@ -170,7 +170,7 @@ func SetQueryConds(q *ent.MessageQuery, conds *Conds) (*ent.MessageQuery, error)
 				entmessage.DeletedAt(0),
 			)
 		default:
-			return nil, fmt.Errorf("invalid message field")
+			return nil, fmt.Errorf("invalid message messageid field")
 		}
 	}
 	if conds.MessageIDs != nil {
@@ -185,7 +185,7 @@ func SetQueryConds(q *ent.MessageQuery, conds *Conds) (*ent.MessageQuery, error)
 				entmessage.DeletedAt(0),
 			)
 		default:
-			return nil, fmt.Errorf("invalid message field")
+			return nil, fmt.Errorf("invalid message messageids field")
 		}
 	}
 	return q, nil
