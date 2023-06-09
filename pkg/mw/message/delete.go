@@ -2,6 +2,7 @@ package message
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db"
@@ -15,6 +16,9 @@ func (h *Handler) DeleteMessage(ctx context.Context) (*npool.Message, error) {
 	info, err := h.GetMessage(ctx)
 	if err != nil {
 		return nil, err
+	}
+	if info == nil {
+		return nil, fmt.Errorf("message not exist")
 	}
 
 	err = db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {

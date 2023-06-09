@@ -2,6 +2,7 @@ package appcountry
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db"
@@ -15,6 +16,9 @@ func (h *Handler) DeleteCountry(ctx context.Context) (*npool.Country, error) {
 	info, err := h.GetCountry(ctx)
 	if err != nil {
 		return nil, err
+	}
+	if info == nil {
+		return nil, fmt.Errorf("appcountry not exist")
 	}
 
 	err = db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {

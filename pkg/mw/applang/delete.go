@@ -2,6 +2,7 @@ package applang
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db"
@@ -15,6 +16,9 @@ func (h *Handler) DeleteLang(ctx context.Context) (*npool.Lang, error) {
 	info, err := h.GetLang(ctx)
 	if err != nil {
 		return nil, err
+	}
+	if info == nil {
+		return nil, fmt.Errorf("applang not exist")
 	}
 
 	err = db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {

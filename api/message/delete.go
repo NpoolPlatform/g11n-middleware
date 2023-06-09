@@ -17,6 +17,7 @@ func (s *Server) DeleteMessage(ctx context.Context, in *npool.DeleteMessageReque
 	handler, err := message1.NewHandler(
 		ctx,
 		message1.WithID(req.ID),
+		message1.WithAppID(*req.AppID),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(
