@@ -8,6 +8,7 @@ import (
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db/ent"
 
 	applangcrud "github.com/NpoolPlatform/g11n-middleware/pkg/crud/applang"
+	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/applang"
 )
 
@@ -17,6 +18,17 @@ func (h *Handler) UpdateLang(ctx context.Context) (*npool.Lang, error) {
 	}
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
+		h.Conds = &applangcrud.Conds{
+			AppID: &cruder.Cond{Op: cruder.EQ, Val: h.AppID},
+			ID:    &cruder.Cond{Op: cruder.EQ, Val: *h.ID},
+		}
+		exist, err := h.ExistAppLangConds(ctx)
+		if err != nil {
+			return err
+		}
+		if !exist {
+			return fmt.Errorf("applang not exist")
+		}
 		if _, err := applangcrud.UpdateSet(
 			cli.AppLang.UpdateOneID(*h.ID),
 			&applangcrud.Req{

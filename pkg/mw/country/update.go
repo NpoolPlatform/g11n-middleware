@@ -9,6 +9,7 @@ import (
 	entcountry "github.com/NpoolPlatform/g11n-middleware/pkg/db/ent/country"
 
 	countrycrud "github.com/NpoolPlatform/g11n-middleware/pkg/crud/country"
+	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/country"
 )
 
@@ -18,6 +19,19 @@ func (h *Handler) UpdateCountry(ctx context.Context) (*npool.Country, error) {
 	}
 
 	err := db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
+		if h.Country != nil {
+			h.Conds = &countrycrud.Conds{
+				ID:      &cruder.Cond{Op: cruder.NEQ, Val: *h.ID},
+				Country: &cruder.Cond{Op: cruder.EQ, Val: *h.Country},
+			}
+			exist, err := h.ExistCountryConds(ctx)
+			if err != nil {
+				return err
+			}
+			if exist {
+				return fmt.Errorf("country is exist")
+			}
+		}
 		info, err := tx.
 			Country.
 			Query().
