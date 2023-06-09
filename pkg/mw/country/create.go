@@ -21,19 +21,23 @@ type createHandler struct {
 	*Handler
 }
 
-func (h *createHandler) createCountry(ctx context.Context, cli *ent.Client) (*npool.Country, error) {
+func (h *createHandler) validate() error {
 	if h.Country == nil || *h.Country == "" {
-		return nil, fmt.Errorf("invalid country")
+		return fmt.Errorf("invalid country")
 	}
 	if h.Flag == nil || *h.Flag == "" {
-		return nil, fmt.Errorf("invalid flag")
+		return fmt.Errorf("invalid flag")
 	}
 	if h.Code == nil || *h.Code == "" {
-		return nil, fmt.Errorf("invalid code")
+		return fmt.Errorf("invalid code")
 	}
 	if h.Short == nil || *h.Short == "" {
-		return nil, fmt.Errorf("invalid short")
+		return fmt.Errorf("invalid short")
 	}
+	return nil
+}
+
+func (h *createHandler) createCountry(ctx context.Context, cli *ent.Client) (*npool.Country, error) {
 	lockKey := fmt.Sprintf(
 		"%v:%v",
 		basetypes.Prefix_PrefixCreateCountry,
@@ -87,6 +91,19 @@ func (h *Handler) CreateCountry(ctx context.Context) (*npool.Country, error) {
 		Handler: h,
 	}
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
+		if err := handler.validate(); err != nil {
+			return err
+		}
+		h.Conds = &countrycrud.Conds{
+			Country: &cruder.Cond{Op: cruder.EQ, Val: *h.Country},
+		}
+		exist, err := h.ExistCountryConds(ctx)
+		if err != nil {
+			return err
+		}
+		if exist {
+			return fmt.Errorf("country exist")
+		}
 		info, err := handler.createCountry(ctx, cli)
 		if err != nil {
 			return err
@@ -121,6 +138,9 @@ func (h *Handler) CreateCountries(ctx context.Context) ([]*npool.Country, error)
 			handler.Flag = req.Flag
 			handler.Code = req.Code
 			handler.Short = req.Short
+			if err := handler.validate(); err != nil {
+				return err
+			}
 			info, err := handler.createCountry(ctx, cli)
 			if err != nil {
 				return err

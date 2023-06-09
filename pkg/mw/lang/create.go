@@ -21,19 +21,23 @@ type createHandler struct {
 	*Handler
 }
 
-func (h *createHandler) createLang(ctx context.Context, cli *ent.Client) (*npool.Lang, error) {
+func (h *createHandler) validate() error {
 	if h.Lang == nil || *h.Lang == "" {
-		return nil, fmt.Errorf("invalid lang")
+		return fmt.Errorf("invalid lang")
 	}
 	if h.Logo == nil || *h.Logo == "" {
-		return nil, fmt.Errorf("invalid logo")
+		return fmt.Errorf("invalid logo")
 	}
 	if h.Name == nil || *h.Name == "" {
-		return nil, fmt.Errorf("invalid name")
+		return fmt.Errorf("invalid name")
 	}
 	if h.Short == nil || *h.Short == "" {
-		return nil, fmt.Errorf("invalid short")
+		return fmt.Errorf("invalid short")
 	}
+	return nil
+}
+
+func (h *createHandler) createLang(ctx context.Context, cli *ent.Client) (*npool.Lang, error) {
 	lockKey := fmt.Sprintf(
 		"%v:%v",
 		basetypes.Prefix_PrefixCreateLang,
@@ -87,6 +91,19 @@ func (h *Handler) CreateLang(ctx context.Context) (*npool.Lang, error) {
 		Handler: h,
 	}
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
+		if err := handler.validate(); err != nil {
+			return err
+		}
+		h.Conds = &langcrud.Conds{
+			Lang: &cruder.Cond{Op: cruder.EQ, Val: *h.Lang},
+		}
+		exist, err := h.ExistLangConds(ctx)
+		if err != nil {
+			return err
+		}
+		if exist {
+			return fmt.Errorf("lang exist")
+		}
 		info, err := handler.createLang(ctx, cli)
 		if err != nil {
 			return err
@@ -121,6 +138,9 @@ func (h *Handler) CreateLangs(ctx context.Context) ([]*npool.Lang, error) {
 			handler.Logo = req.Logo
 			handler.Name = req.Name
 			handler.Short = req.Short
+			if err := handler.validate(); err != nil {
+				return err
+			}
 			info, err := handler.createLang(ctx, cli)
 			if err != nil {
 				return err
