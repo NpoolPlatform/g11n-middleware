@@ -47,7 +47,7 @@ func (h *createHandler) createLang(ctx context.Context, cli *ent.Client) error {
 		return err
 	}
 	if exist {
-		return fmt.Errorf("applang exist")
+		return nil
 	}
 	if h.Main == nil {
 		return fmt.Errorf("main invalid")

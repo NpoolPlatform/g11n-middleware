@@ -21,9 +21,9 @@ type createHandler struct {
 	*Handler
 }
 
-func (h *createHandler) createCountry(ctx context.Context, cli *ent.Client) error {
+func (h *createHandler) createCountry(ctx context.Context, cli *ent.Client) (*npool.Country, error) {
 	if h.Country == nil {
-		return fmt.Errorf("country invalid")
+		return nil, fmt.Errorf("country invalid")
 	}
 	lockKey := fmt.Sprintf(
 		"%v:%v",
@@ -31,7 +31,7 @@ func (h *createHandler) createCountry(ctx context.Context, cli *ent.Client) erro
 		*h.Country,
 	)
 	if err := redis2.TryLock(lockKey, 0); err != nil {
-		return err
+		return nil, err
 	}
 	defer func() {
 		_ = redis2.Unlock(lockKey)
@@ -40,12 +40,13 @@ func (h *createHandler) createCountry(ctx context.Context, cli *ent.Client) erro
 	h.Conds = &countrycrud.Conds{
 		Country: &cruder.Cond{Op: cruder.EQ, Val: *h.Country},
 	}
-	exist, err := h.ExistCountryConds(ctx)
+	h.Limit = 2
+	exist, _, err := h.GetCountries(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	if exist {
-		return fmt.Errorf("country exist")
+	if exist != nil {
+		return exist[0], nil
 	}
 
 	id := uuid.New()
@@ -64,12 +65,12 @@ func (h *createHandler) createCountry(ctx context.Context, cli *ent.Client) erro
 		},
 	).Save(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	h.ID = &info.ID
 
-	return nil
+	return nil, nil
 }
 
 func (h *Handler) CreateCountry(ctx context.Context) (*npool.Country, error) {
@@ -77,8 +78,16 @@ func (h *Handler) CreateCountry(ctx context.Context) (*npool.Country, error) {
 		Handler: h,
 	}
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		if err := handler.createCountry(ctx, cli); err != nil {
+		info, err := handler.createCountry(ctx, cli)
+		if err != nil {
 			return err
+		}
+		if info != nil {
+			id, err := uuid.Parse(info.GetID())
+			if err != nil {
+				return err
+			}
+			h.ID = &id
 		}
 		return nil
 	})
@@ -103,8 +112,16 @@ func (h *Handler) CreateCountries(ctx context.Context) ([]*npool.Country, error)
 			handler.Flag = req.Flag
 			handler.Code = req.Code
 			handler.Short = req.Short
-			if err := handler.createCountry(ctx, cli); err != nil {
+			info, err := handler.createCountry(ctx, cli)
+			if err != nil {
 				return err
+			}
+			if info != nil {
+				id, err := uuid.Parse(info.GetID())
+				if err != nil {
+					return err
+				}
+				h.ID = &id
 			}
 			ids = append(ids, *h.ID)
 		}

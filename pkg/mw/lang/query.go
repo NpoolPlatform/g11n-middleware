@@ -32,7 +32,7 @@ func (h *queryHandler) selectLang(stm *ent.LangQuery) {
 
 func (h *queryHandler) queryLang(cli *ent.Client) error {
 	if h.ID == nil {
-		return fmt.Errorf("invalid roleid")
+		return fmt.Errorf("invalid langid")
 	}
 
 	h.selectLang(
@@ -102,7 +102,7 @@ func (h *Handler) GetLangs(ctx context.Context) ([]*npool.Lang, uint32, error) {
 	}
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		if err := handler.queryLangs(ctx, cli); err != nil {
+		if err := handler.queryLangs(ctx, cli.Debug()); err != nil {
 			return err
 		}
 		handler.stm.

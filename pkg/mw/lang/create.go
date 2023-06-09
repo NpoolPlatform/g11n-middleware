@@ -21,9 +21,9 @@ type createHandler struct {
 	*Handler
 }
 
-func (h *createHandler) createLang(ctx context.Context, cli *ent.Client) error {
+func (h *createHandler) createLang(ctx context.Context, cli *ent.Client) (*npool.Lang, error) {
 	if h.Lang == nil {
-		return fmt.Errorf("lang invalid")
+		return nil, fmt.Errorf("lang invalid")
 	}
 	lockKey := fmt.Sprintf(
 		"%v:%v",
@@ -31,7 +31,7 @@ func (h *createHandler) createLang(ctx context.Context, cli *ent.Client) error {
 		*h.Lang,
 	)
 	if err := redis2.TryLock(lockKey, 0); err != nil {
-		return err
+		return nil, err
 	}
 	defer func() {
 		_ = redis2.Unlock(lockKey)
@@ -40,12 +40,13 @@ func (h *createHandler) createLang(ctx context.Context, cli *ent.Client) error {
 	h.Conds = &langcrud.Conds{
 		Lang: &cruder.Cond{Op: cruder.EQ, Val: *h.Lang},
 	}
-	exist, err := h.ExistLangConds(ctx)
+	h.Limit = 2
+	exist, _, err := h.GetLangs(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	if exist {
-		return fmt.Errorf("lang exist")
+	if exist != nil {
+		return exist[0], nil
 	}
 
 	id := uuid.New()
@@ -64,12 +65,12 @@ func (h *createHandler) createLang(ctx context.Context, cli *ent.Client) error {
 		},
 	).Save(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	h.ID = &info.ID
 
-	return nil
+	return nil, nil
 }
 
 func (h *Handler) CreateLang(ctx context.Context) (*npool.Lang, error) {
@@ -77,8 +78,16 @@ func (h *Handler) CreateLang(ctx context.Context) (*npool.Lang, error) {
 		Handler: h,
 	}
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		if err := handler.createLang(ctx, cli); err != nil {
+		info, err := handler.createLang(ctx, cli)
+		if err != nil {
 			return err
+		}
+		if info != nil {
+			id, err := uuid.Parse(info.GetID())
+			if err != nil {
+				return err
+			}
+			h.ID = &id
 		}
 		return nil
 	})
@@ -103,8 +112,16 @@ func (h *Handler) CreateLangs(ctx context.Context) ([]*npool.Lang, error) {
 			handler.Logo = req.Logo
 			handler.Name = req.Name
 			handler.Short = req.Short
-			if err := handler.createLang(ctx, cli); err != nil {
+			info, err := handler.createLang(ctx, cli)
+			if err != nil {
 				return err
+			}
+			if info != nil {
+				id, err := uuid.Parse(info.GetID())
+				if err != nil {
+					return err
+				}
+				h.ID = &id
 			}
 			ids = append(ids, *h.ID)
 		}

@@ -21,12 +21,12 @@ type createHandler struct {
 	*Handler
 }
 
-func (h *createHandler) createMessage(ctx context.Context, cli *ent.Client) error {
+func (h *createHandler) createMessage(ctx context.Context, cli *ent.Client) (*npool.Message, error) {
 	if h.LangID == nil {
-		return fmt.Errorf("langid invalid")
+		return nil, fmt.Errorf("langid invalid")
 	}
 	if h.MessageID == nil {
-		return fmt.Errorf("messageid invalid")
+		return nil, fmt.Errorf("messageid invalid")
 	}
 	lockKey := fmt.Sprintf(
 		"%v:%v:%v:%v",
@@ -36,7 +36,7 @@ func (h *createHandler) createMessage(ctx context.Context, cli *ent.Client) erro
 		*h.MessageID,
 	)
 	if err := redis2.TryLock(lockKey, 0); err != nil {
-		return err
+		return nil, err
 	}
 	defer func() {
 		_ = redis2.Unlock(lockKey)
@@ -47,12 +47,13 @@ func (h *createHandler) createMessage(ctx context.Context, cli *ent.Client) erro
 		LangID:    &cruder.Cond{Op: cruder.EQ, Val: *h.LangID},
 		MessageID: &cruder.Cond{Op: cruder.EQ, Val: *h.MessageID},
 	}
-	exist, err := h.ExistMessageConds(ctx)
+	h.Limit = 2
+	exist, _, err := h.GetMessages(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	if exist {
-		return fmt.Errorf("message exist")
+	if exist != nil {
+		return exist[0], nil
 	}
 
 	id := uuid.New()
@@ -73,12 +74,12 @@ func (h *createHandler) createMessage(ctx context.Context, cli *ent.Client) erro
 		},
 	).Save(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	h.ID = &info.ID
 
-	return nil
+	return nil, nil
 }
 
 func (h *Handler) CreateMessage(ctx context.Context) (*npool.Message, error) {
@@ -86,8 +87,16 @@ func (h *Handler) CreateMessage(ctx context.Context) (*npool.Message, error) {
 		Handler: h,
 	}
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		if err := handler.createMessage(ctx, cli); err != nil {
+		info, err := handler.createMessage(ctx, cli)
+		if err != nil {
 			return err
+		}
+		if info != nil {
+			id, err := uuid.Parse(info.GetID())
+			if err != nil {
+				return err
+			}
+			h.ID = &id
 		}
 		return nil
 	})
@@ -114,8 +123,16 @@ func (h *Handler) CreateMessages(ctx context.Context) ([]*npool.Message, error) 
 			handler.Message = req.Message
 			handler.GetIndex = req.GetIndex
 			handler.Disabled = req.Disabled
-			if err := handler.createMessage(ctx, cli); err != nil {
+			info, err := handler.createMessage(ctx, cli)
+			if err != nil {
 				return err
+			}
+			if info != nil {
+				id, err := uuid.Parse(info.GetID())
+				if err != nil {
+					return err
+				}
+				h.ID = &id
 			}
 			ids = append(ids, *h.ID)
 		}
