@@ -102,7 +102,7 @@ func (h *Handler) GetLangs(ctx context.Context) ([]*npool.Lang, uint32, error) {
 	}
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		if err := handler.queryLangs(ctx, cli.Debug()); err != nil {
+		if err := handler.queryLangs(ctx, cli); err != nil {
 			return err
 		}
 		handler.stm.

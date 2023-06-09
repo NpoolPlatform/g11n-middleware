@@ -23,7 +23,7 @@ type createHandler struct {
 
 func (h *createHandler) createLang(ctx context.Context, cli *ent.Client) error {
 	if h.LangID == nil {
-		return fmt.Errorf("langid invalid")
+		return fmt.Errorf("invalid langid")
 	}
 	lockKey := fmt.Sprintf(
 		"%v:%v:%v",

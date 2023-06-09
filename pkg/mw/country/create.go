@@ -22,8 +22,17 @@ type createHandler struct {
 }
 
 func (h *createHandler) createCountry(ctx context.Context, cli *ent.Client) (*npool.Country, error) {
-	if h.Country == nil {
-		return nil, fmt.Errorf("country invalid")
+	if h.Country == nil || *h.Country == "" {
+		return nil, fmt.Errorf("invalid country")
+	}
+	if h.Flag == nil || *h.Flag == "" {
+		return nil, fmt.Errorf("invalid flag")
+	}
+	if h.Code == nil || *h.Code == "" {
+		return nil, fmt.Errorf("invalid code")
+	}
+	if h.Short == nil || *h.Short == "" {
+		return nil, fmt.Errorf("invalid short")
 	}
 	lockKey := fmt.Sprintf(
 		"%v:%v",

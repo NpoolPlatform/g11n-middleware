@@ -22,8 +22,17 @@ type createHandler struct {
 }
 
 func (h *createHandler) createLang(ctx context.Context, cli *ent.Client) (*npool.Lang, error) {
-	if h.Lang == nil {
-		return nil, fmt.Errorf("lang invalid")
+	if h.Lang == nil || *h.Lang == "" {
+		return nil, fmt.Errorf("invalid lang")
+	}
+	if h.Logo == nil || *h.Logo == "" {
+		return nil, fmt.Errorf("invalid logo")
+	}
+	if h.Name == nil || *h.Name == "" {
+		return nil, fmt.Errorf("invalid name")
+	}
+	if h.Short == nil || *h.Short == "" {
+		return nil, fmt.Errorf("invalid short")
 	}
 	lockKey := fmt.Sprintf(
 		"%v:%v",

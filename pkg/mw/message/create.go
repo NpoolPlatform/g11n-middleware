@@ -23,10 +23,13 @@ type createHandler struct {
 
 func (h *createHandler) createMessage(ctx context.Context, cli *ent.Client) (*npool.Message, error) {
 	if h.LangID == nil {
-		return nil, fmt.Errorf("langid invalid")
+		return nil, fmt.Errorf("invalid langid")
 	}
-	if h.MessageID == nil {
-		return nil, fmt.Errorf("messageid invalid")
+	if h.MessageID == nil || *h.MessageID == "" {
+		return nil, fmt.Errorf("invalid messageid")
+	}
+	if h.Message == nil || *h.Message == "" {
+		return nil, fmt.Errorf("invalid message")
 	}
 	lockKey := fmt.Sprintf(
 		"%v:%v:%v:%v",
