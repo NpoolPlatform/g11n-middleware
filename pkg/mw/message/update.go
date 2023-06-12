@@ -16,6 +16,15 @@ func (h *Handler) UpdateMessage(ctx context.Context) (*npool.Message, error) {
 	if h.ID == nil {
 		return nil, fmt.Errorf("invalid id")
 	}
+	if h.AppID == nil {
+		return nil, fmt.Errorf("invalid appid")
+	}
+	if h.LangID == nil {
+		return nil, fmt.Errorf("invalid langid")
+	}
+	if h.MessageID == nil {
+		return nil, fmt.Errorf("invalid messageid")
+	}
 
 	err := db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		h.Conds = &messagecrud.Conds{
