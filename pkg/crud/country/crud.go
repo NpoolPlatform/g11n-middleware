@@ -82,6 +82,11 @@ func SetQueryConds(q *ent.CountryQuery, conds *Conds) (*ent.CountryQuery, error)
 				entcountry.ID(id),
 				entcountry.DeletedAt(0),
 			)
+		case cruder.NEQ:
+			q.Where(
+				entcountry.IDNEQ(id),
+				entcountry.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid id field")
 		}

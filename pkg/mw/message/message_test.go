@@ -34,10 +34,13 @@ var (
 		Lang:      "test lang" + uuid.NewString(),
 		LangID:    uuid.NewString(),
 		MessageID: uuid.NewString(),
-		Message:   uuid.NewString(),
+		Message:   "test message" + uuid.NewString(),
 		Disabled:  false,
 		GetIndex:  0,
 	}
+	langName  = "test lang name" + uuid.NewString()
+	langLogo  = "test lang logo" + uuid.NewString()
+	langShort = "test lang short" + uuid.NewString()
 )
 
 func setupMessage(t *testing.T) func(*testing.T) {
@@ -45,6 +48,9 @@ func setupMessage(t *testing.T) func(*testing.T) {
 		context.Background(),
 		lang.WithID(&ret.LangID),
 		lang.WithLang(&ret.Lang),
+		lang.WithName(&langName),
+		lang.WithLogo(&langLogo),
+		lang.WithShort(&langShort),
 	)
 	assert.Nil(t, err)
 	assert.NotNil(t, lh)
@@ -80,17 +86,20 @@ func createMessage(t *testing.T) {
 }
 
 func updateMessage(t *testing.T) {
-	ret.AppID = uuid.NewString()
+	ret.Message = "change message" + uuid.NewString()
+	ret.MessageID = "change messageID" + uuid.NewString()
+	ret.GetIndex = 8
+	ret.Disabled = true
 	handler, err := NewHandler(
 		context.Background(),
 		WithID(&ret.ID),
+		WithAppID(ret.AppID),
 		WithMessageID(&ret.MessageID),
 		WithMessage(&ret.Message),
 		WithGetIndex(&ret.GetIndex),
 		WithDisabled(&ret.Disabled),
 	)
 	assert.Nil(t, err)
-
 	info, err := handler.UpdateMessage(context.Background())
 	if assert.Nil(t, err) {
 		ret.AppID = info.AppID

@@ -83,6 +83,11 @@ func SetQueryConds(q *ent.LangQuery, conds *Conds) (*ent.LangQuery, error) {
 				entlang.ID(id),
 				entlang.DeletedAt(0),
 			)
+		case cruder.NEQ:
+			q.Where(
+				entlang.IDNEQ(id),
+				entlang.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid id field")
 		}

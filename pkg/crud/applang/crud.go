@@ -70,6 +70,11 @@ func SetQueryConds(q *ent.AppLangQuery, conds *Conds) (*ent.AppLangQuery, error)
 				entapplang.ID(id),
 				entapplang.DeletedAt(0),
 			)
+		case cruder.NEQ:
+			q.Where(
+				entapplang.IDNEQ(id),
+				entapplang.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid id field")
 		}

@@ -93,6 +93,11 @@ func SetQueryConds(q *ent.MessageQuery, conds *Conds) (*ent.MessageQuery, error)
 				entmessage.ID(id),
 				entmessage.DeletedAt(0),
 			)
+		case cruder.NEQ:
+			q.Where(
+				entmessage.IDNEQ(id),
+				entmessage.DeletedAt(0),
+			)
 		default:
 			return nil, fmt.Errorf("invalid message id field")
 		}
