@@ -19,7 +19,7 @@ func (h *Handler) UpdateMessage(ctx context.Context) (*npool.Message, error) {
 
 	err := db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		h.Conds = &messagecrud.Conds{
-			AppID: &cruder.Cond{Op: cruder.EQ, Val: h.AppID},
+			AppID: &cruder.Cond{Op: cruder.EQ, Val: *h.AppID},
 			ID:    &cruder.Cond{Op: cruder.EQ, Val: *h.ID},
 		}
 		exist, err := h.ExistMessageConds(ctx)
@@ -31,7 +31,7 @@ func (h *Handler) UpdateMessage(ctx context.Context) (*npool.Message, error) {
 		}
 		if h.MessageID != nil {
 			h.Conds = &messagecrud.Conds{
-				AppID:     &cruder.Cond{Op: cruder.EQ, Val: h.AppID},
+				AppID:     &cruder.Cond{Op: cruder.EQ, Val: *h.AppID},
 				LangID:    &cruder.Cond{Op: cruder.EQ, Val: *h.LangID},
 				ID:        &cruder.Cond{Op: cruder.NEQ, Val: *h.ID},
 				MessageID: &cruder.Cond{Op: cruder.EQ, Val: *h.MessageID},

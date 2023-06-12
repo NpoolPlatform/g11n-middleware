@@ -28,7 +28,7 @@ func (h *createHandler) createCountry(ctx context.Context, cli *ent.Client) erro
 	lockKey := fmt.Sprintf(
 		"%v:%v:%v",
 		basetypes.Prefix_PrefixCreateAppCountry,
-		&h.AppID,
+		*h.AppID,
 		*h.CountryID,
 	)
 	if err := redis2.TryLock(lockKey, 0); err != nil {
@@ -39,7 +39,7 @@ func (h *createHandler) createCountry(ctx context.Context, cli *ent.Client) erro
 	}()
 
 	h.Conds = &appcountrycrud.Conds{
-		AppID:     &cruder.Cond{Op: cruder.EQ, Val: h.AppID},
+		AppID:     &cruder.Cond{Op: cruder.EQ, Val: *h.AppID},
 		CountryID: &cruder.Cond{Op: cruder.EQ, Val: *h.CountryID},
 	}
 	exist, err := h.ExistAppCountryConds(ctx)
@@ -59,7 +59,7 @@ func (h *createHandler) createCountry(ctx context.Context, cli *ent.Client) erro
 		cli.AppCountry.Create(),
 		&appcountrycrud.Req{
 			ID:        h.ID,
-			AppID:     &h.AppID,
+			AppID:     h.AppID,
 			CountryID: h.CountryID,
 		},
 	).Save(ctx)
@@ -99,7 +99,7 @@ func (h *Handler) CreateCountries(ctx context.Context) ([]*npool.Country, error)
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
 		for _, req := range h.Reqs {
 			handler.ID = nil
-			handler.AppID = *req.AppID
+			handler.AppID = req.AppID
 			handler.CountryID = req.CountryID
 			if err := handler.createCountry(ctx, cli); err != nil {
 				return err

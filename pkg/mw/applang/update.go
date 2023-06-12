@@ -19,7 +19,7 @@ func (h *Handler) UpdateLang(ctx context.Context) (*npool.Lang, error) {
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
 		h.Conds = &applangcrud.Conds{
-			AppID: &cruder.Cond{Op: cruder.EQ, Val: h.AppID},
+			AppID: &cruder.Cond{Op: cruder.EQ, Val: *h.AppID},
 			ID:    &cruder.Cond{Op: cruder.EQ, Val: *h.ID},
 		}
 		exist, err := h.ExistAppLangConds(ctx)
@@ -33,7 +33,7 @@ func (h *Handler) UpdateLang(ctx context.Context) (*npool.Lang, error) {
 			if *h.Main {
 				h.Conds = &applangcrud.Conds{
 					ID:    &cruder.Cond{Op: cruder.NEQ, Val: *h.ID},
-					AppID: &cruder.Cond{Op: cruder.EQ, Val: h.AppID},
+					AppID: &cruder.Cond{Op: cruder.EQ, Val: *h.AppID},
 					Main:  &cruder.Cond{Op: cruder.EQ, Val: true},
 				}
 				exist, err := h.ExistAppLangConds(ctx)

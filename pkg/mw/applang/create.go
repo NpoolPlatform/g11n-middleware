@@ -28,7 +28,7 @@ func (h *createHandler) createLang(ctx context.Context, cli *ent.Client) error {
 	lockKey := fmt.Sprintf(
 		"%v:%v:%v",
 		basetypes.Prefix_PrefixCreateAppLang,
-		&h.AppID,
+		*h.AppID,
 		*h.LangID,
 	)
 	if err := redis2.TryLock(lockKey, 0); err != nil {
@@ -39,7 +39,7 @@ func (h *createHandler) createLang(ctx context.Context, cli *ent.Client) error {
 	}()
 
 	h.Conds = &applangcrud.Conds{
-		AppID:  &cruder.Cond{Op: cruder.EQ, Val: h.AppID},
+		AppID:  &cruder.Cond{Op: cruder.EQ, Val: *h.AppID},
 		LangID: &cruder.Cond{Op: cruder.EQ, Val: *h.LangID},
 	}
 	exist, err := h.ExistAppLangConds(ctx)
@@ -52,7 +52,7 @@ func (h *createHandler) createLang(ctx context.Context, cli *ent.Client) error {
 	if h.Main != nil {
 		if *h.Main {
 			h.Conds = &applangcrud.Conds{
-				AppID: &cruder.Cond{Op: cruder.EQ, Val: h.AppID},
+				AppID: &cruder.Cond{Op: cruder.EQ, Val: *h.AppID},
 				Main:  &cruder.Cond{Op: cruder.EQ, Val: true},
 			}
 			exist, err := h.ExistAppLangConds(ctx)
@@ -74,7 +74,7 @@ func (h *createHandler) createLang(ctx context.Context, cli *ent.Client) error {
 		cli.AppLang.Create(),
 		&applangcrud.Req{
 			ID:     h.ID,
-			AppID:  &h.AppID,
+			AppID:  h.AppID,
 			LangID: h.LangID,
 			Main:   h.Main,
 		},
@@ -115,7 +115,7 @@ func (h *Handler) CreateLangs(ctx context.Context) ([]*npool.Lang, error) {
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
 		for _, req := range h.Reqs {
 			handler.ID = nil
-			handler.AppID = *req.AppID
+			handler.AppID = req.AppID
 			handler.LangID = req.LangID
 			handler.Main = req.Main
 			if err := handler.createLang(ctx, cli); err != nil {

@@ -63,7 +63,7 @@ func creatCountry(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
 		WithID(&ret.ID),
-		WithAppID(ret.AppID),
+		WithAppID(&ret.AppID),
 		WithCountryID(&ret.CountryID),
 	)
 	assert.Nil(t, err)

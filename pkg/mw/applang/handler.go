@@ -14,7 +14,7 @@ import (
 
 type Handler struct {
 	ID     *uuid.UUID
-	AppID  uuid.UUID
+	AppID  *uuid.UUID
 	LangID *uuid.UUID
 	Main   *bool
 	Reqs   []*applangcrud.Req
@@ -47,13 +47,16 @@ func WithID(id *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithAppID(id string) func(context.Context, *Handler) error {
+func WithAppID(id *string) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
-		_id, err := uuid.Parse(id)
+		if id == nil {
+			return nil
+		}
+		_id, err := uuid.Parse(*id)
 		if err != nil {
 			return err
 		}
-		h.AppID = _id
+		h.AppID = &_id
 		return nil
 	}
 }

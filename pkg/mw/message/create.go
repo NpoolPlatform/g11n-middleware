@@ -38,7 +38,7 @@ func (h *createHandler) createMessage(ctx context.Context, cli *ent.Client) (*np
 	lockKey := fmt.Sprintf(
 		"%v:%v:%v:%v",
 		basetypes.Prefix_PrefixCreateAppCountry,
-		&h.AppID,
+		*h.AppID,
 		*h.LangID,
 		*h.MessageID,
 	)
@@ -50,7 +50,7 @@ func (h *createHandler) createMessage(ctx context.Context, cli *ent.Client) (*np
 	}()
 
 	h.Conds = &messagecrud.Conds{
-		AppID:     &cruder.Cond{Op: cruder.EQ, Val: h.AppID},
+		AppID:     &cruder.Cond{Op: cruder.EQ, Val: *h.AppID},
 		LangID:    &cruder.Cond{Op: cruder.EQ, Val: *h.LangID},
 		MessageID: &cruder.Cond{Op: cruder.EQ, Val: *h.MessageID},
 	}
@@ -72,7 +72,7 @@ func (h *createHandler) createMessage(ctx context.Context, cli *ent.Client) (*np
 		cli.Message.Create(),
 		&messagecrud.Req{
 			ID:        h.ID,
-			AppID:     &h.AppID,
+			AppID:     h.AppID,
 			LangID:    h.LangID,
 			MessageID: h.MessageID,
 			Message:   h.Message,
@@ -98,7 +98,7 @@ func (h *Handler) CreateMessage(ctx context.Context) (*npool.Message, error) {
 			return err
 		}
 		h.Conds = &messagecrud.Conds{
-			AppID:     &cruder.Cond{Op: cruder.EQ, Val: h.AppID},
+			AppID:     &cruder.Cond{Op: cruder.EQ, Val: *h.AppID},
 			LangID:    &cruder.Cond{Op: cruder.EQ, Val: *h.LangID},
 			MessageID: &cruder.Cond{Op: cruder.EQ, Val: *h.MessageID},
 		}
@@ -139,7 +139,7 @@ func (h *Handler) CreateMessages(ctx context.Context) ([]*npool.Message, error) 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
 		for _, req := range h.Reqs {
 			handler.ID = nil
-			handler.AppID = *req.AppID
+			handler.AppID = req.AppID
 			handler.LangID = req.LangID
 			handler.MessageID = req.MessageID
 			handler.Message = req.Message

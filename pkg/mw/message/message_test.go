@@ -67,7 +67,7 @@ func createMessage(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
 		WithID(&ret.ID),
-		WithAppID(ret.AppID),
+		WithAppID(&ret.AppID),
 		WithLangID(&ret.LangID),
 		WithMessageID(&ret.MessageID),
 		WithMessage(&ret.Message),
@@ -93,7 +93,7 @@ func updateMessage(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
 		WithID(&ret.ID),
-		WithAppID(ret.AppID),
+		WithAppID(&ret.AppID),
 		WithLangID(&ret.LangID),
 		WithMessageID(&ret.MessageID),
 		WithMessage(&ret.Message),

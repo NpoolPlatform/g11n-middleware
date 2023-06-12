@@ -16,7 +16,7 @@ func (s *Server) CreateLang(ctx context.Context, in *npool.CreateLangRequest) (*
 	handler, err := applang1.NewHandler(
 		ctx,
 		applang1.WithID(req.ID),
-		applang1.WithAppID(req.GetAppID()),
+		applang1.WithAppID(req.AppID),
 		applang1.WithLangID(req.LangID),
 		applang1.WithMain(req.Main),
 	)

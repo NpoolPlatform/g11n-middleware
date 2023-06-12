@@ -64,7 +64,7 @@ func creatLang(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
 		WithID(&ret.ID),
-		WithAppID(ret.AppID),
+		WithAppID(&ret.AppID),
 		WithLangID(&ret.LangID),
 		WithMain(&ret.Main),
 	)
@@ -83,7 +83,7 @@ func updateLang(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
 		WithID(&ret.ID),
-		WithAppID(ret.AppID),
+		WithAppID(&ret.AppID),
 		WithLangID(&ret.LangID),
 		WithMain(&ret.Main),
 	)
