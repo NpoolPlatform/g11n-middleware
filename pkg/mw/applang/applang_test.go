@@ -131,6 +131,7 @@ func deleteLang(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
 		WithID(&ret.ID),
+		WithAppID(&ret.AppID),
 	)
 	assert.Nil(t, err)
 
