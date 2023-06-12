@@ -29,6 +29,22 @@ func (h *Handler) UpdateLang(ctx context.Context) (*npool.Lang, error) {
 		if !exist {
 			return fmt.Errorf("applang not exist")
 		}
+		if h.Main != nil {
+			if *h.Main {
+				h.Conds = &applangcrud.Conds{
+					ID:    &cruder.Cond{Op: cruder.NEQ, Val: *h.ID},
+					AppID: &cruder.Cond{Op: cruder.EQ, Val: h.AppID},
+					Main:  &cruder.Cond{Op: cruder.EQ, Val: true},
+				}
+				exist, err := h.ExistAppLangConds(ctx)
+				if err != nil {
+					return err
+				}
+				if exist {
+					return fmt.Errorf("applang main exist")
+				}
+			}
+		}
 		if _, err := applangcrud.UpdateSet(
 			cli.AppLang.UpdateOneID(*h.ID),
 			&applangcrud.Req{
