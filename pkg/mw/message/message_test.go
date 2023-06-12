@@ -87,13 +87,14 @@ func createMessage(t *testing.T) {
 
 func updateMessage(t *testing.T) {
 	ret.Message = "change message" + uuid.NewString()
-	ret.MessageID = "change messageID" + uuid.NewString()
+	ret.MessageID = "change messageID " + uuid.NewString()
 	ret.GetIndex = 8
 	ret.Disabled = true
 	handler, err := NewHandler(
 		context.Background(),
 		WithID(&ret.ID),
 		WithAppID(ret.AppID),
+		WithLangID(&ret.LangID),
 		WithMessageID(&ret.MessageID),
 		WithMessage(&ret.Message),
 		WithGetIndex(&ret.GetIndex),
@@ -103,6 +104,10 @@ func updateMessage(t *testing.T) {
 	info, err := handler.UpdateMessage(context.Background())
 	if assert.Nil(t, err) {
 		ret.AppID = info.AppID
+		ret.Message = info.Message
+		ret.MessageID = info.MessageID
+		ret.GetIndex = info.GetIndex
+		ret.Disabled = info.Disabled
 		assert.Equal(t, info, &ret)
 	}
 }

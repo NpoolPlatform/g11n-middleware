@@ -82,8 +82,9 @@ func createLang(t *testing.T) {
 
 func updateLang(t *testing.T) {
 	req := npool.LangReq{
-		ID:   &ret.ID,
-		Main: &ret.Main,
+		ID:    &ret.ID,
+		AppID: &ret.AppID,
+		Main:  &ret.Main,
 	}
 	info, err := UpdateLang(context.Background(), &req)
 	if assert.Nil(t, err) {
@@ -111,7 +112,8 @@ func getLangs(t *testing.T) {
 
 func deleteLang(t *testing.T) {
 	info, err := DeleteLang(context.Background(), &npool.LangReq{
-		ID: &ret.ID,
+		ID:    &ret.ID,
+		AppID: &ret.AppID,
 	})
 	if assert.Nil(t, err) {
 		assert.Equal(t, info, &ret)
