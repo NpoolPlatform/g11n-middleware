@@ -20,6 +20,7 @@ func (s *Server) UpdateMessage(ctx context.Context, in *npool.UpdateMessageReque
 		ctx,
 		message1.WithID(req.ID),
 		message1.WithAppID(req.AppID),
+		message1.WithLangID(req.LangID),
 		message1.WithMessageID(req.MessageID),
 		message1.WithMessage(req.Message),
 		message1.WithGetIndex(req.GetIndex),
