@@ -18,16 +18,16 @@ func (s *Server) GetLangOnly(ctx context.Context, in *npool.GetLangOnlyRequest) 
 	)
 	if err != nil {
 		logger.Sugar().Errorw(
-			"GetLang",
+			"GetLangOnly",
 			"In", in,
 			"Error", err,
 		)
 		return &npool.GetLangOnlyResponse{}, status.Error(codes.Aborted, err.Error())
 	}
-	info, err := handler.GetLang(ctx)
+	info, err := handler.GetLangOnly(ctx)
 	if err != nil {
 		logger.Sugar().Errorw(
-			"GetLang",
+			"GetLangOnly",
 			"In", in,
 			"Error", err,
 		)

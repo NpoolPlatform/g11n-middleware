@@ -79,16 +79,16 @@ func (s *Server) GetMessageOnly(ctx context.Context, in *npool.GetMessageOnlyReq
 	)
 	if err != nil {
 		logger.Sugar().Errorw(
-			"GetMessage",
+			"GetMessageOnly",
 			"In", in,
 			"Error", err,
 		)
 		return &npool.GetMessageOnlyResponse{}, status.Error(codes.Aborted, err.Error())
 	}
-	info, err := handler.GetMessage(ctx)
+	info, err := handler.GetMessageOnly(ctx)
 	if err != nil {
 		logger.Sugar().Errorw(
-			"GetMessage",
+			"GetMessageOnly",
 			"In", in,
 			"Error", err,
 		)

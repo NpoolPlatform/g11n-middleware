@@ -19,16 +19,16 @@ func (s *Server) GetCountryOnly(ctx context.Context, in *npool.GetCountryOnlyReq
 	)
 	if err != nil {
 		logger.Sugar().Errorw(
-			"GetCountry",
+			"GetCountryOnly",
 			"In", in,
 			"Error", err,
 		)
 		return &npool.GetCountryOnlyResponse{}, status.Error(codes.Aborted, err.Error())
 	}
-	info, err := handler.GetCountry(ctx)
+	info, err := handler.GetCountryOnly(ctx)
 	if err != nil {
 		logger.Sugar().Errorw(
-			"GetCountry",
+			"GetCountryOnly",
 			"In", in,
 			"Error", err,
 		)

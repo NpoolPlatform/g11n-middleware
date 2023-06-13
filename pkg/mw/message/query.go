@@ -114,3 +114,29 @@ func (h *Handler) GetMessages(ctx context.Context) ([]*npool.Message, uint32, er
 	}
 	return handler.infos, handler.total, nil
 }
+
+func (h *Handler) GetMessageOnly(ctx context.Context) (*npool.Message, error) {
+	handler := &queryHandler{
+		Handler: h,
+	}
+
+	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
+		if err := handler.queryMessages(_ctx, cli); err != nil {
+			return err
+		}
+		const singleRowLimit = 2
+		handler.stm.Offset(0).Limit(singleRowLimit)
+		return handler.scan(_ctx)
+	})
+	if err != nil {
+		return nil, err
+	}
+	if len(handler.infos) == 0 {
+		return nil, nil
+	}
+	if len(handler.infos) > 1 {
+		return nil, fmt.Errorf("too many records")
+	}
+
+	return handler.infos[0], nil
+}
