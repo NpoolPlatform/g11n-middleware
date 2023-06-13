@@ -124,7 +124,7 @@ func WithConds(conds *npool.Conds) func(context.Context, *Handler) error {
 				}
 				ids = append(ids, _id)
 			}
-			h.Conds.AppIDs = &cruder.Cond{Op: conds.GetLangIDs().GetOp(), Val: ids}
+			h.Conds.LangIDs = &cruder.Cond{Op: conds.GetLangIDs().GetOp(), Val: ids}
 		}
 		return nil
 	}
