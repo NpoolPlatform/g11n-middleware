@@ -67,6 +67,9 @@ func WithAppID(id *string) func(context.Context, *Handler) error {
 
 func WithLangID(id *string) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
+		if id == nil {
+			return nil
+		}
 		_id, err := uuid.Parse(*id)
 		if err != nil {
 			return err
