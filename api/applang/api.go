@@ -2,8 +2,7 @@ package applang
 
 import (
 	"github.com/NpoolPlatform/message/npool/g11n/mw/v1/applang"
-
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/grpc-ecosystem/grpc-gateway/runtime"
 	"google.golang.org/grpc"
 )
 

@@ -1,4 +1,4 @@
-//nolint:dupl
+//nolint:nolintlint,dupl
 package appcountry
 
 import (
@@ -9,113 +9,130 @@ import (
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
 
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-
-	appcountrymgrpb "github.com/NpoolPlatform/message/npool/g11n/mgr/v1/appcountry"
 	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/appcountry"
 
-	constant "github.com/NpoolPlatform/g11n-middleware/pkg/message/const"
+	servicename "github.com/NpoolPlatform/g11n-middleware/pkg/servicename"
 )
 
-var timeout = 10 * time.Second
-
-type handler func(context.Context, npool.MiddlewareClient) (cruder.Any, error)
-
-func withCRUD(ctx context.Context, handler handler) (cruder.Any, error) {
-	_ctx, cancel := context.WithTimeout(ctx, timeout)
+func do(ctx context.Context, fn func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error)) (cruder.Any, error) {
+	_ctx, cancel := context.WithTimeout(ctx, 10*time.Second) //nolint
 	defer cancel()
 
-	conn, err := grpc2.GetGRPCConn(constant.ServiceName, grpc2.GRPCTAG)
+	conn, err := grpc2.GetGRPCConn(servicename.ServiceDomain, grpc2.GRPCTAG)
 	if err != nil {
-		return nil, fmt.Errorf("fail get appcountry connection: %v", err)
+		return nil, err
 	}
-
 	defer conn.Close()
 
 	cli := npool.NewMiddlewareClient(conn)
 
-	return handler(_ctx, cli)
+	return fn(_ctx, cli)
 }
 
-func CreateCountry(ctx context.Context, in *appcountrymgrpb.CountryReq) (*npool.Country, error) {
-	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+func CreateCountry(ctx context.Context, req *npool.CountryReq) (*npool.Country, error) {
+	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.CreateCountry(ctx, &npool.CreateCountryRequest{
-			Info: in,
+			Info: req,
 		})
 		if err != nil {
-			return nil, fmt.Errorf("fail create appcountry: %v", err)
+			return nil, err
 		}
 		return resp.Info, nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("fail create appcountry: %v", err)
+		return nil, err
 	}
 	return info.(*npool.Country), nil
 }
 
-func CreateCountries(ctx context.Context, in []*appcountrymgrpb.CountryReq) ([]*npool.Country, error) {
-	infos, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+func CreateCountries(ctx context.Context, reqs []*npool.CountryReq) ([]*npool.Country, error) {
+	infos, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.CreateCountries(ctx, &npool.CreateCountriesRequest{
-			Infos: in,
+			Infos: reqs,
 		})
 		if err != nil {
-			return nil, fmt.Errorf("fail create appcountries: %v", err)
+			return nil, err
 		}
 		return resp.Infos, nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("fail create appcountries: %v", err)
+		return nil, err
 	}
 	return infos.([]*npool.Country), nil
 }
 
-func GetCountries(ctx context.Context, conds *appcountrymgrpb.Conds, offset, limit int32) ([]*npool.Country, uint32, error) {
+func GetCountries(ctx context.Context, conds *npool.Conds, offset, limit int32) ([]*npool.Country, uint32, error) {
 	var total uint32
-	infos, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+	infos, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.GetCountries(ctx, &npool.GetCountriesRequest{
 			Conds:  conds,
-			Limit:  limit,
 			Offset: offset,
+			Limit:  limit,
 		})
 		if err != nil {
-			return nil, fmt.Errorf("fail get appcountries: %v", err)
+			return nil, err
 		}
-		total = resp.Total
+		total = resp.GetTotal()
 		return resp.Infos, nil
 	})
 	if err != nil {
-		return nil, 0, fmt.Errorf("fail get appcountries: %v", err)
+		return nil, 0, err
 	}
 	return infos.([]*npool.Country), total, nil
 }
 
-func GetCountryOnly(ctx context.Context, conds *appcountrymgrpb.Conds) (*npool.Country, error) {
-	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
-		resp, err := cli.GetCountryOnly(ctx, &npool.GetCountryOnlyRequest{
-			Conds: conds,
+func GetCountryOnly(ctx context.Context, conds *npool.Conds) (*npool.Country, error) {
+	infos, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+		resp, err := cli.GetCountries(ctx, &npool.GetCountriesRequest{
+			Conds:  conds,
+			Offset: 0,
+			Limit:  2, //nolint
 		})
 		if err != nil {
-			return nil, fmt.Errorf("fail get appcountryonly: %v", err)
+			return nil, err
+		}
+		return resp.Infos, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if len(infos.([]*npool.Country)) == 0 {
+		return nil, nil
+	}
+	if len(infos.([]*npool.Country)) > 1 {
+		return nil, fmt.Errorf("too many record")
+	}
+	return infos.([]*npool.Country)[0], nil
+}
+
+func DeleteCountry(ctx context.Context, req *npool.CountryReq) (*npool.Country, error) {
+	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+		resp, err := cli.DeleteCountry(ctx, &npool.DeleteCountryRequest{
+			Info: req,
+		})
+		if err != nil {
+			return nil, err
 		}
 		return resp.Info, nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("fail get appcountryonly: %v", err)
+		return nil, err
 	}
 	return info.(*npool.Country), nil
 }
 
-func DeleteCountry(ctx context.Context, id string) (*npool.Country, error) {
-	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
-		resp, err := cli.DeleteCountry(ctx, &npool.DeleteCountryRequest{
-			ID: id,
+func ExistAppCountryConds(ctx context.Context, conds *npool.Conds) (bool, error) {
+	infos, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+		resp, err := cli.ExistCountryConds(ctx, &npool.ExistCountryCondsRequest{
+			Conds: conds,
 		})
 		if err != nil {
-			return nil, fmt.Errorf("fail delete appcountry: %v", err)
+			return nil, fmt.Errorf("fail get appcountry: %v", err)
 		}
-		return resp.Info, nil
+		return resp.GetInfo(), nil
 	})
 	if err != nil {
-		return nil, fmt.Errorf("fail delete appcountry: %v", err)
+		return false, fmt.Errorf("fail get appcountry: %v", err)
 	}
-	return info.(*npool.Country), nil
+	return infos.(bool), nil
 }
