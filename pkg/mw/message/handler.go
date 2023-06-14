@@ -2,6 +2,7 @@ package message
 
 import (
 	"context"
+	"fmt"
 
 	constant "github.com/NpoolPlatform/g11n-middleware/pkg/const"
 	messagecrud "github.com/NpoolPlatform/g11n-middleware/pkg/crud/message"
@@ -77,6 +78,12 @@ func WithLangID(id *string) func(context.Context, *Handler) error {
 
 func WithMessageID(id *string) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
+		if id == nil {
+			return nil
+		}
+		if *id == "" {
+			return fmt.Errorf("invalid messageid")
+		}
 		h.MessageID = id
 		return nil
 	}

@@ -12,6 +12,7 @@ import (
 	"github.com/NpoolPlatform/g11n-middleware/pkg/testinit"
 	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/message"
 
+	applang "github.com/NpoolPlatform/g11n-middleware/pkg/mw/applang"
 	lang "github.com/NpoolPlatform/g11n-middleware/pkg/mw/lang"
 	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 	"github.com/google/uuid"
@@ -38,9 +39,11 @@ var (
 		Disabled:  false,
 		GetIndex:  0,
 	}
-	langName  = "test lang name" + uuid.NewString()
-	langLogo  = "test lang logo" + uuid.NewString()
-	langShort = "test lang short" + uuid.NewString()
+	langName    = "test lang name" + uuid.NewString()
+	langLogo    = "test lang logo" + uuid.NewString()
+	langShort   = "test lang short" + uuid.NewString()
+	appLangID   = uuid.NewString()
+	appLangMain = false
 )
 
 func setupMessage(t *testing.T) func(*testing.T) {
@@ -58,8 +61,22 @@ func setupMessage(t *testing.T) func(*testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, lang1)
 
+	ah, err := applang.NewHandler(
+		context.Background(),
+		applang.WithID(&appLangID),
+		applang.WithAppID(&ret.AppID),
+		applang.WithLangID(&ret.LangID),
+		applang.WithMain(&appLangMain),
+	)
+	assert.Nil(t, err)
+	assert.NotNil(t, ah)
+	applang1, err := ah.CreateLang(context.Background())
+	assert.Nil(t, err)
+	assert.NotNil(t, applang1)
+
 	return func(t *testing.T) {
 		_, _ = lh.DeleteLang(context.Background())
+		_, _ = ah.DeleteLang(context.Background())
 	}
 }
 
