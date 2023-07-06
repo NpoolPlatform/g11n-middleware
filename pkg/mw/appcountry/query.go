@@ -74,7 +74,8 @@ func (h *queryHandler) queryJoinCountry(s *sql.Selector) {
 			sql.As(t.C(entcountry.FieldFlag), "flag"),
 			sql.As(t.C(entcountry.FieldCode), "code"),
 			sql.As(t.C(entcountry.FieldShort), "short"),
-		)
+		).
+		OrderBy(entcountry.FieldCountry)
 }
 
 func (h *queryHandler) queryJoin() {
