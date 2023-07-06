@@ -108,6 +108,7 @@ func (h *Handler) GetCountries(ctx context.Context) ([]*npool.Country, uint32, e
 		handler.stm.
 			Offset(int(handler.Offset)).
 			Limit(int(handler.Limit)).
+			Order(ent.Asc(entcountry.FieldCountry)).
 			Modify(func(s *sql.Selector) {})
 		if err := handler.scan(ctx); err != nil {
 			return nil
