@@ -54,8 +54,8 @@ github.com/NpoolPlatform/basal-middleware v0.0.0-20230518061816-62bd589c0f63 h1:
 github.com/NpoolPlatform/basal-middleware v0.0.0-20230518061816-62bd589c0f63/go.mod h1:3sHDVUUQHRkZsCiBFI6CdCL2HWf3cO7/E2DZU3nHMfE=
 github.com/NpoolPlatform/g11n-manager v0.0.0-20230223031133-01fb857f1b94 h1:/bu69QAhRwm4HmWtEt7tzlj2BO/1DyAnpLWj7GRmzgw=
 github.com/NpoolPlatform/g11n-manager v0.0.0-20230223031133-01fb857f1b94/go.mod h1:9iRR5ZGX/mxvdfnO2MAYy/Uslxafoj6q2SVoigxBlMY=
-github.com/NpoolPlatform/go-service-framework v0.0.0-20230812113554-9fa7285b9d16 h1:yu5UgLyxvxQYTVlEmv47t90jE1NAqkFaEIbYBmyjMos=
-github.com/NpoolPlatform/go-service-framework v0.0.0-20230812113554-9fa7285b9d16/go.mod h1:Kh7DMkWnYOMHxEKq7QfJqbxm1HaUPkhTNN74lfHQxyE=
+github.com/NpoolPlatform/go-service-framework v0.0.0-20230813051150-7eebbb198154 h1:KfCqt6gceo1ES3TPZ1+cNAwj2RLeLxMcDQ7Vskz+OCE=
+github.com/NpoolPlatform/go-service-framework v0.0.0-20230813051150-7eebbb198154/go.mod h1:Kh7DMkWnYOMHxEKq7QfJqbxm1HaUPkhTNN74lfHQxyE=
 github.com/NpoolPlatform/libent-cruder v0.0.0-20221109023947-366125b690fb h1:IAQOJ0xQWdJS1BnimNdM6GZMLgTL/FnIa8C8K4xffUA=
 github.com/NpoolPlatform/libent-cruder v0.0.0-20221109023947-366125b690fb/go.mod h1:zvvqlRwbOdTUauPQ9dFDhDuxa91ILV0CQfVdPBZj+eA=
 github.com/NpoolPlatform/message v0.0.0-20230704074320-3b0736660660 h1:aA6dXZuBcSpdByopT3jP/lsiaCwLs/sKJrrNcjZTTpg=
