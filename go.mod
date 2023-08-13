@@ -7,7 +7,7 @@ require (
 	entgo.io/ent v0.11.2
 	github.com/NpoolPlatform/basal-middleware v0.0.0-20230518061816-62bd589c0f63
 	github.com/NpoolPlatform/g11n-manager v0.0.0-20230223031133-01fb857f1b94
-	github.com/NpoolPlatform/go-service-framework v0.0.0-20230812113554-9fa7285b9d16
+	github.com/NpoolPlatform/go-service-framework 7eebbb1981544cd7b5b0d7bdb3913bf54076abfb
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20221109023947-366125b690fb
 	github.com/NpoolPlatform/message v0.0.0-20230704074320-3b0736660660
 	github.com/go-resty/resty/v2 v2.7.0
@@ -120,3 +120,5 @@ replace entgo.io/ent => entgo.io/ent v0.11.2
 replace ariga.io/atlas => ariga.io/atlas v0.5.1-0.20220717122844-8593d7eb1a8e
 
 replace github.com/ugorji/go => github.com/ugorji/go/codec v0.0.0-20190204201341-e444a5086c43
+
+replace github.com/NpoolPlatform/go-service-framework v0.0.0-20230812113554-9fa7285b9d16 => ../go-service-framework
