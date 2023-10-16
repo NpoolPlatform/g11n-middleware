@@ -23,6 +23,7 @@ type queryHandler struct {
 func (h *queryHandler) selectLang(stm *ent.LangQuery) {
 	h.stm = stm.Select(
 		entlang.FieldID,
+		entlang.FieldEntID,
 		entlang.FieldLang,
 		entlang.FieldLogo,
 		entlang.FieldName,
@@ -31,18 +32,17 @@ func (h *queryHandler) selectLang(stm *ent.LangQuery) {
 }
 
 func (h *queryHandler) queryLang(cli *ent.Client) error {
-	if h.ID == nil {
-		return fmt.Errorf("invalid langid")
+	if h.ID == nil && h.EntID == nil {
+		return fmt.Errorf("invalid id")
 	}
-
-	h.selectLang(
-		cli.Lang.
-			Query().
-			Where(
-				entlang.ID(*h.ID),
-				entlang.DeletedAt(0),
-			),
-	)
+	stm := cli.Lang.Query().Where(entlang.DeletedAt(0))
+	if h.ID != nil {
+		stm.Where(entlang.ID(*h.ID))
+	}
+	if h.EntID != nil {
+		stm.Where(entlang.EntID(*h.EntID))
+	}
+	h.selectLang(stm)
 	return nil
 }
 

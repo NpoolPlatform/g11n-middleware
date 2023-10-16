@@ -14,7 +14,7 @@ import (
 func (s *Server) GetLang(ctx context.Context, in *npool.GetLangRequest) (*npool.GetLangResponse, error) {
 	handler, err := lang1.NewHandler(
 		ctx,
-		lang1.WithID(&in.ID),
+		lang1.WithEntID(&in.EntID, true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

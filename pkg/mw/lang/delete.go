@@ -22,7 +22,6 @@ func (h *Handler) DeleteLang(ctx context.Context) (*npool.Lang, error) {
 		if _, err := langcrud.UpdateSet(
 			cli.Lang.UpdateOneID(*h.ID),
 			&langcrud.Req{
-				ID:        h.ID,
 				DeletedAt: &now,
 			},
 		).Save(ctx); err != nil {

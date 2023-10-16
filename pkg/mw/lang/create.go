@@ -21,27 +21,27 @@ type createHandler struct {
 	*Handler
 }
 
-func (h *createHandler) validate() error {
-	if h.Lang == nil || *h.Lang == "" {
+func (h *createHandler) validate(req *langcrud.Req) error {
+	if req.Lang == nil || *req.Lang == "" {
 		return fmt.Errorf("invalid lang")
 	}
-	if h.Logo == nil || *h.Logo == "" {
+	if req.Logo == nil || *req.Logo == "" {
 		return fmt.Errorf("invalid logo")
 	}
-	if h.Name == nil || *h.Name == "" {
+	if req.Name == nil || *req.Name == "" {
 		return fmt.Errorf("invalid name")
 	}
-	if h.Short == nil || *h.Short == "" {
+	if req.Short == nil || *req.Short == "" {
 		return fmt.Errorf("invalid short")
 	}
 	return nil
 }
 
-func (h *createHandler) createLang(ctx context.Context, cli *ent.Client) (*npool.Lang, error) {
+func (h *createHandler) createLang(ctx context.Context, cli *ent.Client, req *langcrud.Req) (*npool.Lang, error) {
 	lockKey := fmt.Sprintf(
 		"%v:%v",
 		basetypes.Prefix_PrefixCreateLang,
-		*h.Lang,
+		*req.Lang,
 	)
 	if err := redis2.TryLock(lockKey, 0); err != nil {
 		return nil, err
@@ -51,30 +51,30 @@ func (h *createHandler) createLang(ctx context.Context, cli *ent.Client) (*npool
 	}()
 
 	h.Conds = &langcrud.Conds{
-		Lang: &cruder.Cond{Op: cruder.EQ, Val: *h.Lang},
+		Lang: &cruder.Cond{Op: cruder.EQ, Val: *req.Lang},
 	}
 	h.Limit = 2
-	exist, _, err := h.GetLangs(ctx)
+	infos, _, err := h.GetLangs(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if exist != nil {
-		return exist[0], nil
+	if infos != nil {
+		return infos[0], nil
 	}
 
 	id := uuid.New()
-	if h.ID == nil {
-		h.ID = &id
+	if req.EntID == nil {
+		req.EntID = &id
 	}
 
 	info, err := langcrud.CreateSet(
 		cli.Lang.Create(),
 		&langcrud.Req{
-			ID:    h.ID,
-			Lang:  h.Lang,
-			Logo:  h.Logo,
-			Name:  h.Name,
-			Short: h.Short,
+			EntID: req.EntID,
+			Lang:  req.Lang,
+			Logo:  req.Logo,
+			Name:  req.Name,
+			Short: req.Short,
 		},
 	).Save(ctx)
 	if err != nil {
@@ -82,6 +82,7 @@ func (h *createHandler) createLang(ctx context.Context, cli *ent.Client) (*npool
 	}
 
 	h.ID = &info.ID
+	h.EntID = &info.EntID
 
 	return nil, nil
 }
@@ -91,7 +92,14 @@ func (h *Handler) CreateLang(ctx context.Context) (*npool.Lang, error) {
 		Handler: h,
 	}
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		if err := handler.validate(); err != nil {
+		req := &langcrud.Req{
+			EntID: h.EntID,
+			Lang:  h.Lang,
+			Logo:  h.Logo,
+			Name:  h.Name,
+			Short: h.Short,
+		}
+		if err := handler.validate(req); err != nil {
 			return err
 		}
 		h.Conds = &langcrud.Conds{
@@ -104,16 +112,16 @@ func (h *Handler) CreateLang(ctx context.Context) (*npool.Lang, error) {
 		if exist {
 			return fmt.Errorf("lang exist")
 		}
-		info, err := handler.createLang(ctx, cli)
+		info, err := handler.createLang(ctx, cli, req)
 		if err != nil {
 			return err
 		}
 		if info != nil {
-			id, err := uuid.Parse(info.GetID())
+			id, err := uuid.Parse(info.GetEntID())
 			if err != nil {
 				return err
 			}
-			h.ID = &id
+			h.EntID = &id
 		}
 		return nil
 	})
@@ -133,26 +141,24 @@ func (h *Handler) CreateLangs(ctx context.Context) ([]*npool.Lang, error) {
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
 		for _, req := range h.Reqs {
-			handler.ID = nil
-			handler.Lang = req.Lang
-			handler.Logo = req.Logo
-			handler.Name = req.Name
-			handler.Short = req.Short
-			if err := handler.validate(); err != nil {
+			if err := handler.validate(req); err != nil {
 				return err
 			}
-			info, err := handler.createLang(ctx, cli)
+			if req.EntID != nil {
+				handler.EntID = req.EntID
+			}
+			info, err := handler.createLang(ctx, cli, req)
 			if err != nil {
 				return err
 			}
 			if info != nil {
-				id, err := uuid.Parse(info.GetID())
+				id, err := uuid.Parse(info.GetEntID())
 				if err != nil {
 					return err
 				}
-				h.ID = &id
+				h.EntID = &id
 			}
-			ids = append(ids, *h.ID)
+			ids = append(ids, *h.EntID)
 		}
 		return nil
 	})
@@ -161,7 +167,7 @@ func (h *Handler) CreateLangs(ctx context.Context) ([]*npool.Lang, error) {
 	}
 
 	h.Conds = &langcrud.Conds{
-		IDs: &cruder.Cond{Op: cruder.IN, Val: ids},
+		EntIDs: &cruder.Cond{Op: cruder.IN, Val: ids},
 	}
 	h.Offset = 0
 	h.Limit = int32(len(ids))

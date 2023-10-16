@@ -6,7 +6,6 @@ import (
 
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db"
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db/ent"
-	entlang "github.com/NpoolPlatform/g11n-middleware/pkg/db/ent/lang"
 
 	langcrud "github.com/NpoolPlatform/g11n-middleware/pkg/crud/lang"
 	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
@@ -17,12 +16,19 @@ func (h *Handler) UpdateLang(ctx context.Context) (*npool.Lang, error) {
 	if h.ID == nil {
 		return nil, fmt.Errorf("invalid id")
 	}
+	info, err := h.GetLang(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if info == nil {
+		return nil, fmt.Errorf("lang not exist")
+	}
 
-	err := db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
+	err = db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		if h.Lang != nil {
 			h.Conds = &langcrud.Conds{
-				ID:   &cruder.Cond{Op: cruder.NEQ, Val: *h.ID},
-				Lang: &cruder.Cond{Op: cruder.EQ, Val: *h.Lang},
+				EntID: &cruder.Cond{Op: cruder.NEQ, Val: info.EntID},
+				Lang:  &cruder.Cond{Op: cruder.EQ, Val: *h.Lang},
 			}
 			exist, err := h.ExistLangConds(ctx)
 			if err != nil {
@@ -32,23 +38,10 @@ func (h *Handler) UpdateLang(ctx context.Context) (*npool.Lang, error) {
 				return fmt.Errorf("lang is exist")
 			}
 		}
-		info, err := tx.
-			Lang.
-			Query().
-			Where(
-				entlang.ID(*h.ID),
-				entlang.DeletedAt(0),
-			).
-			ForUpdate().
-			Only(_ctx)
-		if err != nil {
-			return err
-		}
 
 		if _, err := langcrud.UpdateSet(
-			info.Update(),
+			tx.Lang.UpdateOneID(*h.ID),
 			&langcrud.Req{
-				ID:    h.ID,
 				Lang:  h.Lang,
 				Logo:  h.Logo,
 				Name:  h.Name,

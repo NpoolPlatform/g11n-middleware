@@ -16,11 +16,11 @@ func (s *Server) CreateLang(ctx context.Context, in *npool.CreateLangRequest) (*
 	req := in.GetInfo()
 	handler, err := lang1.NewHandler(
 		ctx,
-		lang1.WithID(req.ID),
-		lang1.WithLang(req.Lang),
-		lang1.WithLogo(req.Logo),
-		lang1.WithName(req.Name),
-		lang1.WithShort(req.Short),
+		lang1.WithEntID(req.EntID, false),
+		lang1.WithLang(req.Lang, true),
+		lang1.WithLogo(req.Logo, true),
+		lang1.WithName(req.Name, true),
+		lang1.WithShort(req.Short, true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(
