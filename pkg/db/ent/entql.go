@@ -23,7 +23,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			Table:   appcountry.Table,
 			Columns: appcountry.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: appcountry.FieldID,
 			},
 		},
@@ -32,6 +32,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			appcountry.FieldCreatedAt: {Type: field.TypeUint32, Column: appcountry.FieldCreatedAt},
 			appcountry.FieldUpdatedAt: {Type: field.TypeUint32, Column: appcountry.FieldUpdatedAt},
 			appcountry.FieldDeletedAt: {Type: field.TypeUint32, Column: appcountry.FieldDeletedAt},
+			appcountry.FieldEntID:     {Type: field.TypeUUID, Column: appcountry.FieldEntID},
 			appcountry.FieldAppID:     {Type: field.TypeUUID, Column: appcountry.FieldAppID},
 			appcountry.FieldCountryID: {Type: field.TypeUUID, Column: appcountry.FieldCountryID},
 		},
@@ -41,7 +42,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			Table:   applang.Table,
 			Columns: applang.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: applang.FieldID,
 			},
 		},
@@ -50,6 +51,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			applang.FieldCreatedAt: {Type: field.TypeUint32, Column: applang.FieldCreatedAt},
 			applang.FieldUpdatedAt: {Type: field.TypeUint32, Column: applang.FieldUpdatedAt},
 			applang.FieldDeletedAt: {Type: field.TypeUint32, Column: applang.FieldDeletedAt},
+			applang.FieldEntID:     {Type: field.TypeUUID, Column: applang.FieldEntID},
 			applang.FieldAppID:     {Type: field.TypeUUID, Column: applang.FieldAppID},
 			applang.FieldLangID:    {Type: field.TypeUUID, Column: applang.FieldLangID},
 			applang.FieldMain:      {Type: field.TypeBool, Column: applang.FieldMain},
@@ -60,7 +62,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			Table:   country.Table,
 			Columns: country.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: country.FieldID,
 			},
 		},
@@ -69,6 +71,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			country.FieldCreatedAt: {Type: field.TypeUint32, Column: country.FieldCreatedAt},
 			country.FieldUpdatedAt: {Type: field.TypeUint32, Column: country.FieldUpdatedAt},
 			country.FieldDeletedAt: {Type: field.TypeUint32, Column: country.FieldDeletedAt},
+			country.FieldEntID:     {Type: field.TypeUUID, Column: country.FieldEntID},
 			country.FieldCountry:   {Type: field.TypeString, Column: country.FieldCountry},
 			country.FieldFlag:      {Type: field.TypeString, Column: country.FieldFlag},
 			country.FieldCode:      {Type: field.TypeString, Column: country.FieldCode},
@@ -80,7 +83,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			Table:   lang.Table,
 			Columns: lang.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: lang.FieldID,
 			},
 		},
@@ -89,6 +92,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			lang.FieldCreatedAt: {Type: field.TypeUint32, Column: lang.FieldCreatedAt},
 			lang.FieldUpdatedAt: {Type: field.TypeUint32, Column: lang.FieldUpdatedAt},
 			lang.FieldDeletedAt: {Type: field.TypeUint32, Column: lang.FieldDeletedAt},
+			lang.FieldEntID:     {Type: field.TypeUUID, Column: lang.FieldEntID},
 			lang.FieldLang:      {Type: field.TypeString, Column: lang.FieldLang},
 			lang.FieldLogo:      {Type: field.TypeString, Column: lang.FieldLogo},
 			lang.FieldName:      {Type: field.TypeString, Column: lang.FieldName},
@@ -100,7 +104,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			Table:   message.Table,
 			Columns: message.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: message.FieldID,
 			},
 		},
@@ -109,6 +113,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			message.FieldCreatedAt: {Type: field.TypeUint32, Column: message.FieldCreatedAt},
 			message.FieldUpdatedAt: {Type: field.TypeUint32, Column: message.FieldUpdatedAt},
 			message.FieldDeletedAt: {Type: field.TypeUint32, Column: message.FieldDeletedAt},
+			message.FieldEntID:     {Type: field.TypeUUID, Column: message.FieldEntID},
 			message.FieldAppID:     {Type: field.TypeUUID, Column: message.FieldAppID},
 			message.FieldLangID:    {Type: field.TypeUUID, Column: message.FieldLangID},
 			message.FieldMessageID: {Type: field.TypeString, Column: message.FieldMessageID},
@@ -162,8 +167,8 @@ func (f *AppCountryFilter) Where(p entql.P) {
 	})
 }
 
-// WhereID applies the entql [16]byte predicate on the id field.
-func (f *AppCountryFilter) WhereID(p entql.ValueP) {
+// WhereID applies the entql uint32 predicate on the id field.
+func (f *AppCountryFilter) WhereID(p entql.Uint32P) {
 	f.Where(p.Field(appcountry.FieldID))
 }
 
@@ -180,6 +185,11 @@ func (f *AppCountryFilter) WhereUpdatedAt(p entql.Uint32P) {
 // WhereDeletedAt applies the entql uint32 predicate on the deleted_at field.
 func (f *AppCountryFilter) WhereDeletedAt(p entql.Uint32P) {
 	f.Where(p.Field(appcountry.FieldDeletedAt))
+}
+
+// WhereEntID applies the entql [16]byte predicate on the ent_id field.
+func (f *AppCountryFilter) WhereEntID(p entql.ValueP) {
+	f.Where(p.Field(appcountry.FieldEntID))
 }
 
 // WhereAppID applies the entql [16]byte predicate on the app_id field.
@@ -227,8 +237,8 @@ func (f *AppLangFilter) Where(p entql.P) {
 	})
 }
 
-// WhereID applies the entql [16]byte predicate on the id field.
-func (f *AppLangFilter) WhereID(p entql.ValueP) {
+// WhereID applies the entql uint32 predicate on the id field.
+func (f *AppLangFilter) WhereID(p entql.Uint32P) {
 	f.Where(p.Field(applang.FieldID))
 }
 
@@ -245,6 +255,11 @@ func (f *AppLangFilter) WhereUpdatedAt(p entql.Uint32P) {
 // WhereDeletedAt applies the entql uint32 predicate on the deleted_at field.
 func (f *AppLangFilter) WhereDeletedAt(p entql.Uint32P) {
 	f.Where(p.Field(applang.FieldDeletedAt))
+}
+
+// WhereEntID applies the entql [16]byte predicate on the ent_id field.
+func (f *AppLangFilter) WhereEntID(p entql.ValueP) {
+	f.Where(p.Field(applang.FieldEntID))
 }
 
 // WhereAppID applies the entql [16]byte predicate on the app_id field.
@@ -297,8 +312,8 @@ func (f *CountryFilter) Where(p entql.P) {
 	})
 }
 
-// WhereID applies the entql [16]byte predicate on the id field.
-func (f *CountryFilter) WhereID(p entql.ValueP) {
+// WhereID applies the entql uint32 predicate on the id field.
+func (f *CountryFilter) WhereID(p entql.Uint32P) {
 	f.Where(p.Field(country.FieldID))
 }
 
@@ -315,6 +330,11 @@ func (f *CountryFilter) WhereUpdatedAt(p entql.Uint32P) {
 // WhereDeletedAt applies the entql uint32 predicate on the deleted_at field.
 func (f *CountryFilter) WhereDeletedAt(p entql.Uint32P) {
 	f.Where(p.Field(country.FieldDeletedAt))
+}
+
+// WhereEntID applies the entql [16]byte predicate on the ent_id field.
+func (f *CountryFilter) WhereEntID(p entql.ValueP) {
+	f.Where(p.Field(country.FieldEntID))
 }
 
 // WhereCountry applies the entql string predicate on the country field.
@@ -372,8 +392,8 @@ func (f *LangFilter) Where(p entql.P) {
 	})
 }
 
-// WhereID applies the entql [16]byte predicate on the id field.
-func (f *LangFilter) WhereID(p entql.ValueP) {
+// WhereID applies the entql uint32 predicate on the id field.
+func (f *LangFilter) WhereID(p entql.Uint32P) {
 	f.Where(p.Field(lang.FieldID))
 }
 
@@ -390,6 +410,11 @@ func (f *LangFilter) WhereUpdatedAt(p entql.Uint32P) {
 // WhereDeletedAt applies the entql uint32 predicate on the deleted_at field.
 func (f *LangFilter) WhereDeletedAt(p entql.Uint32P) {
 	f.Where(p.Field(lang.FieldDeletedAt))
+}
+
+// WhereEntID applies the entql [16]byte predicate on the ent_id field.
+func (f *LangFilter) WhereEntID(p entql.ValueP) {
+	f.Where(p.Field(lang.FieldEntID))
 }
 
 // WhereLang applies the entql string predicate on the lang field.
@@ -447,8 +472,8 @@ func (f *MessageFilter) Where(p entql.P) {
 	})
 }
 
-// WhereID applies the entql [16]byte predicate on the id field.
-func (f *MessageFilter) WhereID(p entql.ValueP) {
+// WhereID applies the entql uint32 predicate on the id field.
+func (f *MessageFilter) WhereID(p entql.Uint32P) {
 	f.Where(p.Field(message.FieldID))
 }
 
@@ -465,6 +490,11 @@ func (f *MessageFilter) WhereUpdatedAt(p entql.Uint32P) {
 // WhereDeletedAt applies the entql uint32 predicate on the deleted_at field.
 func (f *MessageFilter) WhereDeletedAt(p entql.Uint32P) {
 	f.Where(p.Field(message.FieldDeletedAt))
+}
+
+// WhereEntID applies the entql [16]byte predicate on the ent_id field.
+func (f *MessageFilter) WhereEntID(p entql.ValueP) {
+	f.Where(p.Field(message.FieldEntID))
 }
 
 // WhereAppID applies the entql [16]byte predicate on the app_id field.

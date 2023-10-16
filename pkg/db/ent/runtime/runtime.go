@@ -33,6 +33,8 @@ func init() {
 	}
 	appcountryMixinFields0 := appcountryMixin[0].Fields()
 	_ = appcountryMixinFields0
+	appcountryMixinFields1 := appcountryMixin[1].Fields()
+	_ = appcountryMixinFields1
 	appcountryFields := schema.AppCountry{}.Fields()
 	_ = appcountryFields
 	// appcountryDescCreatedAt is the schema descriptor for created_at field.
@@ -49,18 +51,18 @@ func init() {
 	appcountryDescDeletedAt := appcountryMixinFields0[2].Descriptor()
 	// appcountry.DefaultDeletedAt holds the default value on creation for the deleted_at field.
 	appcountry.DefaultDeletedAt = appcountryDescDeletedAt.Default.(func() uint32)
+	// appcountryDescEntID is the schema descriptor for ent_id field.
+	appcountryDescEntID := appcountryMixinFields1[1].Descriptor()
+	// appcountry.DefaultEntID holds the default value on creation for the ent_id field.
+	appcountry.DefaultEntID = appcountryDescEntID.Default.(func() uuid.UUID)
 	// appcountryDescAppID is the schema descriptor for app_id field.
-	appcountryDescAppID := appcountryFields[1].Descriptor()
+	appcountryDescAppID := appcountryFields[0].Descriptor()
 	// appcountry.DefaultAppID holds the default value on creation for the app_id field.
 	appcountry.DefaultAppID = appcountryDescAppID.Default.(func() uuid.UUID)
 	// appcountryDescCountryID is the schema descriptor for country_id field.
-	appcountryDescCountryID := appcountryFields[2].Descriptor()
+	appcountryDescCountryID := appcountryFields[1].Descriptor()
 	// appcountry.DefaultCountryID holds the default value on creation for the country_id field.
 	appcountry.DefaultCountryID = appcountryDescCountryID.Default.(func() uuid.UUID)
-	// appcountryDescID is the schema descriptor for id field.
-	appcountryDescID := appcountryFields[0].Descriptor()
-	// appcountry.DefaultID holds the default value on creation for the id field.
-	appcountry.DefaultID = appcountryDescID.Default.(func() uuid.UUID)
 	applangMixin := schema.AppLang{}.Mixin()
 	applang.Policy = privacy.NewPolicies(applangMixin[0], schema.AppLang{})
 	applang.Hooks[0] = func(next ent.Mutator) ent.Mutator {
@@ -73,6 +75,8 @@ func init() {
 	}
 	applangMixinFields0 := applangMixin[0].Fields()
 	_ = applangMixinFields0
+	applangMixinFields1 := applangMixin[1].Fields()
+	_ = applangMixinFields1
 	applangFields := schema.AppLang{}.Fields()
 	_ = applangFields
 	// applangDescCreatedAt is the schema descriptor for created_at field.
@@ -89,22 +93,22 @@ func init() {
 	applangDescDeletedAt := applangMixinFields0[2].Descriptor()
 	// applang.DefaultDeletedAt holds the default value on creation for the deleted_at field.
 	applang.DefaultDeletedAt = applangDescDeletedAt.Default.(func() uint32)
+	// applangDescEntID is the schema descriptor for ent_id field.
+	applangDescEntID := applangMixinFields1[1].Descriptor()
+	// applang.DefaultEntID holds the default value on creation for the ent_id field.
+	applang.DefaultEntID = applangDescEntID.Default.(func() uuid.UUID)
 	// applangDescAppID is the schema descriptor for app_id field.
-	applangDescAppID := applangFields[1].Descriptor()
+	applangDescAppID := applangFields[0].Descriptor()
 	// applang.DefaultAppID holds the default value on creation for the app_id field.
 	applang.DefaultAppID = applangDescAppID.Default.(func() uuid.UUID)
 	// applangDescLangID is the schema descriptor for lang_id field.
-	applangDescLangID := applangFields[2].Descriptor()
+	applangDescLangID := applangFields[1].Descriptor()
 	// applang.DefaultLangID holds the default value on creation for the lang_id field.
 	applang.DefaultLangID = applangDescLangID.Default.(func() uuid.UUID)
 	// applangDescMain is the schema descriptor for main field.
-	applangDescMain := applangFields[3].Descriptor()
+	applangDescMain := applangFields[2].Descriptor()
 	// applang.DefaultMain holds the default value on creation for the main field.
 	applang.DefaultMain = applangDescMain.Default.(bool)
-	// applangDescID is the schema descriptor for id field.
-	applangDescID := applangFields[0].Descriptor()
-	// applang.DefaultID holds the default value on creation for the id field.
-	applang.DefaultID = applangDescID.Default.(func() uuid.UUID)
 	countryMixin := schema.Country{}.Mixin()
 	country.Policy = privacy.NewPolicies(countryMixin[0], schema.Country{})
 	country.Hooks[0] = func(next ent.Mutator) ent.Mutator {
@@ -117,6 +121,8 @@ func init() {
 	}
 	countryMixinFields0 := countryMixin[0].Fields()
 	_ = countryMixinFields0
+	countryMixinFields1 := countryMixin[1].Fields()
+	_ = countryMixinFields1
 	countryFields := schema.Country{}.Fields()
 	_ = countryFields
 	// countryDescCreatedAt is the schema descriptor for created_at field.
@@ -133,26 +139,26 @@ func init() {
 	countryDescDeletedAt := countryMixinFields0[2].Descriptor()
 	// country.DefaultDeletedAt holds the default value on creation for the deleted_at field.
 	country.DefaultDeletedAt = countryDescDeletedAt.Default.(func() uint32)
+	// countryDescEntID is the schema descriptor for ent_id field.
+	countryDescEntID := countryMixinFields1[1].Descriptor()
+	// country.DefaultEntID holds the default value on creation for the ent_id field.
+	country.DefaultEntID = countryDescEntID.Default.(func() uuid.UUID)
 	// countryDescCountry is the schema descriptor for country field.
-	countryDescCountry := countryFields[1].Descriptor()
+	countryDescCountry := countryFields[0].Descriptor()
 	// country.DefaultCountry holds the default value on creation for the country field.
 	country.DefaultCountry = countryDescCountry.Default.(string)
 	// countryDescFlag is the schema descriptor for flag field.
-	countryDescFlag := countryFields[2].Descriptor()
+	countryDescFlag := countryFields[1].Descriptor()
 	// country.DefaultFlag holds the default value on creation for the flag field.
 	country.DefaultFlag = countryDescFlag.Default.(string)
 	// countryDescCode is the schema descriptor for code field.
-	countryDescCode := countryFields[3].Descriptor()
+	countryDescCode := countryFields[2].Descriptor()
 	// country.DefaultCode holds the default value on creation for the code field.
 	country.DefaultCode = countryDescCode.Default.(string)
 	// countryDescShort is the schema descriptor for short field.
-	countryDescShort := countryFields[4].Descriptor()
+	countryDescShort := countryFields[3].Descriptor()
 	// country.DefaultShort holds the default value on creation for the short field.
 	country.DefaultShort = countryDescShort.Default.(string)
-	// countryDescID is the schema descriptor for id field.
-	countryDescID := countryFields[0].Descriptor()
-	// country.DefaultID holds the default value on creation for the id field.
-	country.DefaultID = countryDescID.Default.(func() uuid.UUID)
 	langMixin := schema.Lang{}.Mixin()
 	lang.Policy = privacy.NewPolicies(langMixin[0], schema.Lang{})
 	lang.Hooks[0] = func(next ent.Mutator) ent.Mutator {
@@ -165,6 +171,8 @@ func init() {
 	}
 	langMixinFields0 := langMixin[0].Fields()
 	_ = langMixinFields0
+	langMixinFields1 := langMixin[1].Fields()
+	_ = langMixinFields1
 	langFields := schema.Lang{}.Fields()
 	_ = langFields
 	// langDescCreatedAt is the schema descriptor for created_at field.
@@ -181,26 +189,26 @@ func init() {
 	langDescDeletedAt := langMixinFields0[2].Descriptor()
 	// lang.DefaultDeletedAt holds the default value on creation for the deleted_at field.
 	lang.DefaultDeletedAt = langDescDeletedAt.Default.(func() uint32)
+	// langDescEntID is the schema descriptor for ent_id field.
+	langDescEntID := langMixinFields1[1].Descriptor()
+	// lang.DefaultEntID holds the default value on creation for the ent_id field.
+	lang.DefaultEntID = langDescEntID.Default.(func() uuid.UUID)
 	// langDescLang is the schema descriptor for lang field.
-	langDescLang := langFields[1].Descriptor()
+	langDescLang := langFields[0].Descriptor()
 	// lang.DefaultLang holds the default value on creation for the lang field.
 	lang.DefaultLang = langDescLang.Default.(string)
 	// langDescLogo is the schema descriptor for logo field.
-	langDescLogo := langFields[2].Descriptor()
+	langDescLogo := langFields[1].Descriptor()
 	// lang.DefaultLogo holds the default value on creation for the logo field.
 	lang.DefaultLogo = langDescLogo.Default.(string)
 	// langDescName is the schema descriptor for name field.
-	langDescName := langFields[3].Descriptor()
+	langDescName := langFields[2].Descriptor()
 	// lang.DefaultName holds the default value on creation for the name field.
 	lang.DefaultName = langDescName.Default.(string)
 	// langDescShort is the schema descriptor for short field.
-	langDescShort := langFields[4].Descriptor()
+	langDescShort := langFields[3].Descriptor()
 	// lang.DefaultShort holds the default value on creation for the short field.
 	lang.DefaultShort = langDescShort.Default.(string)
-	// langDescID is the schema descriptor for id field.
-	langDescID := langFields[0].Descriptor()
-	// lang.DefaultID holds the default value on creation for the id field.
-	lang.DefaultID = langDescID.Default.(func() uuid.UUID)
 	messageMixin := schema.Message{}.Mixin()
 	message.Policy = privacy.NewPolicies(messageMixin[0], schema.Message{})
 	message.Hooks[0] = func(next ent.Mutator) ent.Mutator {
@@ -213,6 +221,8 @@ func init() {
 	}
 	messageMixinFields0 := messageMixin[0].Fields()
 	_ = messageMixinFields0
+	messageMixinFields1 := messageMixin[1].Fields()
+	_ = messageMixinFields1
 	messageFields := schema.Message{}.Fields()
 	_ = messageFields
 	// messageDescCreatedAt is the schema descriptor for created_at field.
@@ -229,38 +239,38 @@ func init() {
 	messageDescDeletedAt := messageMixinFields0[2].Descriptor()
 	// message.DefaultDeletedAt holds the default value on creation for the deleted_at field.
 	message.DefaultDeletedAt = messageDescDeletedAt.Default.(func() uint32)
+	// messageDescEntID is the schema descriptor for ent_id field.
+	messageDescEntID := messageMixinFields1[1].Descriptor()
+	// message.DefaultEntID holds the default value on creation for the ent_id field.
+	message.DefaultEntID = messageDescEntID.Default.(func() uuid.UUID)
 	// messageDescAppID is the schema descriptor for app_id field.
-	messageDescAppID := messageFields[1].Descriptor()
+	messageDescAppID := messageFields[0].Descriptor()
 	// message.DefaultAppID holds the default value on creation for the app_id field.
 	message.DefaultAppID = messageDescAppID.Default.(func() uuid.UUID)
 	// messageDescLangID is the schema descriptor for lang_id field.
-	messageDescLangID := messageFields[2].Descriptor()
+	messageDescLangID := messageFields[1].Descriptor()
 	// message.DefaultLangID holds the default value on creation for the lang_id field.
 	message.DefaultLangID = messageDescLangID.Default.(func() uuid.UUID)
 	// messageDescMessageID is the schema descriptor for message_id field.
-	messageDescMessageID := messageFields[3].Descriptor()
+	messageDescMessageID := messageFields[2].Descriptor()
 	// message.DefaultMessageID holds the default value on creation for the message_id field.
 	message.DefaultMessageID = messageDescMessageID.Default.(string)
 	// messageDescMessage is the schema descriptor for message field.
-	messageDescMessage := messageFields[4].Descriptor()
+	messageDescMessage := messageFields[3].Descriptor()
 	// message.DefaultMessage holds the default value on creation for the message field.
 	message.DefaultMessage = messageDescMessage.Default.(string)
 	// messageDescGetIndex is the schema descriptor for get_index field.
-	messageDescGetIndex := messageFields[5].Descriptor()
+	messageDescGetIndex := messageFields[4].Descriptor()
 	// message.DefaultGetIndex holds the default value on creation for the get_index field.
 	message.DefaultGetIndex = messageDescGetIndex.Default.(uint32)
 	// messageDescDisabled is the schema descriptor for disabled field.
-	messageDescDisabled := messageFields[6].Descriptor()
+	messageDescDisabled := messageFields[5].Descriptor()
 	// message.DefaultDisabled holds the default value on creation for the disabled field.
 	message.DefaultDisabled = messageDescDisabled.Default.(bool)
 	// messageDescShort is the schema descriptor for short field.
-	messageDescShort := messageFields[7].Descriptor()
+	messageDescShort := messageFields[6].Descriptor()
 	// message.DefaultShort holds the default value on creation for the short field.
 	message.DefaultShort = messageDescShort.Default.(string)
-	// messageDescID is the schema descriptor for id field.
-	messageDescID := messageFields[0].Descriptor()
-	// message.DefaultID holds the default value on creation for the id field.
-	message.DefaultID = messageDescID.Default.(func() uuid.UUID)
 }
 
 const (

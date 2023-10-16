@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 
-	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -61,6 +60,20 @@ func (lc *LangCreate) SetDeletedAt(u uint32) *LangCreate {
 func (lc *LangCreate) SetNillableDeletedAt(u *uint32) *LangCreate {
 	if u != nil {
 		lc.SetDeletedAt(*u)
+	}
+	return lc
+}
+
+// SetEntID sets the "ent_id" field.
+func (lc *LangCreate) SetEntID(u uuid.UUID) *LangCreate {
+	lc.mutation.SetEntID(u)
+	return lc
+}
+
+// SetNillableEntID sets the "ent_id" field if the given value is not nil.
+func (lc *LangCreate) SetNillableEntID(u *uuid.UUID) *LangCreate {
+	if u != nil {
+		lc.SetEntID(*u)
 	}
 	return lc
 }
@@ -122,16 +135,8 @@ func (lc *LangCreate) SetNillableShort(s *string) *LangCreate {
 }
 
 // SetID sets the "id" field.
-func (lc *LangCreate) SetID(u uuid.UUID) *LangCreate {
+func (lc *LangCreate) SetID(u uint32) *LangCreate {
 	lc.mutation.SetID(u)
-	return lc
-}
-
-// SetNillableID sets the "id" field if the given value is not nil.
-func (lc *LangCreate) SetNillableID(u *uuid.UUID) *LangCreate {
-	if u != nil {
-		lc.SetID(*u)
-	}
 	return lc
 }
 
@@ -235,6 +240,13 @@ func (lc *LangCreate) defaults() error {
 		v := lang.DefaultDeletedAt()
 		lc.mutation.SetDeletedAt(v)
 	}
+	if _, ok := lc.mutation.EntID(); !ok {
+		if lang.DefaultEntID == nil {
+			return fmt.Errorf("ent: uninitialized lang.DefaultEntID (forgotten import ent/runtime?)")
+		}
+		v := lang.DefaultEntID()
+		lc.mutation.SetEntID(v)
+	}
 	if _, ok := lc.mutation.Lang(); !ok {
 		v := lang.DefaultLang
 		lc.mutation.SetLang(v)
@@ -251,13 +263,6 @@ func (lc *LangCreate) defaults() error {
 		v := lang.DefaultShort
 		lc.mutation.SetShort(v)
 	}
-	if _, ok := lc.mutation.ID(); !ok {
-		if lang.DefaultID == nil {
-			return fmt.Errorf("ent: uninitialized lang.DefaultID (forgotten import ent/runtime?)")
-		}
-		v := lang.DefaultID()
-		lc.mutation.SetID(v)
-	}
 	return nil
 }
 
@@ -272,6 +277,9 @@ func (lc *LangCreate) check() error {
 	if _, ok := lc.mutation.DeletedAt(); !ok {
 		return &ValidationError{Name: "deleted_at", err: errors.New(`ent: missing required field "Lang.deleted_at"`)}
 	}
+	if _, ok := lc.mutation.EntID(); !ok {
+		return &ValidationError{Name: "ent_id", err: errors.New(`ent: missing required field "Lang.ent_id"`)}
+	}
 	return nil
 }
 
@@ -283,12 +291,9 @@ func (lc *LangCreate) sqlSave(ctx context.Context) (*Lang, error) {
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
-			_node.ID = *id
-		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
-			return nil, err
-		}
+	if _spec.ID.Value != _node.ID {
+		id := _spec.ID.Value.(int64)
+		_node.ID = uint32(id)
 	}
 	return _node, nil
 }
@@ -299,7 +304,7 @@ func (lc *LangCreate) createSpec() (*Lang, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: lang.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: lang.FieldID,
 			},
 		}
@@ -307,7 +312,7 @@ func (lc *LangCreate) createSpec() (*Lang, *sqlgraph.CreateSpec) {
 	_spec.OnConflict = lc.conflict
 	if id, ok := lc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = &id
+		_spec.ID.Value = id
 	}
 	if value, ok := lc.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -332,6 +337,14 @@ func (lc *LangCreate) createSpec() (*Lang, *sqlgraph.CreateSpec) {
 			Column: lang.FieldDeletedAt,
 		})
 		_node.DeletedAt = value
+	}
+	if value, ok := lc.mutation.EntID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: lang.FieldEntID,
+		})
+		_node.EntID = value
 	}
 	if value, ok := lc.mutation.Lang(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -470,6 +483,18 @@ func (u *LangUpsert) UpdateDeletedAt() *LangUpsert {
 // AddDeletedAt adds v to the "deleted_at" field.
 func (u *LangUpsert) AddDeletedAt(v uint32) *LangUpsert {
 	u.Add(lang.FieldDeletedAt, v)
+	return u
+}
+
+// SetEntID sets the "ent_id" field.
+func (u *LangUpsert) SetEntID(v uuid.UUID) *LangUpsert {
+	u.Set(lang.FieldEntID, v)
+	return u
+}
+
+// UpdateEntID sets the "ent_id" field to the value that was provided on create.
+func (u *LangUpsert) UpdateEntID() *LangUpsert {
+	u.SetExcluded(lang.FieldEntID)
 	return u
 }
 
@@ -658,6 +683,20 @@ func (u *LangUpsertOne) UpdateDeletedAt() *LangUpsertOne {
 	})
 }
 
+// SetEntID sets the "ent_id" field.
+func (u *LangUpsertOne) SetEntID(v uuid.UUID) *LangUpsertOne {
+	return u.Update(func(s *LangUpsert) {
+		s.SetEntID(v)
+	})
+}
+
+// UpdateEntID sets the "ent_id" field to the value that was provided on create.
+func (u *LangUpsertOne) UpdateEntID() *LangUpsertOne {
+	return u.Update(func(s *LangUpsert) {
+		s.UpdateEntID()
+	})
+}
+
 // SetLang sets the "lang" field.
 func (u *LangUpsertOne) SetLang(v string) *LangUpsertOne {
 	return u.Update(func(s *LangUpsert) {
@@ -758,12 +797,7 @@ func (u *LangUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *LangUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
-	if u.create.driver.Dialect() == dialect.MySQL {
-		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
-		// fields from the database since MySQL does not support the RETURNING clause.
-		return id, errors.New("ent: LangUpsertOne.ID is not supported by MySQL driver. Use LangUpsertOne.Exec instead")
-	}
+func (u *LangUpsertOne) ID(ctx context.Context) (id uint32, err error) {
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -772,7 +806,7 @@ func (u *LangUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *LangUpsertOne) IDX(ctx context.Context) uuid.UUID {
+func (u *LangUpsertOne) IDX(ctx context.Context) uint32 {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -823,6 +857,10 @@ func (lcb *LangCreateBulk) Save(ctx context.Context) ([]*Lang, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
+				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = uint32(id)
+				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -1018,6 +1056,20 @@ func (u *LangUpsertBulk) AddDeletedAt(v uint32) *LangUpsertBulk {
 func (u *LangUpsertBulk) UpdateDeletedAt() *LangUpsertBulk {
 	return u.Update(func(s *LangUpsert) {
 		s.UpdateDeletedAt()
+	})
+}
+
+// SetEntID sets the "ent_id" field.
+func (u *LangUpsertBulk) SetEntID(v uuid.UUID) *LangUpsertBulk {
+	return u.Update(func(s *LangUpsert) {
+		s.SetEntID(v)
+	})
+}
+
+// UpdateEntID sets the "ent_id" field to the value that was provided on create.
+func (u *LangUpsertBulk) UpdateEntID() *LangUpsertBulk {
+	return u.Update(func(s *LangUpsert) {
+		s.UpdateEntID()
 	})
 }
 

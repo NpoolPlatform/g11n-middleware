@@ -84,6 +84,20 @@ func (alu *AppLangUpdate) AddDeletedAt(u int32) *AppLangUpdate {
 	return alu
 }
 
+// SetEntID sets the "ent_id" field.
+func (alu *AppLangUpdate) SetEntID(u uuid.UUID) *AppLangUpdate {
+	alu.mutation.SetEntID(u)
+	return alu
+}
+
+// SetNillableEntID sets the "ent_id" field if the given value is not nil.
+func (alu *AppLangUpdate) SetNillableEntID(u *uuid.UUID) *AppLangUpdate {
+	if u != nil {
+		alu.SetEntID(*u)
+	}
+	return alu
+}
+
 // SetAppID sets the "app_id" field.
 func (alu *AppLangUpdate) SetAppID(u uuid.UUID) *AppLangUpdate {
 	alu.mutation.SetAppID(u)
@@ -230,7 +244,7 @@ func (alu *AppLangUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   applang.Table,
 			Columns: applang.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: applang.FieldID,
 			},
 		},
@@ -282,6 +296,13 @@ func (alu *AppLangUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeUint32,
 			Value:  value,
 			Column: applang.FieldDeletedAt,
+		})
+	}
+	if value, ok := alu.mutation.EntID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: applang.FieldEntID,
 		})
 	}
 	if value, ok := alu.mutation.AppID(); ok {
@@ -396,6 +417,20 @@ func (aluo *AppLangUpdateOne) SetNillableDeletedAt(u *uint32) *AppLangUpdateOne 
 // AddDeletedAt adds u to the "deleted_at" field.
 func (aluo *AppLangUpdateOne) AddDeletedAt(u int32) *AppLangUpdateOne {
 	aluo.mutation.AddDeletedAt(u)
+	return aluo
+}
+
+// SetEntID sets the "ent_id" field.
+func (aluo *AppLangUpdateOne) SetEntID(u uuid.UUID) *AppLangUpdateOne {
+	aluo.mutation.SetEntID(u)
+	return aluo
+}
+
+// SetNillableEntID sets the "ent_id" field if the given value is not nil.
+func (aluo *AppLangUpdateOne) SetNillableEntID(u *uuid.UUID) *AppLangUpdateOne {
+	if u != nil {
+		aluo.SetEntID(*u)
+	}
 	return aluo
 }
 
@@ -558,7 +593,7 @@ func (aluo *AppLangUpdateOne) sqlSave(ctx context.Context) (_node *AppLang, err 
 			Table:   applang.Table,
 			Columns: applang.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: applang.FieldID,
 			},
 		},
@@ -627,6 +662,13 @@ func (aluo *AppLangUpdateOne) sqlSave(ctx context.Context) (_node *AppLang, err 
 			Type:   field.TypeUint32,
 			Value:  value,
 			Column: applang.FieldDeletedAt,
+		})
+	}
+	if value, ok := aluo.mutation.EntID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: applang.FieldEntID,
 		})
 	}
 	if value, ok := aluo.mutation.AppID(); ok {

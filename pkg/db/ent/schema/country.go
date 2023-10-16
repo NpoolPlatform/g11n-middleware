@@ -5,7 +5,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db/mixin"
-	"github.com/google/uuid"
+	crudermixin "github.com/NpoolPlatform/libent-cruder/pkg/mixin"
 )
 
 // Country holds the schema definition for the Country entity.
@@ -16,16 +16,13 @@ type Country struct {
 func (Country) Mixin() []ent.Mixin {
 	return []ent.Mixin{
 		mixin.TimeMixin{},
+		crudermixin.AutoIDMixin{},
 	}
 }
 
 // Fields of the Country.
 func (Country) Fields() []ent.Field {
 	return []ent.Field{
-		field.
-			UUID("id", uuid.UUID{}).
-			Default(uuid.New).
-			Unique(),
 		field.
 			String("country").
 			Optional().

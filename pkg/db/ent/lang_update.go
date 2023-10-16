@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db/ent/lang"
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db/ent/predicate"
+	"github.com/google/uuid"
 )
 
 // LangUpdate is the builder for updating Lang entities.
@@ -80,6 +81,20 @@ func (lu *LangUpdate) SetNillableDeletedAt(u *uint32) *LangUpdate {
 // AddDeletedAt adds u to the "deleted_at" field.
 func (lu *LangUpdate) AddDeletedAt(u int32) *LangUpdate {
 	lu.mutation.AddDeletedAt(u)
+	return lu
+}
+
+// SetEntID sets the "ent_id" field.
+func (lu *LangUpdate) SetEntID(u uuid.UUID) *LangUpdate {
+	lu.mutation.SetEntID(u)
+	return lu
+}
+
+// SetNillableEntID sets the "ent_id" field if the given value is not nil.
+func (lu *LangUpdate) SetNillableEntID(u *uuid.UUID) *LangUpdate {
+	if u != nil {
+		lu.SetEntID(*u)
+	}
 	return lu
 }
 
@@ -249,7 +264,7 @@ func (lu *LangUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   lang.Table,
 			Columns: lang.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: lang.FieldID,
 			},
 		},
@@ -301,6 +316,13 @@ func (lu *LangUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeUint32,
 			Value:  value,
 			Column: lang.FieldDeletedAt,
+		})
+	}
+	if value, ok := lu.mutation.EntID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: lang.FieldEntID,
 		})
 	}
 	if value, ok := lu.mutation.Lang(); ok {
@@ -428,6 +450,20 @@ func (luo *LangUpdateOne) SetNillableDeletedAt(u *uint32) *LangUpdateOne {
 // AddDeletedAt adds u to the "deleted_at" field.
 func (luo *LangUpdateOne) AddDeletedAt(u int32) *LangUpdateOne {
 	luo.mutation.AddDeletedAt(u)
+	return luo
+}
+
+// SetEntID sets the "ent_id" field.
+func (luo *LangUpdateOne) SetEntID(u uuid.UUID) *LangUpdateOne {
+	luo.mutation.SetEntID(u)
+	return luo
+}
+
+// SetNillableEntID sets the "ent_id" field if the given value is not nil.
+func (luo *LangUpdateOne) SetNillableEntID(u *uuid.UUID) *LangUpdateOne {
+	if u != nil {
+		luo.SetEntID(*u)
+	}
 	return luo
 }
 
@@ -610,7 +646,7 @@ func (luo *LangUpdateOne) sqlSave(ctx context.Context) (_node *Lang, err error) 
 			Table:   lang.Table,
 			Columns: lang.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: lang.FieldID,
 			},
 		},
@@ -679,6 +715,13 @@ func (luo *LangUpdateOne) sqlSave(ctx context.Context) (_node *Lang, err error) 
 			Type:   field.TypeUint32,
 			Value:  value,
 			Column: lang.FieldDeletedAt,
+		})
+	}
+	if value, ok := luo.mutation.EntID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: lang.FieldEntID,
 		})
 	}
 	if value, ok := luo.mutation.Lang(); ok {

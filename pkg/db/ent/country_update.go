@@ -12,6 +12,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db/ent/country"
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db/ent/predicate"
+	"github.com/google/uuid"
 )
 
 // CountryUpdate is the builder for updating Country entities.
@@ -80,6 +81,20 @@ func (cu *CountryUpdate) SetNillableDeletedAt(u *uint32) *CountryUpdate {
 // AddDeletedAt adds u to the "deleted_at" field.
 func (cu *CountryUpdate) AddDeletedAt(u int32) *CountryUpdate {
 	cu.mutation.AddDeletedAt(u)
+	return cu
+}
+
+// SetEntID sets the "ent_id" field.
+func (cu *CountryUpdate) SetEntID(u uuid.UUID) *CountryUpdate {
+	cu.mutation.SetEntID(u)
+	return cu
+}
+
+// SetNillableEntID sets the "ent_id" field if the given value is not nil.
+func (cu *CountryUpdate) SetNillableEntID(u *uuid.UUID) *CountryUpdate {
+	if u != nil {
+		cu.SetEntID(*u)
+	}
 	return cu
 }
 
@@ -249,7 +264,7 @@ func (cu *CountryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   country.Table,
 			Columns: country.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: country.FieldID,
 			},
 		},
@@ -301,6 +316,13 @@ func (cu *CountryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeUint32,
 			Value:  value,
 			Column: country.FieldDeletedAt,
+		})
+	}
+	if value, ok := cu.mutation.EntID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: country.FieldEntID,
 		})
 	}
 	if value, ok := cu.mutation.Country(); ok {
@@ -428,6 +450,20 @@ func (cuo *CountryUpdateOne) SetNillableDeletedAt(u *uint32) *CountryUpdateOne {
 // AddDeletedAt adds u to the "deleted_at" field.
 func (cuo *CountryUpdateOne) AddDeletedAt(u int32) *CountryUpdateOne {
 	cuo.mutation.AddDeletedAt(u)
+	return cuo
+}
+
+// SetEntID sets the "ent_id" field.
+func (cuo *CountryUpdateOne) SetEntID(u uuid.UUID) *CountryUpdateOne {
+	cuo.mutation.SetEntID(u)
+	return cuo
+}
+
+// SetNillableEntID sets the "ent_id" field if the given value is not nil.
+func (cuo *CountryUpdateOne) SetNillableEntID(u *uuid.UUID) *CountryUpdateOne {
+	if u != nil {
+		cuo.SetEntID(*u)
+	}
 	return cuo
 }
 
@@ -610,7 +646,7 @@ func (cuo *CountryUpdateOne) sqlSave(ctx context.Context) (_node *Country, err e
 			Table:   country.Table,
 			Columns: country.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: country.FieldID,
 			},
 		},
@@ -679,6 +715,13 @@ func (cuo *CountryUpdateOne) sqlSave(ctx context.Context) (_node *Country, err e
 			Type:   field.TypeUint32,
 			Value:  value,
 			Column: country.FieldDeletedAt,
+		})
+	}
+	if value, ok := cuo.mutation.EntID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: country.FieldEntID,
 		})
 	}
 	if value, ok := cuo.mutation.Country(); ok {

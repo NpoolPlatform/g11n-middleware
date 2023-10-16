@@ -84,6 +84,20 @@ func (acu *AppCountryUpdate) AddDeletedAt(u int32) *AppCountryUpdate {
 	return acu
 }
 
+// SetEntID sets the "ent_id" field.
+func (acu *AppCountryUpdate) SetEntID(u uuid.UUID) *AppCountryUpdate {
+	acu.mutation.SetEntID(u)
+	return acu
+}
+
+// SetNillableEntID sets the "ent_id" field if the given value is not nil.
+func (acu *AppCountryUpdate) SetNillableEntID(u *uuid.UUID) *AppCountryUpdate {
+	if u != nil {
+		acu.SetEntID(*u)
+	}
+	return acu
+}
+
 // SetAppID sets the "app_id" field.
 func (acu *AppCountryUpdate) SetAppID(u uuid.UUID) *AppCountryUpdate {
 	acu.mutation.SetAppID(u)
@@ -210,7 +224,7 @@ func (acu *AppCountryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   appcountry.Table,
 			Columns: appcountry.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: appcountry.FieldID,
 			},
 		},
@@ -262,6 +276,13 @@ func (acu *AppCountryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeUint32,
 			Value:  value,
 			Column: appcountry.FieldDeletedAt,
+		})
+	}
+	if value, ok := acu.mutation.EntID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: appcountry.FieldEntID,
 		})
 	}
 	if value, ok := acu.mutation.AppID(); ok {
@@ -363,6 +384,20 @@ func (acuo *AppCountryUpdateOne) SetNillableDeletedAt(u *uint32) *AppCountryUpda
 // AddDeletedAt adds u to the "deleted_at" field.
 func (acuo *AppCountryUpdateOne) AddDeletedAt(u int32) *AppCountryUpdateOne {
 	acuo.mutation.AddDeletedAt(u)
+	return acuo
+}
+
+// SetEntID sets the "ent_id" field.
+func (acuo *AppCountryUpdateOne) SetEntID(u uuid.UUID) *AppCountryUpdateOne {
+	acuo.mutation.SetEntID(u)
+	return acuo
+}
+
+// SetNillableEntID sets the "ent_id" field if the given value is not nil.
+func (acuo *AppCountryUpdateOne) SetNillableEntID(u *uuid.UUID) *AppCountryUpdateOne {
+	if u != nil {
+		acuo.SetEntID(*u)
+	}
 	return acuo
 }
 
@@ -505,7 +540,7 @@ func (acuo *AppCountryUpdateOne) sqlSave(ctx context.Context) (_node *AppCountry
 			Table:   appcountry.Table,
 			Columns: appcountry.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: appcountry.FieldID,
 			},
 		},
@@ -574,6 +609,13 @@ func (acuo *AppCountryUpdateOne) sqlSave(ctx context.Context) (_node *AppCountry
 			Type:   field.TypeUint32,
 			Value:  value,
 			Column: appcountry.FieldDeletedAt,
+		})
+	}
+	if value, ok := acuo.mutation.EntID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: appcountry.FieldEntID,
 		})
 	}
 	if value, ok := acuo.mutation.AppID(); ok {
