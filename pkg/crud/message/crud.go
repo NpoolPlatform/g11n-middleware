@@ -10,7 +10,7 @@ import (
 )
 
 type Req struct {
-	ID        *uuid.UUID
+	EntID     *uuid.UUID
 	AppID     *uuid.UUID
 	LangID    *uuid.UUID
 	MessageID *string
@@ -21,8 +21,8 @@ type Req struct {
 }
 
 func CreateSet(c *ent.MessageCreate, req *Req) *ent.MessageCreate {
-	if req.ID != nil {
-		c.SetID(*req.ID)
+	if req.EntID != nil {
+		c.SetEntID(*req.EntID)
 	}
 	if req.AppID != nil {
 		c.SetAppID(*req.AppID)
@@ -68,8 +68,8 @@ func UpdateSet(u *ent.MessageUpdateOne, req *Req) *ent.MessageUpdateOne {
 }
 
 type Conds struct {
-	ID         *cruder.Cond
-	IDs        *cruder.Cond
+	EntID      *cruder.Cond
+	EntIDs     *cruder.Cond
 	AppID      *cruder.Cond
 	LangID     *cruder.Cond
 	MessageID  *cruder.Cond
@@ -82,39 +82,39 @@ func SetQueryConds(q *ent.MessageQuery, conds *Conds) (*ent.MessageQuery, error)
 	if conds == nil {
 		return q, nil
 	}
-	if conds.ID != nil {
-		id, ok := conds.ID.Val.(uuid.UUID)
+	if conds.EntID != nil {
+		id, ok := conds.EntID.Val.(uuid.UUID)
 		if !ok {
-			return nil, fmt.Errorf("invalid id")
+			return nil, fmt.Errorf("invalid entid")
 		}
-		switch conds.ID.Op {
+		switch conds.EntID.Op {
 		case cruder.EQ:
 			q.Where(
-				entmessage.ID(id),
+				entmessage.EntID(id),
 				entmessage.DeletedAt(0),
 			)
 		case cruder.NEQ:
 			q.Where(
-				entmessage.IDNEQ(id),
+				entmessage.EntIDNEQ(id),
 				entmessage.DeletedAt(0),
 			)
 		default:
-			return nil, fmt.Errorf("invalid message id field")
+			return nil, fmt.Errorf("invalid message entid field")
 		}
 	}
-	if conds.IDs != nil {
-		ids, ok := conds.IDs.Val.([]uuid.UUID)
+	if conds.EntIDs != nil {
+		ids, ok := conds.EntIDs.Val.([]uuid.UUID)
 		if !ok {
-			return nil, fmt.Errorf("invalid ids")
+			return nil, fmt.Errorf("invalid entids")
 		}
-		switch conds.IDs.Op {
+		switch conds.EntIDs.Op {
 		case cruder.IN:
 			q.Where(
-				entmessage.IDIn(ids...),
+				entmessage.EntIDIn(ids...),
 				entmessage.DeletedAt(0),
 			)
 		default:
-			return nil, fmt.Errorf("invalid message ids field")
+			return nil, fmt.Errorf("invalid message entids field")
 		}
 	}
 	if conds.AppID != nil {

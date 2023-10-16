@@ -21,15 +21,12 @@ type createHandler struct {
 	*Handler
 }
 
-func (h *createHandler) createLang(ctx context.Context, cli *ent.Client) error {
-	if h.LangID == nil {
-		return fmt.Errorf("invalid langid")
-	}
+func (h *createHandler) createLang(ctx context.Context, cli *ent.Client, req *applangcrud.Req) error {
 	lockKey := fmt.Sprintf(
 		"%v:%v:%v",
 		basetypes.Prefix_PrefixCreateAppLang,
-		*h.AppID,
-		*h.LangID,
+		*req.AppID,
+		*req.LangID,
 	)
 	if err := redis2.TryLock(lockKey, 0); err != nil {
 		return err
@@ -39,8 +36,8 @@ func (h *createHandler) createLang(ctx context.Context, cli *ent.Client) error {
 	}()
 
 	h.Conds = &applangcrud.Conds{
-		AppID:  &cruder.Cond{Op: cruder.EQ, Val: *h.AppID},
-		LangID: &cruder.Cond{Op: cruder.EQ, Val: *h.LangID},
+		AppID:  &cruder.Cond{Op: cruder.EQ, Val: *req.AppID},
+		LangID: &cruder.Cond{Op: cruder.EQ, Val: *req.LangID},
 	}
 	exist, err := h.ExistAppLangConds(ctx)
 	if err != nil {
@@ -66,14 +63,14 @@ func (h *createHandler) createLang(ctx context.Context, cli *ent.Client) error {
 	}
 
 	id := uuid.New()
-	if h.ID == nil {
-		h.ID = &id
+	if h.EntID == nil {
+		h.EntID = &id
 	}
 
 	info, err := applangcrud.CreateSet(
 		cli.AppLang.Create(),
 		&applangcrud.Req{
-			ID:     h.ID,
+			EntID:  h.EntID,
 			AppID:  h.AppID,
 			LangID: h.LangID,
 			Main:   h.Main,
@@ -84,6 +81,7 @@ func (h *createHandler) createLang(ctx context.Context, cli *ent.Client) error {
 	}
 
 	h.ID = &info.ID
+	h.EntID = &info.EntID
 
 	return nil
 }
@@ -93,7 +91,13 @@ func (h *Handler) CreateLang(ctx context.Context) (*npool.Lang, error) {
 		Handler: h,
 	}
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		if err := handler.createLang(ctx, cli); err != nil {
+		req := &applangcrud.Req{
+			EntID:  h.EntID,
+			AppID:  h.AppID,
+			LangID: h.LangID,
+			Main:   h.Main,
+		}
+		if err := handler.createLang(ctx, cli, req); err != nil {
 			return err
 		}
 		return nil
@@ -114,14 +118,13 @@ func (h *Handler) CreateLangs(ctx context.Context) ([]*npool.Lang, error) {
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
 		for _, req := range h.Reqs {
-			handler.ID = nil
-			handler.AppID = req.AppID
-			handler.LangID = req.LangID
-			handler.Main = req.Main
-			if err := handler.createLang(ctx, cli); err != nil {
+			if req.EntID != nil {
+				handler.EntID = req.EntID
+			}
+			if err := handler.createLang(ctx, cli, req); err != nil {
 				return err
 			}
-			ids = append(ids, *h.ID)
+			ids = append(ids, *h.EntID)
 		}
 		return nil
 	})
@@ -130,7 +133,7 @@ func (h *Handler) CreateLangs(ctx context.Context) ([]*npool.Lang, error) {
 	}
 
 	h.Conds = &applangcrud.Conds{
-		IDs: &cruder.Cond{Op: cruder.IN, Val: ids},
+		EntIDs: &cruder.Cond{Op: cruder.IN, Val: ids},
 	}
 	h.Offset = 0
 	h.Limit = int32(len(ids))

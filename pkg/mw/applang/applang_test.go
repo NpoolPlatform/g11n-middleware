@@ -29,7 +29,7 @@ func init() {
 
 var (
 	ret = npool.Lang{
-		ID:     uuid.NewString(),
+		EntID:  uuid.NewString(),
 		AppID:  uuid.NewString(),
 		LangID: uuid.NewString(),
 		Lang:   "test mw lang" + uuid.NewString(),
@@ -43,11 +43,11 @@ var (
 func setup(t *testing.T) func(*testing.T) {
 	lh, err := lang.NewHandler(
 		context.Background(),
-		lang.WithID(&ret.LangID),
-		lang.WithLang(&ret.Lang),
-		lang.WithName(&ret.Name),
-		lang.WithLogo(&ret.Logo),
-		lang.WithShort(&ret.Short),
+		lang.WithEntID(&ret.LangID, true),
+		lang.WithLang(&ret.Lang, true),
+		lang.WithName(&ret.Name, true),
+		lang.WithLogo(&ret.Logo, true),
+		lang.WithShort(&ret.Short, true),
 	)
 	assert.Nil(t, err)
 	assert.NotNil(t, lh)
@@ -63,10 +63,10 @@ func setup(t *testing.T) func(*testing.T) {
 func creatLang(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
-		WithID(&ret.ID),
-		WithAppID(&ret.AppID),
-		WithLangID(&ret.LangID),
-		WithMain(&ret.Main),
+		WithEntID(&ret.EntID, true),
+		WithAppID(&ret.AppID, true),
+		WithLangID(&ret.LangID, true),
+		WithMain(&ret.Main, true),
 	)
 	assert.Nil(t, err)
 
@@ -74,6 +74,7 @@ func creatLang(t *testing.T) {
 	if assert.Nil(t, err) {
 		ret.CreatedAt = info.CreatedAt
 		ret.UpdatedAt = info.UpdatedAt
+		ret.ID = info.ID
 		assert.Equal(t, info, &ret)
 	}
 }
@@ -82,10 +83,10 @@ func updateLang(t *testing.T) {
 	ret.Main = false
 	handler, err := NewHandler(
 		context.Background(),
-		WithID(&ret.ID),
-		WithAppID(&ret.AppID),
-		WithLangID(&ret.LangID),
-		WithMain(&ret.Main),
+		WithEntID(&ret.EntID, true),
+		WithAppID(&ret.AppID, false),
+		WithLangID(&ret.LangID, false),
+		WithMain(&ret.Main, false),
 	)
 	assert.Nil(t, err)
 
@@ -99,7 +100,7 @@ func updateLang(t *testing.T) {
 func getLang(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
-		WithID(&ret.ID),
+		WithEntID(&ret.EntID, true),
 	)
 	assert.Nil(t, err)
 
@@ -131,8 +132,7 @@ func getLangs(t *testing.T) {
 func deleteLang(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
-		WithID(&ret.ID),
-		WithAppID(&ret.AppID),
+		WithEntID(&ret.EntID, true),
 	)
 	assert.Nil(t, err)
 
