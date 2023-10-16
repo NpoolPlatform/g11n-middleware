@@ -80,7 +80,7 @@ func UpdateCountry(ctx context.Context, req *npool.CountryReq) (*npool.Country, 
 func GetCountry(ctx context.Context, id string) (*npool.Country, error) {
 	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.GetCountry(ctx, &npool.GetCountryRequest{
-			ID: id,
+			EntID: id,
 		})
 		if err != nil {
 			return nil, err

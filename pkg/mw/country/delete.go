@@ -22,7 +22,6 @@ func (h *Handler) DeleteCountry(ctx context.Context) (*npool.Country, error) {
 		if _, err := countrycrud.UpdateSet(
 			cli.Country.UpdateOneID(*h.ID),
 			&countrycrud.Req{
-				ID:        h.ID,
 				DeletedAt: &now,
 			},
 		).Save(ctx); err != nil {

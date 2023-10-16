@@ -11,7 +11,7 @@ import (
 )
 
 type Req struct {
-	ID        *uuid.UUID
+	EntID     *uuid.UUID
 	Country   *string
 	Flag      *string
 	Code      *string
@@ -20,8 +20,8 @@ type Req struct {
 }
 
 func CreateSet(c *ent.CountryCreate, req *Req) *ent.CountryCreate {
-	if req.ID != nil {
-		c.SetID(*req.ID)
+	if req.EntID != nil {
+		c.SetEntID(*req.EntID)
 	}
 	if req.Country != nil {
 		c.SetCountry(*req.Country)
@@ -58,8 +58,8 @@ func UpdateSet(u *ent.CountryUpdateOne, req *Req) *ent.CountryUpdateOne {
 }
 
 type Conds struct {
-	ID        *cruder.Cond
-	IDs       *cruder.Cond
+	EntID     *cruder.Cond
+	EntIDs    *cruder.Cond
 	Country   *cruder.Cond
 	Code      *cruder.Cond
 	Short     *cruder.Cond
@@ -71,39 +71,39 @@ func SetQueryConds(q *ent.CountryQuery, conds *Conds) (*ent.CountryQuery, error)
 	if conds == nil {
 		return q, nil
 	}
-	if conds.ID != nil {
-		id, ok := conds.ID.Val.(uuid.UUID)
+	if conds.EntID != nil {
+		id, ok := conds.EntID.Val.(uuid.UUID)
 		if !ok {
-			return nil, fmt.Errorf("invalid id")
+			return nil, fmt.Errorf("invalid entid")
 		}
-		switch conds.ID.Op {
+		switch conds.EntID.Op {
 		case cruder.EQ:
 			q.Where(
-				entcountry.ID(id),
+				entcountry.EntID(id),
 				entcountry.DeletedAt(0),
 			)
 		case cruder.NEQ:
 			q.Where(
-				entcountry.IDNEQ(id),
+				entcountry.EntIDNEQ(id),
 				entcountry.DeletedAt(0),
 			)
 		default:
-			return nil, fmt.Errorf("invalid id field")
+			return nil, fmt.Errorf("invalid entid field")
 		}
 	}
-	if conds.IDs != nil {
-		ids, ok := conds.IDs.Val.([]uuid.UUID)
+	if conds.EntIDs != nil {
+		ids, ok := conds.EntIDs.Val.([]uuid.UUID)
 		if !ok {
-			return nil, fmt.Errorf("invalid ids")
+			return nil, fmt.Errorf("invalid entids")
 		}
-		switch conds.IDs.Op {
+		switch conds.EntIDs.Op {
 		case cruder.IN:
 			q.Where(
-				entcountry.IDIn(ids...),
+				entcountry.EntIDIn(ids...),
 				entcountry.DeletedAt(0),
 			)
 		default:
-			return nil, fmt.Errorf("invalid ids field")
+			return nil, fmt.Errorf("invalid entids field")
 		}
 	}
 	if conds.Country != nil {

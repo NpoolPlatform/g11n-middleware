@@ -14,7 +14,8 @@ import (
 )
 
 type Handler struct {
-	ID      *uuid.UUID
+	ID      *uint32
+	EntID   *uuid.UUID
 	Country *string
 	Flag    *string
 	Code    *string
@@ -35,23 +36,42 @@ func NewHandler(ctx context.Context, options ...func(context.Context, *Handler) 
 	return handler, nil
 }
 
-func WithID(id *string) func(context.Context, *Handler) error {
+func WithID(u *uint32, must bool) func(context.Context, *Handler) error {
+	return func(ctx context.Context, h *Handler) error {
+		if u == nil {
+			if must {
+				return fmt.Errorf("invalid id")
+			}
+			return nil
+		}
+		h.ID = u
+		return nil
+	}
+}
+
+func WithEntID(id *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
+			if must {
+				return fmt.Errorf("invalid entid")
+			}
 			return nil
 		}
 		_id, err := uuid.Parse(*id)
 		if err != nil {
 			return err
 		}
-		h.ID = &_id
+		h.EntID = &_id
 		return nil
 	}
 }
 
-func WithCountry(country *string) func(context.Context, *Handler) error {
+func WithCountry(country *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if country == nil {
+			if must {
+				return fmt.Errorf("invalid country")
+			}
 			return nil
 		}
 		if *country == "" {
@@ -62,9 +82,12 @@ func WithCountry(country *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithFlag(flag *string) func(context.Context, *Handler) error {
+func WithFlag(flag *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if flag == nil {
+			if must {
+				return fmt.Errorf("invalid flag")
+			}
 			return nil
 		}
 		if *flag == "" {
@@ -75,9 +98,12 @@ func WithFlag(flag *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithCode(code *string) func(context.Context, *Handler) error {
+func WithCode(code *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if code == nil {
+			if must {
+				return fmt.Errorf("invalid code")
+			}
 			return nil
 		}
 		if *code == "" {
@@ -88,9 +114,12 @@ func WithCode(code *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithShort(short *string) func(context.Context, *Handler) error {
+func WithShort(short *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if short == nil {
+			if must {
+				return fmt.Errorf("invalid short")
+			}
 			return nil
 		}
 		if *short == "" {
@@ -107,12 +136,12 @@ func WithConds(conds *npool.Conds) func(context.Context, *Handler) error {
 		if conds == nil {
 			return nil
 		}
-		if conds.ID != nil {
-			id, err := uuid.Parse(conds.GetID().GetValue())
+		if conds.EntID != nil {
+			id, err := uuid.Parse(conds.GetEntID().GetValue())
 			if err != nil {
 				return err
 			}
-			h.Conds.ID = &cruder.Cond{Op: conds.GetID().GetOp(), Val: id}
+			h.Conds.EntID = &cruder.Cond{Op: conds.GetEntID().GetOp(), Val: id}
 		}
 		if conds.Country != nil {
 			h.Conds.Country = &cruder.Cond{Op: conds.GetCountry().GetOp(), Val: conds.GetCountry().GetValue()}
@@ -152,12 +181,12 @@ func WithReqs(reqs []*npool.CountryReq) func(context.Context, *Handler) error {
 		_reqs := []*countrycrud.Req{}
 		for _, req := range reqs {
 			_req := &countrycrud.Req{}
-			if req.ID != nil {
-				id, err := uuid.Parse(*req.ID)
+			if req.EntID != nil {
+				id, err := uuid.Parse(*req.EntID)
 				if err != nil {
 					return err
 				}
-				_req.ID = &id
+				_req.EntID = &id
 			}
 			if req.Country != nil {
 				_req.Country = req.Country

@@ -14,13 +14,20 @@ import (
 
 func (s *Server) UpdateCountry(ctx context.Context, in *npool.UpdateCountryRequest) (*npool.UpdateCountryResponse, error) {
 	req := in.GetInfo()
+	if req == nil {
+		logger.Sugar().Errorw(
+			"UpdateCountry",
+			"In", in,
+		)
+		return &npool.UpdateCountryResponse{}, status.Error(codes.InvalidArgument, "Info is empty")
+	}
 	handler, err := country1.NewHandler(
 		ctx,
-		country1.WithID(req.ID),
-		country1.WithCountry(req.Country),
-		country1.WithFlag(req.Flag),
-		country1.WithCode(req.Code),
-		country1.WithShort(req.Short),
+		country1.WithID(req.ID, true),
+		country1.WithCountry(req.Country, false),
+		country1.WithFlag(req.Flag, false),
+		country1.WithCode(req.Code, false),
+		country1.WithShort(req.Short, false),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

@@ -14,13 +14,20 @@ import (
 
 func (s *Server) CreateCountry(ctx context.Context, in *npool.CreateCountryRequest) (*npool.CreateCountryResponse, error) {
 	req := in.GetInfo()
+	if req == nil {
+		logger.Sugar().Errorw(
+			"CreateCountry",
+			"In", in,
+		)
+		return &npool.CreateCountryResponse{}, status.Error(codes.InvalidArgument, "Info is empty")
+	}
 	handler, err := country1.NewHandler(
 		ctx,
-		country1.WithID(req.ID),
-		country1.WithCountry(req.Country),
-		country1.WithFlag(req.Flag),
-		country1.WithCode(req.Code),
-		country1.WithShort(req.Short),
+		country1.WithEntID(req.EntID, false),
+		country1.WithCountry(req.Country, true),
+		country1.WithFlag(req.Flag, true),
+		country1.WithCode(req.Code, true),
+		country1.WithShort(req.Short, true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

@@ -23,6 +23,7 @@ type queryHandler struct {
 func (h *queryHandler) selectCountry(stm *ent.CountryQuery) {
 	h.stm = stm.Select(
 		entcountry.FieldID,
+		entcountry.FieldEntID,
 		entcountry.FieldCountry,
 		entcountry.FieldFlag,
 		entcountry.FieldCode,
@@ -31,18 +32,17 @@ func (h *queryHandler) selectCountry(stm *ent.CountryQuery) {
 }
 
 func (h *queryHandler) queryCountry(cli *ent.Client) error {
-	if h.ID == nil {
+	if h.ID == nil && h.EntID == nil {
 		return fmt.Errorf("invalid id")
 	}
-
-	h.selectCountry(
-		cli.Country.
-			Query().
-			Where(
-				entcountry.ID(*h.ID),
-				entcountry.DeletedAt(0),
-			),
-	)
+	stm := cli.Country.Query().Where(entcountry.DeletedAt(0))
+	if h.ID != nil {
+		stm.Where(entcountry.ID(*h.ID))
+	}
+	if h.EntID != nil {
+		stm.Where(entcountry.EntID(*h.EntID))
+	}
+	h.selectCountry(stm)
 	return nil
 }
 
