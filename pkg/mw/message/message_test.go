@@ -30,7 +30,7 @@ func init() {
 
 var (
 	ret = npool.Message{
-		ID:        uuid.NewString(),
+		EntID:     uuid.NewString(),
 		AppID:     uuid.NewString(),
 		Lang:      "test lang" + uuid.NewString(),
 		LangID:    uuid.NewString(),
@@ -49,11 +49,11 @@ var (
 func setupMessage(t *testing.T) func(*testing.T) {
 	lh, err := lang.NewHandler(
 		context.Background(),
-		lang.WithID(&ret.LangID),
-		lang.WithLang(&ret.Lang),
-		lang.WithName(&langName),
-		lang.WithLogo(&langLogo),
-		lang.WithShort(&langShort),
+		lang.WithEntID(&ret.LangID, true),
+		lang.WithLang(&ret.Lang, true),
+		lang.WithName(&langName, true),
+		lang.WithLogo(&langLogo, true),
+		lang.WithShort(&langShort, true),
 	)
 	assert.Nil(t, err)
 	assert.NotNil(t, lh)
@@ -63,10 +63,10 @@ func setupMessage(t *testing.T) func(*testing.T) {
 
 	ah, err := applang.NewHandler(
 		context.Background(),
-		applang.WithID(&appLangID),
-		applang.WithAppID(&ret.AppID),
-		applang.WithLangID(&ret.LangID),
-		applang.WithMain(&appLangMain),
+		applang.WithEntID(&appLangID, true),
+		applang.WithAppID(&ret.AppID, true),
+		applang.WithLangID(&ret.LangID, true),
+		applang.WithMain(&appLangMain, true),
 	)
 	assert.Nil(t, err)
 	assert.NotNil(t, ah)
@@ -83,13 +83,13 @@ func setupMessage(t *testing.T) func(*testing.T) {
 func createMessage(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
-		WithID(&ret.ID),
-		WithAppID(&ret.AppID),
-		WithLangID(&ret.LangID),
-		WithMessageID(&ret.MessageID),
-		WithMessage(&ret.Message),
-		WithGetIndex(&ret.GetIndex),
-		WithDisabled(&ret.Disabled),
+		WithEntID(&ret.EntID, true),
+		WithAppID(&ret.AppID, true),
+		WithLangID(&ret.LangID, true),
+		WithMessageID(&ret.MessageID, true),
+		WithMessage(&ret.Message, true),
+		WithGetIndex(&ret.GetIndex, false),
+		WithDisabled(&ret.Disabled, false),
 	)
 	assert.Nil(t, err)
 
@@ -98,6 +98,7 @@ func createMessage(t *testing.T) {
 		ret.Lang = info.Lang
 		ret.CreatedAt = info.CreatedAt
 		ret.UpdatedAt = info.UpdatedAt
+		ret.ID = info.ID
 		assert.Equal(t, info, &ret)
 	}
 }
@@ -109,13 +110,13 @@ func updateMessage(t *testing.T) {
 	ret.Disabled = true
 	handler, err := NewHandler(
 		context.Background(),
-		WithID(&ret.ID),
-		WithAppID(&ret.AppID),
-		WithLangID(&ret.LangID),
-		WithMessageID(&ret.MessageID),
-		WithMessage(&ret.Message),
-		WithGetIndex(&ret.GetIndex),
-		WithDisabled(&ret.Disabled),
+		WithEntID(&ret.EntID, true),
+		WithAppID(&ret.AppID, false),
+		WithLangID(&ret.LangID, false),
+		WithMessageID(&ret.MessageID, false),
+		WithMessage(&ret.Message, false),
+		WithGetIndex(&ret.GetIndex, false),
+		WithDisabled(&ret.Disabled, false),
 	)
 	assert.Nil(t, err)
 	info, err := handler.UpdateMessage(context.Background())
@@ -132,7 +133,7 @@ func updateMessage(t *testing.T) {
 func getMessage(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
-		WithID(&ret.ID),
+		WithEntID(&ret.EntID, true),
 	)
 	assert.Nil(t, err)
 
@@ -163,8 +164,7 @@ func getMessages(t *testing.T) {
 func deleteMessage(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
-		WithID(&ret.ID),
-		WithAppID(&ret.AppID),
+		WithEntID(&ret.EntID, true),
 	)
 	assert.Nil(t, err)
 

@@ -80,7 +80,7 @@ func UpdateMessage(ctx context.Context, req *npool.MessageReq) (*npool.Message, 
 func GetMessage(ctx context.Context, id string) (*npool.Message, error) {
 	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.GetMessage(ctx, &npool.GetMessageRequest{
-			ID: id,
+			EntID: id,
 		})
 		if err != nil {
 			return nil, err

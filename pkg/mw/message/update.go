@@ -18,22 +18,14 @@ func (h *Handler) UpdateMessage(ctx context.Context) (*npool.Message, error) {
 	if h.ID == nil {
 		return nil, fmt.Errorf("invalid id")
 	}
-	if h.AppID == nil {
-		return nil, fmt.Errorf("invalid appid")
+	info, err := h.GetMessage(ctx)
+	if err != nil {
+		return nil, err
 	}
-
-	err := db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
-		h.Conds = &messagecrud.Conds{
-			AppID: &cruder.Cond{Op: cruder.EQ, Val: *h.AppID},
-			ID:    &cruder.Cond{Op: cruder.EQ, Val: *h.ID},
-		}
-		exist, err := h.ExistMessageConds(ctx)
-		if err != nil {
-			return err
-		}
-		if !exist {
-			return fmt.Errorf("message not exist")
-		}
+	if info == nil {
+		return nil, fmt.Errorf("message not exist")
+	}
+	err = db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		if h.MessageID != nil {
 			if h.LangID == nil {
 				return fmt.Errorf("invalid langid")
@@ -59,7 +51,7 @@ func (h *Handler) UpdateMessage(ctx context.Context) (*npool.Message, error) {
 			h.Conds = &messagecrud.Conds{
 				AppID:     &cruder.Cond{Op: cruder.EQ, Val: *h.AppID},
 				LangID:    &cruder.Cond{Op: cruder.EQ, Val: *h.LangID},
-				ID:        &cruder.Cond{Op: cruder.NEQ, Val: *h.ID},
+				EntID:     &cruder.Cond{Op: cruder.NEQ, Val: *h.EntID},
 				MessageID: &cruder.Cond{Op: cruder.EQ, Val: *h.MessageID},
 			}
 			exist, err := h.ExistMessageConds(ctx)
@@ -86,7 +78,6 @@ func (h *Handler) UpdateMessage(ctx context.Context) (*npool.Message, error) {
 		if _, err := messagecrud.UpdateSet(
 			tx.Message.UpdateOneID(*h.ID),
 			&messagecrud.Req{
-				ID:        h.ID,
 				MessageID: h.MessageID,
 				Message:   h.Message,
 				GetIndex:  h.GetIndex,

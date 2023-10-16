@@ -22,6 +22,7 @@ type queryHandler struct {
 func (h *queryHandler) selectMessage(stm *ent.MessageQuery) {
 	h.stm = stm.Select(
 		entmessage.FieldID,
+		entmessage.FieldEntID,
 		entmessage.FieldAppID,
 		entmessage.FieldLangID,
 		entmessage.FieldMessageID,
@@ -32,18 +33,17 @@ func (h *queryHandler) selectMessage(stm *ent.MessageQuery) {
 }
 
 func (h *queryHandler) queryMessage(cli *ent.Client) error {
-	if h.ID == nil {
-		return fmt.Errorf("invalid messageid")
+	if h.ID == nil && h.EntID == nil {
+		return fmt.Errorf("invalid id")
 	}
-	h.selectMessage(
-		cli.Message.
-			Query().
-			Where(
-				entmessage.ID(*h.ID),
-				entmessage.DeletedAt(0),
-			),
-	)
-
+	stm := cli.Message.Query().Where(entmessage.DeletedAt(0))
+	if h.ID != nil {
+		stm.Where(entmessage.ID(*h.ID))
+	}
+	if h.EntID != nil {
+		stm.Where(entmessage.EntID(*h.EntID))
+	}
+	h.selectMessage(stm)
 	return nil
 }
 

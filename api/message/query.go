@@ -16,7 +16,7 @@ import (
 func (s *Server) GetMessage(ctx context.Context, in *npool.GetMessageRequest) (*npool.GetMessageResponse, error) {
 	handler, err := message1.NewHandler(
 		ctx,
-		message1.WithID(&in.ID),
+		message1.WithEntID(&in.EntID, true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

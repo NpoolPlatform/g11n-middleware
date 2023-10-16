@@ -18,13 +18,13 @@ func (s *Server) CreateMessage(ctx context.Context, in *npool.CreateMessageReque
 	req := in.GetInfo()
 	handler, err := message1.NewHandler(
 		ctx,
-		message1.WithID(req.ID),
-		message1.WithAppID(req.AppID),
-		message1.WithLangID(req.LangID),
-		message1.WithMessageID(req.MessageID),
-		message1.WithMessage(req.Message),
-		message1.WithGetIndex(req.GetIndex),
-		message1.WithDisabled(req.Disabled),
+		message1.WithEntID(req.EntID, false),
+		message1.WithAppID(req.AppID, true),
+		message1.WithLangID(req.LangID, true),
+		message1.WithMessageID(req.MessageID, true),
+		message1.WithMessage(req.Message, true),
+		message1.WithGetIndex(req.GetIndex, false),
+		message1.WithDisabled(req.Disabled, false),
 	)
 
 	if err != nil {
