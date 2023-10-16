@@ -8,6 +8,7 @@ import (
 
 	"github.com/NpoolPlatform/g11n-middleware/api"
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db"
+	"github.com/NpoolPlatform/g11n-middleware/pkg/migrator"
 
 	apicli "github.com/NpoolPlatform/basal-middleware/pkg/client/api"
 
@@ -33,6 +34,9 @@ var runCmd = &cli.Command{
 }
 
 func run(ctx context.Context) error {
+	if err := migrator.Migrate(ctx); err != nil {
+		return err
+	}
 	if err := db.Init(); err != nil {
 		return err
 	}
