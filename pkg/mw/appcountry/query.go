@@ -25,6 +25,7 @@ type queryHandler struct {
 func (h *queryHandler) selectAppCountry(stm *ent.AppCountryQuery) {
 	h.stm = stm.Select(
 		entappcountry.FieldID,
+		entappcountry.FieldEntID,
 		entappcountry.FieldAppID,
 		entappcountry.FieldCountryID,
 		entappcountry.FieldCreatedAt,
@@ -33,18 +34,17 @@ func (h *queryHandler) selectAppCountry(stm *ent.AppCountryQuery) {
 }
 
 func (h *queryHandler) queryAppCountry(cli *ent.Client) error {
-	if h.ID == nil {
-		return fmt.Errorf("invalid appcountryid")
+	if h.ID == nil && h.EntID == nil {
+		return fmt.Errorf("invalid id")
 	}
-
-	h.selectAppCountry(
-		cli.AppCountry.
-			Query().
-			Where(
-				entappcountry.ID(*h.ID),
-				entappcountry.DeletedAt(0),
-			),
-	)
+	stm := cli.AppCountry.Query().Where(entappcountry.DeletedAt(0))
+	if h.ID != nil {
+		stm.Where(entappcountry.ID(*h.ID))
+	}
+	if h.EntID != nil {
+		stm.Where(entappcountry.EntID(*h.EntID))
+	}
+	h.selectAppCountry(stm)
 	return nil
 }
 
@@ -67,7 +67,7 @@ func (h *queryHandler) queryJoinCountry(s *sql.Selector) {
 	s.LeftJoin(t).
 		On(
 			s.C(entappcountry.FieldCountryID),
-			t.C(entcountry.FieldID),
+			t.C(entcountry.FieldEntID),
 		).
 		AppendSelect(
 			sql.As(t.C(entcountry.FieldCountry), "country"),

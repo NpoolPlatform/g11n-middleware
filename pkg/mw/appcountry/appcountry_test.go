@@ -29,7 +29,7 @@ func init() {
 
 var (
 	ret = npool.Country{
-		ID:        uuid.NewString(),
+		EntID:     uuid.NewString(),
 		AppID:     uuid.NewString(),
 		CountryID: uuid.NewString(),
 		Country:   "test country" + uuid.NewString(),
@@ -42,11 +42,11 @@ var (
 func setup(t *testing.T) func(*testing.T) {
 	ch, err := country.NewHandler(
 		context.Background(),
-		country.WithID(&ret.CountryID),
-		country.WithCountry(&ret.Country),
-		country.WithFlag(&ret.Flag),
-		country.WithCode(&ret.Code),
-		country.WithShort(&ret.Short),
+		country.WithEntID(&ret.CountryID, true),
+		country.WithCountry(&ret.Country, true),
+		country.WithFlag(&ret.Flag, true),
+		country.WithCode(&ret.Code, true),
+		country.WithShort(&ret.Short, true),
 	)
 	assert.Nil(t, err)
 	assert.NotNil(t, ch)
@@ -62,9 +62,9 @@ func setup(t *testing.T) func(*testing.T) {
 func creatCountry(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
-		WithID(&ret.ID),
-		WithAppID(&ret.AppID),
-		WithCountryID(&ret.CountryID),
+		WithEntID(&ret.EntID, true),
+		WithAppID(&ret.AppID, true),
+		WithCountryID(&ret.CountryID, true),
 	)
 	assert.Nil(t, err)
 
@@ -72,6 +72,7 @@ func creatCountry(t *testing.T) {
 	if assert.Nil(t, err) {
 		ret.CreatedAt = info.CreatedAt
 		ret.UpdatedAt = info.UpdatedAt
+		ret.ID = info.ID
 		assert.Equal(t, info, &ret)
 	}
 }
@@ -79,7 +80,7 @@ func creatCountry(t *testing.T) {
 func getCountry(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
-		WithID(&ret.ID),
+		WithEntID(&ret.EntID, true),
 	)
 	assert.Nil(t, err)
 
@@ -111,8 +112,7 @@ func getCountries(t *testing.T) {
 func deleteCountry(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
-		WithID(&ret.ID),
-		WithAppID(&ret.AppID),
+		WithEntID(&ret.EntID, true),
 	)
 	assert.Nil(t, err)
 

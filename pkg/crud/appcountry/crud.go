@@ -11,15 +11,15 @@ import (
 )
 
 type Req struct {
-	ID        *uuid.UUID
+	EntID     *uuid.UUID
 	AppID     *uuid.UUID
 	CountryID *uuid.UUID
 	DeletedAt *uint32
 }
 
 func CreateSet(c *ent.AppCountryCreate, req *Req) *ent.AppCountryCreate {
-	if req.ID != nil {
-		c.SetID(*req.ID)
+	if req.EntID != nil {
+		c.SetEntID(*req.EntID)
 	}
 	if req.AppID != nil {
 		c.SetAppID(*req.AppID)
@@ -38,8 +38,8 @@ func UpdateSet(u *ent.AppCountryUpdateOne, req *Req) *ent.AppCountryUpdateOne {
 }
 
 type Conds struct {
-	ID         *cruder.Cond
-	IDs        *cruder.Cond
+	EntID      *cruder.Cond
+	EntIDs     *cruder.Cond
 	AppID      *cruder.Cond
 	CountryID  *cruder.Cond
 	AppIDs     *cruder.Cond
@@ -51,39 +51,39 @@ func SetQueryConds(q *ent.AppCountryQuery, conds *Conds) (*ent.AppCountryQuery, 
 	if conds == nil {
 		return q, nil
 	}
-	if conds.ID != nil {
-		id, ok := conds.ID.Val.(uuid.UUID)
+	if conds.EntID != nil {
+		id, ok := conds.EntID.Val.(uuid.UUID)
 		if !ok {
-			return nil, fmt.Errorf("invalid id")
+			return nil, fmt.Errorf("invalid entid")
 		}
-		switch conds.ID.Op {
+		switch conds.EntID.Op {
 		case cruder.EQ:
 			q.Where(
-				entappcountry.ID(id),
+				entappcountry.EntID(id),
 				entappcountry.DeletedAt(0),
 			)
 		case cruder.NEQ:
 			q.Where(
-				entappcountry.IDNEQ(id),
+				entappcountry.EntIDNEQ(id),
 				entappcountry.DeletedAt(0),
 			)
 		default:
-			return nil, fmt.Errorf("invalid id field")
+			return nil, fmt.Errorf("invalid entid field")
 		}
 	}
-	if conds.IDs != nil {
-		ids, ok := conds.IDs.Val.([]uuid.UUID)
+	if conds.EntIDs != nil {
+		ids, ok := conds.EntIDs.Val.([]uuid.UUID)
 		if !ok {
-			return nil, fmt.Errorf("invalid ids")
+			return nil, fmt.Errorf("invalid entids")
 		}
-		switch conds.IDs.Op {
+		switch conds.EntIDs.Op {
 		case cruder.IN:
 			q.Where(
-				entappcountry.IDIn(ids...),
+				entappcountry.EntIDIn(ids...),
 				entappcountry.DeletedAt(0),
 			)
 		default:
-			return nil, fmt.Errorf("invalid ids field")
+			return nil, fmt.Errorf("invalid entids field")
 		}
 	}
 	if conds.AppID != nil {
