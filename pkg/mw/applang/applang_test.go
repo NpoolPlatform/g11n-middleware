@@ -60,7 +60,7 @@ func setup(t *testing.T) func(*testing.T) {
 	}
 }
 
-func creatLang(t *testing.T) {
+func createLang(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
 		WithEntID(&ret.EntID, true),
@@ -83,7 +83,7 @@ func updateLang(t *testing.T) {
 	ret.Main = false
 	handler, err := NewHandler(
 		context.Background(),
-		WithEntID(&ret.EntID, true),
+		WithID(&ret.ID, true),
 		WithAppID(&ret.AppID, false),
 		WithLangID(&ret.LangID, false),
 		WithMain(&ret.Main, false),
@@ -132,7 +132,7 @@ func getLangs(t *testing.T) {
 func deleteLang(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
-		WithEntID(&ret.EntID, true),
+		WithID(&ret.ID, true),
 	)
 	assert.Nil(t, err)
 
@@ -154,7 +154,7 @@ func TestLang(t *testing.T) {
 	teardown := setup(t)
 	defer teardown(t)
 
-	t.Run("creatLang", creatLang)
+	t.Run("createLang", createLang)
 	t.Run("updateLang", updateLang)
 	t.Run("getLang", getLang)
 	t.Run("getLangs", getLangs)

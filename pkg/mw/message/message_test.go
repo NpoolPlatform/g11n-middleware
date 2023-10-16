@@ -110,7 +110,7 @@ func updateMessage(t *testing.T) {
 	ret.Disabled = true
 	handler, err := NewHandler(
 		context.Background(),
-		WithEntID(&ret.EntID, true),
+		WithID(&ret.ID, true),
 		WithAppID(&ret.AppID, false),
 		WithLangID(&ret.LangID, false),
 		WithMessageID(&ret.MessageID, false),
@@ -164,7 +164,7 @@ func getMessages(t *testing.T) {
 func deleteMessage(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
-		WithEntID(&ret.EntID, true),
+		WithID(&ret.ID, true),
 	)
 	assert.Nil(t, err)
 

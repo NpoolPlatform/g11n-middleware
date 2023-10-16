@@ -6,6 +6,7 @@ import (
 
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db"
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db/ent"
+	"github.com/google/uuid"
 
 	langcrud "github.com/NpoolPlatform/g11n-middleware/pkg/crud/lang"
 	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
@@ -26,8 +27,10 @@ func (h *Handler) UpdateLang(ctx context.Context) (*npool.Lang, error) {
 
 	err = db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		if h.Lang != nil {
+			id := uuid.MustParse(info.EntID)
+			h.EntID = &id
 			h.Conds = &langcrud.Conds{
-				EntID: &cruder.Cond{Op: cruder.NEQ, Val: info.EntID},
+				EntID: &cruder.Cond{Op: cruder.NEQ, Val: *h.EntID},
 				Lang:  &cruder.Cond{Op: cruder.EQ, Val: *h.Lang},
 			}
 			exist, err := h.ExistLangConds(ctx)

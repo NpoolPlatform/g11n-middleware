@@ -59,7 +59,7 @@ func setup(t *testing.T) func(*testing.T) {
 	}
 }
 
-func creatCountry(t *testing.T) {
+func createCountry(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
 		WithEntID(&ret.EntID, true),
@@ -112,7 +112,7 @@ func getCountries(t *testing.T) {
 func deleteCountry(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
-		WithEntID(&ret.EntID, true),
+		WithID(&ret.ID, true),
 	)
 	assert.Nil(t, err)
 
@@ -134,7 +134,7 @@ func TestCountry(t *testing.T) {
 	teardown := setup(t)
 	defer teardown(t)
 
-	t.Run("creatCountry", creatCountry)
+	t.Run("createCountry", createCountry)
 	t.Run("getCountry", getCountry)
 	t.Run("getCountries", getCountries)
 	t.Run("deleteCountry", deleteCountry)

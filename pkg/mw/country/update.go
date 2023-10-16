@@ -6,6 +6,7 @@ import (
 
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db"
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db/ent"
+	"github.com/google/uuid"
 
 	countrycrud "github.com/NpoolPlatform/g11n-middleware/pkg/crud/country"
 	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
@@ -26,8 +27,10 @@ func (h *Handler) UpdateCountry(ctx context.Context) (*npool.Country, error) {
 
 	err = db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		if h.Country != nil {
+			id := uuid.MustParse(info.EntID)
+			h.EntID = &id
 			h.Conds = &countrycrud.Conds{
-				EntID:   &cruder.Cond{Op: cruder.NEQ, Val: info.EntID},
+				EntID:   &cruder.Cond{Op: cruder.NEQ, Val: *h.EntID},
 				Country: &cruder.Cond{Op: cruder.EQ, Val: *h.Country},
 			}
 			exist, err := h.ExistCountryConds(ctx)

@@ -63,7 +63,7 @@ func updateCountry(t *testing.T) {
 	ret.Short = uuid.NewString()
 	handler, err := NewHandler(
 		context.Background(),
-		WithEntID(&ret.EntID, true),
+		WithID(&ret.ID, true),
 		WithCountry(&ret.Country, false),
 		WithFlag(&ret.Flag, false),
 		WithCode(&ret.Code, false),

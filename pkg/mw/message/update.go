@@ -12,6 +12,7 @@ import (
 	applangmw "github.com/NpoolPlatform/g11n-middleware/pkg/mw/applang"
 	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/message"
+	"github.com/google/uuid"
 )
 
 func (h *Handler) UpdateMessage(ctx context.Context) (*npool.Message, error) {
@@ -48,6 +49,8 @@ func (h *Handler) UpdateMessage(ctx context.Context) (*npool.Message, error) {
 				return fmt.Errorf("applang not exist")
 			}
 
+			id := uuid.MustParse(info.EntID)
+			h.EntID = &id
 			h.Conds = &messagecrud.Conds{
 				AppID:     &cruder.Cond{Op: cruder.EQ, Val: *h.AppID},
 				LangID:    &cruder.Cond{Op: cruder.EQ, Val: *h.LangID},

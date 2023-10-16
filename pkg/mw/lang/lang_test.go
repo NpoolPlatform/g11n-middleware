@@ -36,7 +36,7 @@ var (
 	}
 )
 
-func creatLang(t *testing.T) {
+func createLang(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
 		WithEntID(&ret.EntID, true),
@@ -63,7 +63,7 @@ func updateLang(t *testing.T) {
 	ret.Short = uuid.NewString()
 	handler, err := NewHandler(
 		context.Background(),
-		WithEntID(&ret.EntID, true),
+		WithID(&ret.ID, true),
 		WithLang(&ret.Lang, false),
 		WithLogo(&ret.Logo, false),
 		WithName(&ret.Name, false),
@@ -112,7 +112,7 @@ func getLangs(t *testing.T) {
 func deleteLang(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
-		WithEntID(&ret.EntID, true),
+		WithID(&ret.ID, true),
 	)
 	assert.Nil(t, err)
 
@@ -131,7 +131,7 @@ func TestLang(t *testing.T) {
 		return
 	}
 
-	t.Run("creatLang", creatLang)
+	t.Run("createLang", createLang)
 	t.Run("updateLang", updateLang)
 	t.Run("getLang", getLang)
 	t.Run("getLangs", getLangs)

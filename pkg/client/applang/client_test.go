@@ -76,6 +76,7 @@ func createLang(t *testing.T) {
 	if assert.Nil(t, err) {
 		ret.CreatedAt = info.CreatedAt
 		ret.UpdatedAt = info.UpdatedAt
+		ret.ID = info.ID
 		assert.Equal(t, info, &ret)
 	}
 }

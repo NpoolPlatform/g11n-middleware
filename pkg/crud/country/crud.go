@@ -74,7 +74,7 @@ func SetQueryConds(q *ent.CountryQuery, conds *Conds) (*ent.CountryQuery, error)
 	if conds.EntID != nil {
 		id, ok := conds.EntID.Val.(uuid.UUID)
 		if !ok {
-			return nil, fmt.Errorf("invalid entid")
+			return nil, fmt.Errorf("invalid entid1")
 		}
 		switch conds.EntID.Op {
 		case cruder.EQ:
