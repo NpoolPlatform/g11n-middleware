@@ -47,7 +47,7 @@ func (s *Server) CreateLang(ctx context.Context, in *npool.CreateLangRequest) (*
 func (s *Server) CreateLangs(ctx context.Context, in *npool.CreateLangsRequest) (*npool.CreateLangsResponse, error) {
 	handler, err := lang1.NewHandler(
 		ctx,
-		lang1.WithReqs(in.GetInfos()),
+		lang1.WithReqs(in.GetInfos(), true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

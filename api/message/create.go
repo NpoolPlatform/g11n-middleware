@@ -52,7 +52,7 @@ func (s *Server) CreateMessage(ctx context.Context, in *npool.CreateMessageReque
 func (s *Server) CreateMessages(ctx context.Context, in *npool.CreateMessagesRequest) (*npool.CreateMessagesResponse, error) {
 	handler, err := message1.NewHandler(
 		ctx,
-		message1.WithReqs(in.GetInfos()),
+		message1.WithReqs(in.GetInfos(), true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

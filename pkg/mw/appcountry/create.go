@@ -21,7 +21,7 @@ type createHandler struct {
 	*Handler
 }
 
-func (h *createHandler) createCountry(ctx context.Context, cli *ent.Client, req *appcountrycrud.Req) error {
+func (h *createHandler) createCountry(ctx context.Context, tx *ent.Tx, req *appcountrycrud.Req) error {
 	lockKey := fmt.Sprintf(
 		"%v:%v:%v",
 		basetypes.Prefix_PrefixCreateAppCountry,
@@ -53,11 +53,11 @@ func (h *createHandler) createCountry(ctx context.Context, cli *ent.Client, req 
 	}
 
 	info, err := appcountrycrud.CreateSet(
-		cli.AppCountry.Create(),
+		tx.AppCountry.Create(),
 		&appcountrycrud.Req{
-			EntID:     h.EntID,
-			AppID:     h.AppID,
-			CountryID: h.CountryID,
+			EntID:     req.EntID,
+			AppID:     req.AppID,
+			CountryID: req.CountryID,
 		},
 	).Save(ctx)
 	if err != nil {
@@ -74,13 +74,13 @@ func (h *Handler) CreateCountry(ctx context.Context) (*npool.Country, error) {
 	handler := &createHandler{
 		Handler: h,
 	}
-	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
+	err := db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		req := &appcountrycrud.Req{
 			EntID:     h.EntID,
 			AppID:     h.AppID,
 			CountryID: h.CountryID,
 		}
-		if err := handler.createCountry(ctx, cli, req); err != nil {
+		if err := handler.createCountry(ctx, tx, req); err != nil {
 			return err
 		}
 		return nil
@@ -99,12 +99,9 @@ func (h *Handler) CreateCountries(ctx context.Context) ([]*npool.Country, error)
 
 	ids := []uuid.UUID{}
 
-	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
+	err := db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		for _, req := range h.Reqs {
-			if req.EntID != nil {
-				handler.EntID = req.EntID
-			}
-			if err := handler.createCountry(ctx, cli, req); err != nil {
+			if err := handler.createCountry(ctx, tx, req); err != nil {
 				return err
 			}
 			ids = append(ids, *h.EntID)

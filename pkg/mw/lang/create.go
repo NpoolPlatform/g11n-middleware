@@ -21,23 +21,7 @@ type createHandler struct {
 	*Handler
 }
 
-func (h *createHandler) validate(req *langcrud.Req) error {
-	if req.Lang == nil || *req.Lang == "" {
-		return fmt.Errorf("invalid lang")
-	}
-	if req.Logo == nil || *req.Logo == "" {
-		return fmt.Errorf("invalid logo")
-	}
-	if req.Name == nil || *req.Name == "" {
-		return fmt.Errorf("invalid name")
-	}
-	if req.Short == nil || *req.Short == "" {
-		return fmt.Errorf("invalid short")
-	}
-	return nil
-}
-
-func (h *createHandler) createLang(ctx context.Context, cli *ent.Client, req *langcrud.Req) (*npool.Lang, error) {
+func (h *createHandler) createLang(ctx context.Context, tx *ent.Tx, req *langcrud.Req) (*npool.Lang, error) {
 	lockKey := fmt.Sprintf(
 		"%v:%v",
 		basetypes.Prefix_PrefixCreateLang,
@@ -68,7 +52,7 @@ func (h *createHandler) createLang(ctx context.Context, cli *ent.Client, req *la
 	}
 
 	info, err := langcrud.CreateSet(
-		cli.Lang.Create(),
+		tx.Lang.Create(),
 		&langcrud.Req{
 			EntID: req.EntID,
 			Lang:  req.Lang,
@@ -91,7 +75,18 @@ func (h *Handler) CreateLang(ctx context.Context) (*npool.Lang, error) {
 	handler := &createHandler{
 		Handler: h,
 	}
-	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
+	h.Conds = &langcrud.Conds{
+		Lang: &cruder.Cond{Op: cruder.EQ, Val: *h.Lang},
+	}
+	exist, err := h.ExistLangConds(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if exist {
+		return nil, fmt.Errorf("lang exist")
+	}
+
+	err = db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		req := &langcrud.Req{
 			EntID: h.EntID,
 			Lang:  h.Lang,
@@ -99,20 +94,7 @@ func (h *Handler) CreateLang(ctx context.Context) (*npool.Lang, error) {
 			Name:  h.Name,
 			Short: h.Short,
 		}
-		if err := handler.validate(req); err != nil {
-			return err
-		}
-		h.Conds = &langcrud.Conds{
-			Lang: &cruder.Cond{Op: cruder.EQ, Val: *h.Lang},
-		}
-		exist, err := h.ExistLangConds(ctx)
-		if err != nil {
-			return err
-		}
-		if exist {
-			return fmt.Errorf("lang exist")
-		}
-		info, err := handler.createLang(ctx, cli, req)
+		info, err := handler.createLang(ctx, tx, req)
 		if err != nil {
 			return err
 		}
@@ -139,15 +121,9 @@ func (h *Handler) CreateLangs(ctx context.Context) ([]*npool.Lang, error) {
 
 	ids := []uuid.UUID{}
 
-	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
+	err := db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		for _, req := range h.Reqs {
-			if err := handler.validate(req); err != nil {
-				return err
-			}
-			if req.EntID != nil {
-				handler.EntID = req.EntID
-			}
-			info, err := handler.createLang(ctx, cli, req)
+			info, err := handler.createLang(ctx, tx, req)
 			if err != nil {
 				return err
 			}

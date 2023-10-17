@@ -21,7 +21,7 @@ type createHandler struct {
 	*Handler
 }
 
-func (h *createHandler) createLang(ctx context.Context, cli *ent.Client, req *applangcrud.Req) error {
+func (h *createHandler) createLang(ctx context.Context, tx *ent.Tx, req *applangcrud.Req) error {
 	lockKey := fmt.Sprintf(
 		"%v:%v:%v",
 		basetypes.Prefix_PrefixCreateAppLang,
@@ -46,10 +46,10 @@ func (h *createHandler) createLang(ctx context.Context, cli *ent.Client, req *ap
 	if exist {
 		return fmt.Errorf("applang exist")
 	}
-	if h.Main != nil {
-		if *h.Main {
+	if req.Main != nil {
+		if *req.Main {
 			h.Conds = &applangcrud.Conds{
-				AppID: &cruder.Cond{Op: cruder.EQ, Val: *h.AppID},
+				AppID: &cruder.Cond{Op: cruder.EQ, Val: *req.AppID},
 				Main:  &cruder.Cond{Op: cruder.EQ, Val: true},
 			}
 			exist, err := h.ExistAppLangConds(ctx)
@@ -63,17 +63,17 @@ func (h *createHandler) createLang(ctx context.Context, cli *ent.Client, req *ap
 	}
 
 	id := uuid.New()
-	if h.EntID == nil {
-		h.EntID = &id
+	if req.EntID == nil {
+		req.EntID = &id
 	}
 
 	info, err := applangcrud.CreateSet(
-		cli.AppLang.Create(),
+		tx.AppLang.Create(),
 		&applangcrud.Req{
-			EntID:  h.EntID,
-			AppID:  h.AppID,
-			LangID: h.LangID,
-			Main:   h.Main,
+			EntID:  req.EntID,
+			AppID:  req.AppID,
+			LangID: req.LangID,
+			Main:   req.Main,
 		},
 	).Save(ctx)
 	if err != nil {
@@ -90,14 +90,14 @@ func (h *Handler) CreateLang(ctx context.Context) (*npool.Lang, error) {
 	handler := &createHandler{
 		Handler: h,
 	}
-	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
+	err := db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		req := &applangcrud.Req{
 			EntID:  h.EntID,
 			AppID:  h.AppID,
 			LangID: h.LangID,
 			Main:   h.Main,
 		}
-		if err := handler.createLang(ctx, cli, req); err != nil {
+		if err := handler.createLang(ctx, tx, req); err != nil {
 			return err
 		}
 		return nil
@@ -116,12 +116,9 @@ func (h *Handler) CreateLangs(ctx context.Context) ([]*npool.Lang, error) {
 
 	ids := []uuid.UUID{}
 
-	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
+	err := db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		for _, req := range h.Reqs {
-			if req.EntID != nil {
-				handler.EntID = req.EntID
-			}
-			if err := handler.createLang(ctx, cli, req); err != nil {
+			if err := handler.createLang(ctx, tx, req); err != nil {
 				return err
 			}
 			ids = append(ids, *h.EntID)

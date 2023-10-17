@@ -174,10 +174,18 @@ func WithLimit(limit int32) func(context.Context, *Handler) error {
 	}
 }
 
-func WithReqs(reqs []*npool.LangReq) func(context.Context, *Handler) error {
+func WithReqs(reqs []*npool.LangReq, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		_reqs := []*applangcrud.Req{}
 		for _, req := range reqs {
+			if must {
+				if req.AppID == nil {
+					return fmt.Errorf("invalid appid")
+				}
+				if req.LangID == nil {
+					return fmt.Errorf("invalid langid")
+				}
+			}
 			_req := &applangcrud.Req{}
 			if req.EntID != nil {
 				id, err := uuid.Parse(*req.EntID)

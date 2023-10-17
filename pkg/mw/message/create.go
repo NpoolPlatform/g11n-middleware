@@ -21,20 +21,7 @@ type createHandler struct {
 	*Handler
 }
 
-func (h *createHandler) validate(req *messagecrud.Req) error {
-	if req.LangID == nil {
-		return fmt.Errorf("invalid langid")
-	}
-	if req.MessageID == nil || *req.MessageID == "" {
-		return fmt.Errorf("invalid messageid")
-	}
-	if req.Message == nil || *req.Message == "" {
-		return fmt.Errorf("invalid message")
-	}
-	return nil
-}
-
-func (h *createHandler) createMessage(ctx context.Context, cli *ent.Client, req *messagecrud.Req) (*npool.Message, error) {
+func (h *createHandler) createMessage(ctx context.Context, tx *ent.Tx, req *messagecrud.Req) (*npool.Message, error) {
 	lockKey := fmt.Sprintf(
 		"%v:%v:%v:%v",
 		basetypes.Prefix_PrefixCreateAppCountry,
@@ -55,12 +42,12 @@ func (h *createHandler) createMessage(ctx context.Context, cli *ent.Client, req 
 		MessageID: &cruder.Cond{Op: cruder.EQ, Val: *req.MessageID},
 	}
 	h.Limit = 2
-	exist, _, err := h.GetMessages(ctx)
+	infos, _, err := h.GetMessages(ctx)
 	if err != nil {
 		return nil, err
 	}
-	if exist != nil {
-		return exist[0], nil
+	if infos != nil {
+		return infos[0], nil
 	}
 
 	id := uuid.New()
@@ -69,7 +56,7 @@ func (h *createHandler) createMessage(ctx context.Context, cli *ent.Client, req 
 	}
 
 	info, err := messagecrud.CreateSet(
-		cli.Message.Create(),
+		tx.Message.Create(),
 		&messagecrud.Req{
 			EntID:     req.EntID,
 			AppID:     req.AppID,
@@ -94,7 +81,20 @@ func (h *Handler) CreateMessage(ctx context.Context) (*npool.Message, error) {
 	handler := &createHandler{
 		Handler: h,
 	}
-	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
+	h.Conds = &messagecrud.Conds{
+		AppID:     &cruder.Cond{Op: cruder.EQ, Val: *h.AppID},
+		LangID:    &cruder.Cond{Op: cruder.EQ, Val: *h.LangID},
+		MessageID: &cruder.Cond{Op: cruder.EQ, Val: *h.MessageID},
+	}
+	exist, err := h.ExistMessageConds(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if exist {
+		return nil, fmt.Errorf("message exist")
+	}
+
+	err = db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		req := &messagecrud.Req{
 			EntID:     h.EntID,
 			AppID:     h.AppID,
@@ -104,22 +104,7 @@ func (h *Handler) CreateMessage(ctx context.Context) (*npool.Message, error) {
 			GetIndex:  h.GetIndex,
 			Disabled:  h.Disabled,
 		}
-		if err := handler.validate(req); err != nil {
-			return err
-		}
-		h.Conds = &messagecrud.Conds{
-			AppID:     &cruder.Cond{Op: cruder.EQ, Val: *h.AppID},
-			LangID:    &cruder.Cond{Op: cruder.EQ, Val: *h.LangID},
-			MessageID: &cruder.Cond{Op: cruder.EQ, Val: *h.MessageID},
-		}
-		exist, err := h.ExistMessageConds(ctx)
-		if err != nil {
-			return err
-		}
-		if exist {
-			return fmt.Errorf("message exist")
-		}
-		info, err := handler.createMessage(ctx, cli, req)
+		info, err := handler.createMessage(ctx, tx, req)
 		if err != nil {
 			return err
 		}
@@ -146,15 +131,9 @@ func (h *Handler) CreateMessages(ctx context.Context) ([]*npool.Message, error) 
 
 	ids := []uuid.UUID{}
 
-	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
+	err := db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		for _, req := range h.Reqs {
-			if err := handler.validate(req); err != nil {
-				return err
-			}
-			if req.EntID != nil {
-				handler.EntID = req.EntID
-			}
-			info, err := handler.createMessage(ctx, cli, req)
+			info, err := handler.createMessage(ctx, tx, req)
 			if err != nil {
 				return err
 			}

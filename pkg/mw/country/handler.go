@@ -176,10 +176,25 @@ func WithLimit(limit int32) func(context.Context, *Handler) error {
 	}
 }
 
-func WithReqs(reqs []*npool.CountryReq) func(context.Context, *Handler) error {
+//nolint:gocyclo
+func WithReqs(reqs []*npool.CountryReq, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		_reqs := []*countrycrud.Req{}
 		for _, req := range reqs {
+			if must {
+				if req.Country == nil {
+					return fmt.Errorf("invalid country")
+				}
+				if req.Flag == nil {
+					return fmt.Errorf("invalid flag")
+				}
+				if req.Code == nil {
+					return fmt.Errorf("invalid code")
+				}
+				if req.Short == nil {
+					return fmt.Errorf("invalid short")
+				}
+			}
 			_req := &countrycrud.Req{}
 			if req.EntID != nil {
 				id, err := uuid.Parse(*req.EntID)
@@ -189,15 +204,27 @@ func WithReqs(reqs []*npool.CountryReq) func(context.Context, *Handler) error {
 				_req.EntID = &id
 			}
 			if req.Country != nil {
+				if *req.Country == "" {
+					return fmt.Errorf("invalid country")
+				}
 				_req.Country = req.Country
 			}
 			if req.Flag != nil {
+				if *req.Flag == "" {
+					return fmt.Errorf("invalid flag")
+				}
 				_req.Flag = req.Flag
 			}
 			if req.Code != nil {
+				if *req.Code == "" {
+					return fmt.Errorf("invalid code")
+				}
 				_req.Code = req.Code
 			}
 			if req.Short != nil {
+				if *req.Short == "" {
+					return fmt.Errorf("invalid short")
+				}
 				_req.Short = req.Short
 			}
 			_reqs = append(_reqs, _req)

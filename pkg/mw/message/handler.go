@@ -184,10 +184,25 @@ func WithLimit(limit int32) func(context.Context, *Handler) error {
 	}
 }
 
-func WithReqs(reqs []*npool.MessageReq) func(context.Context, *Handler) error {
+//nolint:gocyclo
+func WithReqs(reqs []*npool.MessageReq, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		_reqs := []*messagecrud.Req{}
 		for _, req := range reqs {
+			if must {
+				if req.AppID == nil {
+					return fmt.Errorf("invalid appid")
+				}
+				if req.LangID == nil {
+					return fmt.Errorf("invalid langid")
+				}
+				if req.MessageID == nil {
+					return fmt.Errorf("invalid messageid")
+				}
+				if req.Message == nil {
+					return fmt.Errorf("invalid message")
+				}
+			}
 			_req := &messagecrud.Req{}
 			if req.EntID != nil {
 				id, err := uuid.Parse(*req.EntID)
@@ -211,9 +226,15 @@ func WithReqs(reqs []*npool.MessageReq) func(context.Context, *Handler) error {
 				_req.LangID = &id
 			}
 			if req.MessageID != nil {
+				if *req.MessageID == "" {
+					return fmt.Errorf("invalid messageid")
+				}
 				_req.MessageID = req.MessageID
 			}
 			if req.Message != nil {
+				if *req.Message == "" {
+					return fmt.Errorf("invalid message")
+				}
 				_req.Message = req.Message
 			}
 			if req.GetIndex != nil {

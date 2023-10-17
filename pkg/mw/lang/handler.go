@@ -176,10 +176,25 @@ func WithLimit(limit int32) func(context.Context, *Handler) error {
 	}
 }
 
-func WithReqs(reqs []*npool.LangReq) func(context.Context, *Handler) error {
+//nolint:gocyclo
+func WithReqs(reqs []*npool.LangReq, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		_reqs := []*langcrud.Req{}
 		for _, req := range reqs {
+			if must {
+				if req.Lang == nil {
+					return fmt.Errorf("invalid lang")
+				}
+				if req.Name == nil {
+					return fmt.Errorf("invalid name")
+				}
+				if req.Logo == nil {
+					return fmt.Errorf("invalid logo")
+				}
+				if req.Short == nil {
+					return fmt.Errorf("invalid short")
+				}
+			}
 			_req := &langcrud.Req{}
 			if req.EntID != nil {
 				id, err := uuid.Parse(*req.EntID)
@@ -189,15 +204,27 @@ func WithReqs(reqs []*npool.LangReq) func(context.Context, *Handler) error {
 				_req.EntID = &id
 			}
 			if req.Lang != nil {
+				if *req.Lang == "" {
+					return fmt.Errorf("invalid lang")
+				}
 				_req.Lang = req.Lang
 			}
 			if req.Name != nil {
+				if *req.Name == "" {
+					return fmt.Errorf("invalid name")
+				}
 				_req.Name = req.Name
 			}
 			if req.Logo != nil {
+				if *req.Logo == "" {
+					return fmt.Errorf("invalid logo")
+				}
 				_req.Logo = req.Logo
 			}
 			if req.Short != nil {
+				if *req.Short == "" {
+					return fmt.Errorf("invalid short")
+				}
 				_req.Short = req.Short
 			}
 			_reqs = append(_reqs, _req)

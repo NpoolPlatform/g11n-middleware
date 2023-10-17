@@ -2,7 +2,6 @@ package appcountry
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db"
@@ -13,9 +12,6 @@ import (
 )
 
 func (h *Handler) DeleteCountry(ctx context.Context) (*npool.Country, error) {
-	if h.ID == nil {
-		return nil, fmt.Errorf("invalid id")
-	}
 	info, err := h.GetCountry(ctx)
 	if err != nil {
 		return nil, err

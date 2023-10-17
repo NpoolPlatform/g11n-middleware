@@ -2,7 +2,6 @@ package applang
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db"
@@ -13,9 +12,6 @@ import (
 )
 
 func (h *Handler) DeleteLang(ctx context.Context) (*npool.Lang, error) {
-	if h.ID == nil {
-		return nil, fmt.Errorf("invalid id")
-	}
 	info, err := h.GetLang(ctx)
 	if err != nil {
 		return nil, err

@@ -54,7 +54,7 @@ func (s *Server) CreateCountry(ctx context.Context, in *npool.CreateCountryReque
 func (s *Server) CreateCountries(ctx context.Context, in *npool.CreateCountriesRequest) (*npool.CreateCountriesResponse, error) {
 	handler, err := country1.NewHandler(
 		ctx,
-		country1.WithReqs(in.GetInfos()),
+		country1.WithReqs(in.GetInfos(), true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(
