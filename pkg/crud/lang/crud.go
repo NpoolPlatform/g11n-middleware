@@ -58,6 +58,7 @@ func UpdateSet(u *ent.LangUpdateOne, req *Req) *ent.LangUpdateOne {
 }
 
 type Conds struct {
+	ID     *cruder.Cond
 	EntID  *cruder.Cond
 	EntIDs *cruder.Cond
 	Lang   *cruder.Cond
@@ -71,6 +72,26 @@ type Conds struct {
 func SetQueryConds(q *ent.LangQuery, conds *Conds) (*ent.LangQuery, error) {
 	if conds == nil {
 		return q, nil
+	}
+	if conds.ID != nil {
+		id, ok := conds.ID.Val.(uint32)
+		if !ok {
+			return nil, fmt.Errorf("invalid id")
+		}
+		switch conds.ID.Op {
+		case cruder.EQ:
+			q.Where(
+				entlang.ID(id),
+				entlang.DeletedAt(0),
+			)
+		case cruder.NEQ:
+			q.Where(
+				entlang.IDNEQ(id),
+				entlang.DeletedAt(0),
+			)
+		default:
+			return nil, fmt.Errorf("invalid id field")
+		}
 	}
 	if conds.EntID != nil {
 		id, ok := conds.EntID.Val.(uuid.UUID)

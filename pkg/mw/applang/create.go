@@ -21,6 +21,20 @@ type createHandler struct {
 	*Handler
 }
 
+func (h createHandler) checkReqMainCount() error {
+	mainMap := map[uuid.UUID]*uuid.UUID{}
+	for _, req := range h.Reqs {
+		if req.Main != nil && *req.Main {
+			main := mainMap[*req.AppID]
+			if main != nil {
+				return fmt.Errorf("too many applang main")
+			}
+			mainMap[*req.AppID] = req.AppID
+		}
+	}
+	return nil
+}
+
 func (h *createHandler) createLang(ctx context.Context, tx *ent.Tx, req *applangcrud.Req) error {
 	lockKey := fmt.Sprintf(
 		"%v:%v:%v",
@@ -117,6 +131,9 @@ func (h *Handler) CreateLangs(ctx context.Context) ([]*npool.Lang, error) {
 	ids := []uuid.UUID{}
 
 	err := db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
+		if err := handler.checkReqMainCount(); err != nil {
+			return err
+		}
 		for _, req := range h.Reqs {
 			if err := handler.createLang(ctx, tx, req); err != nil {
 				return err

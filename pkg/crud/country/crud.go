@@ -58,6 +58,7 @@ func UpdateSet(u *ent.CountryUpdateOne, req *Req) *ent.CountryUpdateOne {
 }
 
 type Conds struct {
+	ID        *cruder.Cond
 	EntID     *cruder.Cond
 	EntIDs    *cruder.Cond
 	Country   *cruder.Cond
@@ -70,6 +71,26 @@ type Conds struct {
 func SetQueryConds(q *ent.CountryQuery, conds *Conds) (*ent.CountryQuery, error) {
 	if conds == nil {
 		return q, nil
+	}
+	if conds.ID != nil {
+		id, ok := conds.ID.Val.(uint32)
+		if !ok {
+			return nil, fmt.Errorf("invalid id")
+		}
+		switch conds.ID.Op {
+		case cruder.EQ:
+			q.Where(
+				entcountry.ID(id),
+				entcountry.DeletedAt(0),
+			)
+		case cruder.NEQ:
+			q.Where(
+				entcountry.IDNEQ(id),
+				entcountry.DeletedAt(0),
+			)
+		default:
+			return nil, fmt.Errorf("invalid id field")
+		}
 	}
 	if conds.EntID != nil {
 		id, ok := conds.EntID.Val.(uuid.UUID)

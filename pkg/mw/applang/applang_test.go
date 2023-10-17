@@ -84,8 +84,6 @@ func updateLang(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
 		WithID(&ret.ID, true),
-		WithAppID(&ret.AppID, false),
-		WithLangID(&ret.LangID, false),
 		WithMain(&ret.Main, false),
 	)
 	assert.Nil(t, err)

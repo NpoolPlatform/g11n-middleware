@@ -6,6 +6,7 @@ import (
 
 	constant "github.com/NpoolPlatform/g11n-middleware/pkg/const"
 	messagecrud "github.com/NpoolPlatform/g11n-middleware/pkg/crud/message"
+	lang1 "github.com/NpoolPlatform/g11n-middleware/pkg/mw/lang"
 	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/message"
 
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
@@ -71,6 +72,9 @@ func WithEntID(id *string, must bool) func(context.Context, *Handler) error {
 func WithAppID(id *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
+			if must {
+				return fmt.Errorf("invalid appid")
+			}
 			return nil
 		}
 		_id, err := uuid.Parse(*id)
@@ -85,11 +89,28 @@ func WithAppID(id *string, must bool) func(context.Context, *Handler) error {
 func WithLangID(id *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
+			if must {
+				return fmt.Errorf("invalid langid")
+			}
 			return nil
 		}
 		_id, err := uuid.Parse(*id)
 		if err != nil {
 			return err
+		}
+		handler, err := lang1.NewHandler(
+			ctx,
+			lang1.WithEntID(id, true),
+		)
+		if err != nil {
+			return err
+		}
+		exist, err := handler.ExistLang(ctx)
+		if err != nil {
+			return err
+		}
+		if !exist {
+			return fmt.Errorf("invalid lang")
 		}
 		h.LangID = &_id
 		return nil
@@ -99,6 +120,9 @@ func WithLangID(id *string, must bool) func(context.Context, *Handler) error {
 func WithMessageID(id *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
+			if must {
+				return fmt.Errorf("invalid messageid")
+			}
 			return nil
 		}
 		if *id == "" {
@@ -111,6 +135,12 @@ func WithMessageID(id *string, must bool) func(context.Context, *Handler) error 
 
 func WithMessage(message *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
+		if message == nil {
+			if must {
+				return fmt.Errorf("invalid message")
+			}
+			return nil
+		}
 		h.Message = message
 		return nil
 	}
@@ -118,6 +148,12 @@ func WithMessage(message *string, must bool) func(context.Context, *Handler) err
 
 func WithGetIndex(getindex *uint32, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
+		if getindex == nil {
+			if must {
+				return fmt.Errorf("invalid getindex")
+			}
+			return nil
+		}
 		h.GetIndex = getindex
 		return nil
 	}
@@ -125,6 +161,12 @@ func WithGetIndex(getindex *uint32, must bool) func(context.Context, *Handler) e
 
 func WithDisabled(disabled *bool, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
+		if disabled == nil {
+			if must {
+				return fmt.Errorf("invalid disabled")
+			}
+			return nil
+		}
 		h.Disabled = disabled
 		return nil
 	}
@@ -135,6 +177,9 @@ func WithConds(conds *npool.Conds) func(context.Context, *Handler) error {
 		h.Conds = &messagecrud.Conds{}
 		if conds == nil {
 			return nil
+		}
+		if conds.ID != nil {
+			h.Conds.ID = &cruder.Cond{Op: conds.GetID().GetOp(), Val: conds.GetID().GetValue()}
 		}
 		if conds.EntID != nil {
 			id, err := uuid.Parse(conds.GetEntID().GetValue())

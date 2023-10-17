@@ -19,8 +19,6 @@ func (s *Server) UpdateMessage(ctx context.Context, in *npool.UpdateMessageReque
 	handler, err := message1.NewHandler(
 		ctx,
 		message1.WithID(req.ID, true),
-		message1.WithAppID(req.AppID, false),
-		message1.WithLangID(req.LangID, false),
 		message1.WithMessageID(req.MessageID, false),
 		message1.WithMessage(req.Message, false),
 		message1.WithGetIndex(req.GetIndex, false),

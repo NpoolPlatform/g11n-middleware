@@ -16,7 +16,6 @@ func (s *Server) UpdateLang(ctx context.Context, in *npool.UpdateLangRequest) (*
 	handler, err := applang1.NewHandler(
 		ctx,
 		applang1.WithID(req.ID, true),
-		applang1.WithAppID(req.AppID, true),
 		applang1.WithMain(req.Main, false),
 	)
 	if err != nil {

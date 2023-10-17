@@ -11,7 +11,7 @@ import (
 
 func (h *Handler) ExistAppLangConds(ctx context.Context) (exist bool, err error) {
 	err = db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		stm, err := applangcrud.SetQueryConds(cli.Debug().AppLang.Query(), h.Conds)
+		stm, err := applangcrud.SetQueryConds(cli.AppLang.Query(), h.Conds)
 		if err != nil {
 			return err
 		}

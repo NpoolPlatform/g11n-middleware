@@ -7,7 +7,9 @@ import (
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db"
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db/ent"
 
+	applangcrud "github.com/NpoolPlatform/g11n-middleware/pkg/crud/applang"
 	messagecrud "github.com/NpoolPlatform/g11n-middleware/pkg/crud/message"
+	applangmw "github.com/NpoolPlatform/g11n-middleware/pkg/mw/applang"
 	redis2 "github.com/NpoolPlatform/go-service-framework/pkg/redis"
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/message"
@@ -19,6 +21,29 @@ import (
 
 type createHandler struct {
 	*Handler
+}
+
+func (h *createHandler) checkAppLang(ctx context.Context) error {
+	for _, req := range h.Reqs {
+		handler, err := applangmw.NewHandler(
+			ctx,
+		)
+		if err != nil {
+			return err
+		}
+		handler.Conds = &applangcrud.Conds{
+			AppID:  &cruder.Cond{Op: cruder.EQ, Val: *req.AppID},
+			LangID: &cruder.Cond{Op: cruder.EQ, Val: *req.LangID},
+		}
+		exist, err := handler.ExistAppLangConds(ctx)
+		if err != nil {
+			return err
+		}
+		if !exist {
+			return fmt.Errorf("invalid applang")
+		}
+	}
+	return nil
 }
 
 func (h *createHandler) createMessage(ctx context.Context, tx *ent.Tx, req *messagecrud.Req) (*npool.Message, error) {
@@ -104,6 +129,9 @@ func (h *Handler) CreateMessage(ctx context.Context) (*npool.Message, error) {
 			GetIndex:  h.GetIndex,
 			Disabled:  h.Disabled,
 		}
+		if err := handler.checkAppLang(ctx); err != nil {
+			return err
+		}
 		info, err := handler.createMessage(ctx, tx, req)
 		if err != nil {
 			return err
@@ -132,6 +160,9 @@ func (h *Handler) CreateMessages(ctx context.Context) ([]*npool.Message, error) 
 	ids := []uuid.UUID{}
 
 	err := db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
+		if err := handler.checkAppLang(ctx); err != nil {
+			return err
+		}
 		for _, req := range h.Reqs {
 			info, err := handler.createMessage(ctx, tx, req)
 			if err != nil {

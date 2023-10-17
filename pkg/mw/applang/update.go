@@ -25,10 +25,10 @@ func (h *Handler) UpdateLang(ctx context.Context) (*npool.Lang, error) {
 	err = db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
 		if h.Main != nil {
 			if *h.Main {
-				id := uuid.MustParse(info.EntID)
-				h.EntID = &id
+				id := uuid.MustParse(info.AppID)
+				h.AppID = &id
 				h.Conds = &applangcrud.Conds{
-					EntID: &cruder.Cond{Op: cruder.NEQ, Val: *h.EntID},
+					ID:    &cruder.Cond{Op: cruder.NEQ, Val: *h.ID},
 					AppID: &cruder.Cond{Op: cruder.EQ, Val: *h.AppID},
 					Main:  &cruder.Cond{Op: cruder.EQ, Val: true},
 				}
