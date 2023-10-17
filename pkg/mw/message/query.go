@@ -31,6 +31,8 @@ func (h *queryHandler) selectMessage(stm *ent.MessageQuery) {
 		entmessage.FieldMessage,
 		entmessage.FieldGetIndex,
 		entmessage.FieldDisabled,
+		entmessage.FieldCreatedAt,
+		entmessage.FieldUpdatedAt,
 	)
 }
 
