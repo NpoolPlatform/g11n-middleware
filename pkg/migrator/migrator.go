@@ -1,4 +1,4 @@
-//nolint:nolintlint
+//nolint
 package migrator
 
 import (
@@ -22,8 +22,8 @@ const (
 	keyUsername  = "username"
 	keyPassword  = "password"
 	keyDBName    = "database_name"
-	maxOpen      = 2
-	maxIdle      = 1
+	maxOpen      = 5
+	maxIdle      = 2
 	MaxLife      = 0
 	keyServiceID = "serviceid"
 )
@@ -75,7 +75,7 @@ func open(hostname string) (conn *sql.DB, err error) {
 	return conn, nil
 }
 
-func tables(ctx context.Context, dbName string, tx *sql.Tx) ([]string, error) {
+func tables(ctx context.Context, dbName string, tx *sql.DB) ([]string, error) {
 	tables := []string{}
 	rows, err := tx.QueryContext(
 		ctx,
@@ -98,143 +98,82 @@ func tables(ctx context.Context, dbName string, tx *sql.Tx) ([]string, error) {
 	return tables, nil
 }
 
-//nolint:funlen,gocyclo
-func migrateEntID(ctx context.Context, dbName, table string, tx *sql.Tx) error {
-	logger.Sugar().Infow(
-		"migrateEntID",
-		"db", dbName,
-		"table", table,
-	)
-
+func existIDInt(ctx context.Context, dbName, table string, tx *sql.DB) (bool, bool, bool, error) {
 	_type := []byte{}
+	rc := 0
+
 	rows, err := tx.QueryContext(
 		ctx,
-		fmt.Sprintf("select column_type from information_schema.columns where table_name='%v' and column_name='id' and table_schema='%v'", table, dbName),
+		fmt.Sprintf("select column_type,1 from information_schema.columns where table_name='%v' and column_name='id' and table_schema='%v'", table, dbName),
+	)
+	if err != nil {
+		return false, false, false, err
+	}
+	for rows.Next() {
+		if err := rows.Scan(&_type, &rc); err != nil {
+			return false, false, false, err
+		}
+	}
+	return rc == 1, strings.Contains(string(_type), "int"), strings.Contains(string(_type), "unsigned"), nil
+}
+
+func setIDUnsigned(ctx context.Context, dbName, table string, tx *sql.DB) error {
+	logger.Sugar().Infow(
+		"setIDUnsigned",
+		"db", dbName,
+		"table", table,
+		"State", "INT UNSIGNED",
+	)
+	_, err := tx.ExecContext(
+		ctx,
+		fmt.Sprintf("alter table %v.%v change id id int unsigned not null auto_increment", dbName, table),
 	)
 	if err != nil {
 		return err
 	}
-	for rows.Next() {
-		if err := rows.Scan(&_type); err != nil {
-			return err
-		}
-	}
-	if strings.Contains(string(_type), "int") && !strings.Contains(string(_type), "unsigned") {
-		logger.Sugar().Infow(
-			"migrateEntID",
-			"db", dbName,
-			"table", table,
-			"type", string(_type),
-			"State", "INT UNSIGNED",
-		)
-		_, err = tx.ExecContext(
-			ctx,
-			fmt.Sprintf("alter table %v.%v change id id int unsigned not null auto_increment", dbName, table),
-		)
-		if err != nil {
-			return err
-		}
-	}
+	return nil
+}
+
+func existEntIDUnique(ctx context.Context, dbName, table string, tx *sql.DB) (bool, bool, error) {
 	key := ""
 	rc := 0
-	rows, err = tx.QueryContext(
+	rows, err := tx.QueryContext(
 		ctx,
 		fmt.Sprintf("select column_key,1 from information_schema.columns where table_schema='%v' and table_name='%v' and column_name='ent_id'", dbName, table),
 	)
 	if err != nil {
-		return err
+		return false, false, err
 	}
 	for rows.Next() {
 		if err := rows.Scan(&key, &rc); err != nil {
-			return err
+			return false, false, err
 		}
 	}
-	if rc == 1 {
-		if key != "UNI" {
-			logger.Sugar().Infow(
-				"migrateEntID",
-				"db", dbName,
-				"table", table,
-				"State", "ENT_ID UNIQUE",
-			)
-			_, err = tx.ExecContext(
-				ctx,
-				fmt.Sprintf("alter table %v.%v change column ent_id ent_id char(36) unique", dbName, table),
-			)
-			if err != nil {
-				return err
-			}
-		}
-		logger.Sugar().Infow(
-			"migrateEntID",
-			"db", dbName,
-			"table", table,
-			"State", "ENT_ID UUID",
-		)
-		rows, err := tx.QueryContext(
-			ctx,
-			fmt.Sprintf("select id from %v.%v where ent_id=''", dbName, table),
-		)
-		if err != nil {
-			return err
-		}
-		for rows.Next() {
-			var id uint32
-			if err := rows.Scan(&id); err != nil {
-				return err
-			}
-			if _, err := tx.ExecContext(
-				ctx,
-				fmt.Sprintf("update %v.%v set ent_id='%v' where id=%v", dbName, table, uuid.New(), id),
-			); err != nil {
-				return err
-			}
-		}
-		return nil
-	}
+	return rc == 1, key == "UNI", nil
+}
+
+func setEmptyEntID(ctx context.Context, dbName, table string, tx *sql.DB) error {
 	logger.Sugar().Infow(
-		"migrateEntID",
-		"db", dbName,
-		"table", table,
-		"State", "ID -> EntID",
-	)
-	_, err = tx.ExecContext(
-		ctx,
-		fmt.Sprintf("alter table %v.%v change column id ent_id char(36) unique", dbName, table),
-	)
-	if err != nil {
-		return err
-	}
-	logger.Sugar().Infow(
-		"migrateEntID",
-		"db", dbName,
-		"table", table,
-		"State", "ID INT",
-	)
-	_, err = tx.ExecContext(
-		ctx,
-		fmt.Sprintf("alter table %v.%v add id int unsigned not null auto_increment, drop primary key, add primary key(id)", dbName, table),
-	)
-	if err != nil {
-		return err
-	}
-	rows, err = tx.QueryContext(
-		ctx,
-		fmt.Sprintf("select id from %v.%v where ent_id=''", dbName, table),
-	)
-	if err != nil {
-		return err
-	}
-	logger.Sugar().Infow(
-		"migrateEntID",
+		"setEmptyEntID",
 		"db", dbName,
 		"table", table,
 		"State", "ENT_ID UUID",
 	)
+	rows, err := tx.QueryContext(
+		ctx,
+		fmt.Sprintf("select id, ent_id from %v.%v", dbName, table),
+	)
+	if err != nil {
+		return err
+	}
 	for rows.Next() {
 		var id uint32
-		if err := rows.Scan(&id); err != nil {
+		var entID string
+		if err := rows.Scan(&id, &entID); err != nil {
 			return err
+		}
+		if _, err := uuid.Parse(entID); err == nil {
+			continue
 		}
 		if _, err := tx.ExecContext(
 			ctx,
@@ -242,6 +181,162 @@ func migrateEntID(ctx context.Context, dbName, table string, tx *sql.Tx) error {
 		); err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func setEntIDUnique(ctx context.Context, dbName, table string, tx *sql.DB) error {
+	logger.Sugar().Infow(
+		"setEntIDUnique",
+		"db", dbName,
+		"table", table,
+		"State", "ENT_ID UNIQUE",
+	)
+	_, err := tx.ExecContext(
+		ctx,
+		fmt.Sprintf("alter table %v.%v change column ent_id ent_id char(36) unique", dbName, table),
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func id2EntID(ctx context.Context, dbName, table string, tx *sql.DB) error {
+	logger.Sugar().Infow(
+		"id2EntID",
+		"db", dbName,
+		"table", table,
+		"State", "ID -> EntID",
+	)
+	_, err := tx.ExecContext(
+		ctx,
+		fmt.Sprintf("alter table %v.%v change column id ent_id char(36) unique", dbName, table),
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func addIDColumn(ctx context.Context, dbName, table string, tx *sql.DB) error {
+	logger.Sugar().Infow(
+		"addIDColumn",
+		"db", dbName,
+		"table", table,
+		"State", "ID INT",
+	)
+	_, err := tx.ExecContext(
+		ctx,
+		fmt.Sprintf("alter table %v.%v add id int unsigned not null auto_increment, add primary key(id)", dbName, table),
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func dropPrimaryKey(ctx context.Context, dbName, table string, tx *sql.DB) error {
+	logger.Sugar().Infow(
+		"dropPrimaryKey",
+		"db", dbName,
+		"table", table,
+		"State", "DROP PRIMARY",
+	)
+	_, err := tx.ExecContext(
+		ctx,
+		fmt.Sprintf("alter table %v.%v drop primary key", dbName, table),
+	)
+	if err != nil {
+		logger.Sugar().Warnw(
+			"dropPrimaryKey",
+			"db", dbName,
+			"table", table,
+			"Error", err,
+		)
+	}
+	return nil
+}
+
+func addEntIDColumn(ctx context.Context, dbName, table string, tx *sql.DB) error {
+	logger.Sugar().Infow(
+		"addEntIDColumn",
+		"db", dbName,
+		"table", table,
+		"State", "ADD ENT_ID",
+	)
+	_, err := tx.ExecContext(
+		ctx,
+		fmt.Sprintf("alter table %v.%v add ent_id char(36) not null", dbName, table),
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func migrateEntID(ctx context.Context, dbName, table string, tx *sql.DB) error {
+	logger.Sugar().Infow(
+		"migrateEntID",
+		"db", dbName,
+		"table", table,
+	)
+
+	idExist, idInt, idUnsigned, err := existIDInt(ctx, dbName, table, tx)
+	if err != nil {
+		return err
+	}
+
+	if idInt && !idUnsigned {
+		if err := setIDUnsigned(ctx, dbName, table, tx); err != nil {
+			return err
+		}
+	}
+
+	entIDExist, entIDUnique, err := existEntIDUnique(ctx, dbName, table, tx)
+	if err != nil {
+		return err
+	}
+
+	if entIDExist && idInt {
+		if err := setEmptyEntID(ctx, dbName, table, tx); err != nil {
+			return err
+		}
+		if !entIDUnique {
+			if err := setEntIDUnique(ctx, dbName, table, tx); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+	if idExist && !idInt {
+		if err := id2EntID(ctx, dbName, table, tx); err != nil {
+			return err
+		}
+	}
+	if !idInt {
+		if err := dropPrimaryKey(ctx, dbName, table, tx); err != nil {
+			return err
+		}
+		if err := addIDColumn(ctx, dbName, table, tx); err != nil {
+			return err
+		}
+	}
+
+	entIDExist, _, err = existEntIDUnique(ctx, dbName, table, tx)
+	if err != nil {
+		return err
+	}
+	if !entIDExist {
+		if err := addEntIDColumn(ctx, dbName, table, tx); err != nil {
+			return err
+		}
+	}
+	if err := setEmptyEntID(ctx, dbName, table, tx); err != nil {
+		return err
+	}
+	if err := setEntIDUnique(ctx, dbName, table, tx); err != nil {
+		return err
 	}
 	logger.Sugar().Infow(
 		"migrateEntID",
@@ -255,18 +350,16 @@ func migrateEntID(ctx context.Context, dbName, table string, tx *sql.Tx) error {
 func Migrate(ctx context.Context) error {
 	var err error
 	var conn *sql.DB
-	var tx *sql.Tx
 
 	logger.Sugar().Infow("Migrate", "Start", "...")
-	defer func(err *error) {
-		_ = redis2.Unlock(lockKey())
-		logger.Sugar().Infow("Migrate", "Done", "...", "error", *err)
-	}(&err)
-
 	err = redis2.TryLock(lockKey(), 0)
 	if err != nil {
 		return err
 	}
+	defer func(err *error) {
+		_ = redis2.Unlock(lockKey())
+		logger.Sugar().Infow("Migrate", "Done", "...", "error", *err)
+	}(&err)
 
 	conn, err = open(servicename.ServiceDomain)
 	if err != nil {
@@ -278,23 +371,30 @@ func Migrate(ctx context.Context) error {
 		}
 	}()
 
-	tx, err = conn.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
-	if err != nil {
-		return err
-	}
-
 	dbname := config.GetStringValueWithNameSpace(servicename.ServiceDomain, keyDBName)
-	_tables, err := tables(ctx, dbname, tx)
+	_tables, err := tables(ctx, dbname, conn)
 	if err != nil {
 		return err
 	}
 
+	logger.Sugar().Infow(
+		"Migrate",
+		"Round", 1,
+	)
 	for _, table := range _tables {
-		if err = migrateEntID(ctx, dbname, table, tx); err != nil {
-			_ = tx.Rollback()
+		if err = migrateEntID(ctx, dbname, table, conn); err != nil {
 			return err
 		}
 	}
-	_ = tx.Commit()
+
+	logger.Sugar().Infow(
+		"Migrate",
+		"Round", 2,
+	)
+	for _, table := range _tables {
+		if err = migrateEntID(ctx, dbname, table, conn); err != nil {
+			return err
+		}
+	}
 	return nil
 }
