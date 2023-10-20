@@ -13,6 +13,13 @@ import (
 
 func (s *Server) DeleteLang(ctx context.Context, in *npool.DeleteLangRequest) (*npool.DeleteLangResponse, error) {
 	req := in.GetInfo()
+	if req == nil {
+		logger.Sugar().Errorw(
+			"DeleteLang",
+			"In", in,
+		)
+		return &npool.DeleteLangResponse{}, status.Error(codes.InvalidArgument, "Info is empty")
+	}
 	handler, err := lang1.NewHandler(
 		ctx,
 		lang1.WithID(req.ID, true),

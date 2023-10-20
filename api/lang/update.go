@@ -14,6 +14,13 @@ import (
 
 func (s *Server) UpdateLang(ctx context.Context, in *npool.UpdateLangRequest) (*npool.UpdateLangResponse, error) {
 	req := in.GetInfo()
+	if req == nil {
+		logger.Sugar().Errorw(
+			"UpdateLang",
+			"In", in,
+		)
+		return &npool.UpdateLangResponse{}, status.Error(codes.InvalidArgument, "Info is empty")
+	}
 	handler, err := lang1.NewHandler(
 		ctx,
 		lang1.WithID(req.ID, true),

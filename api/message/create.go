@@ -16,6 +16,13 @@ import (
 
 func (s *Server) CreateMessage(ctx context.Context, in *npool.CreateMessageRequest) (*npool.CreateMessageResponse, error) {
 	req := in.GetInfo()
+	if req == nil {
+		logger.Sugar().Errorw(
+			"CreateMessage",
+			"In", in,
+		)
+		return &npool.CreateMessageResponse{}, status.Error(codes.InvalidArgument, "Info is empty")
+	}
 	handler, err := message1.NewHandler(
 		ctx,
 		message1.WithEntID(req.EntID, false),

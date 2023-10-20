@@ -16,6 +16,13 @@ import (
 
 func (s *Server) UpdateMessage(ctx context.Context, in *npool.UpdateMessageRequest) (*npool.UpdateMessageResponse, error) {
 	req := in.GetInfo()
+	if req == nil {
+		logger.Sugar().Errorw(
+			"UpdateMessage",
+			"In", in,
+		)
+		return &npool.UpdateMessageResponse{}, status.Error(codes.InvalidArgument, "Info is empty")
+	}
 	handler, err := message1.NewHandler(
 		ctx,
 		message1.WithID(req.ID, true),
