@@ -71,31 +71,3 @@ func (s *Server) GetMessages(ctx context.Context, in *npool.GetMessagesRequest) 
 		Total: total,
 	}, nil
 }
-
-func (s *Server) GetMessageOnly(ctx context.Context, in *npool.GetMessageOnlyRequest) (*npool.GetMessageOnlyResponse, error) {
-	handler, err := message1.NewHandler(
-		ctx,
-		message1.WithConds(in.Conds),
-	)
-	if err != nil {
-		logger.Sugar().Errorw(
-			"GetMessageOnly",
-			"In", in,
-			"Error", err,
-		)
-		return &npool.GetMessageOnlyResponse{}, status.Error(codes.Aborted, err.Error())
-	}
-	info, err := handler.GetMessageOnly(ctx)
-	if err != nil {
-		logger.Sugar().Errorw(
-			"GetMessageOnly",
-			"In", in,
-			"Error", err,
-		)
-		return &npool.GetMessageOnlyResponse{}, status.Error(codes.Aborted, err.Error())
-	}
-
-	return &npool.GetMessageOnlyResponse{
-		Info: info,
-	}, nil
-}
