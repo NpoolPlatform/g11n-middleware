@@ -70,6 +70,9 @@ func (h *queryHandler) queryJoinLang(s *sql.Selector) {
 			s.C(entapplang.FieldLangID),
 			t.C(entlang.FieldEntID),
 		).
+		OnP(
+			sql.EQ(t.C(entlang.FieldDeletedAt), 0),
+		).
 		AppendSelect(
 			sql.As(t.C(entlang.FieldLang), "lang"),
 			sql.As(t.C(entlang.FieldLogo), "logo"),

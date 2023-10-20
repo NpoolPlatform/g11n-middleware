@@ -208,6 +208,9 @@ func WithConds(conds *npool.Conds) func(context.Context, *Handler) error {
 		if conds.Disabled != nil {
 			h.Conds.Disabled = &cruder.Cond{Op: conds.GetDisabled().GetOp(), Val: conds.GetDisabled().GetValue()}
 		}
+		if len(conds.GetMessageIDs().GetValue()) > 0 {
+			h.Conds.MessageIDs = &cruder.Cond{Op: conds.GetMessageIDs().GetOp(), Val: conds.GetMessageIDs().GetValue()}
+		}
 		return nil
 	}
 }

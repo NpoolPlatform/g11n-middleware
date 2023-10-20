@@ -69,6 +69,9 @@ func (h *queryHandler) queryJoinCountry(s *sql.Selector) {
 			s.C(entappcountry.FieldCountryID),
 			t.C(entcountry.FieldEntID),
 		).
+		OnP(
+			sql.EQ(t.C(entcountry.FieldDeletedAt), 0),
+		).
 		AppendSelect(
 			sql.As(t.C(entcountry.FieldCountry), "country"),
 			sql.As(t.C(entcountry.FieldFlag), "flag"),
