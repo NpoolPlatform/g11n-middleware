@@ -72,6 +72,7 @@ func updateCountry(t *testing.T) {
 	}
 	info, err := UpdateCountry(context.Background(), &req)
 	if assert.Nil(t, err) {
+		ret.UpdatedAt = info.UpdatedAt
 		assert.Equal(t, info, &ret)
 	}
 }

@@ -121,11 +121,7 @@ func updateMessage(t *testing.T) {
 	assert.Nil(t, err)
 	info, err := handler.UpdateMessage(context.Background())
 	if assert.Nil(t, err) {
-		ret.AppID = info.AppID
-		ret.Message = info.Message
-		ret.MessageID = info.MessageID
-		ret.GetIndex = info.GetIndex
-		ret.Disabled = info.Disabled
+		ret.UpdatedAt = info.UpdatedAt
 		assert.Equal(t, info, &ret)
 	}
 }

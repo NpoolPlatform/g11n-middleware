@@ -73,6 +73,7 @@ func updateLang(t *testing.T) {
 
 	info, err := handler.UpdateLang(context.Background())
 	if assert.Nil(t, err) {
+		ret.UpdatedAt = info.UpdatedAt
 		assert.Equal(t, info, &ret)
 	}
 }
