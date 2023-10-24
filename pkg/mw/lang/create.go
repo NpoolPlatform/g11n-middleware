@@ -19,20 +19,27 @@ import (
 
 type createHandler struct {
 	*Handler
+	langIDs map[string]*uuid.UUID
 }
 
-func (h *createHandler) createLang(ctx context.Context, tx *ent.Tx, req *langcrud.Req) (*npool.Lang, error) {
+func (h *createHandler) createLang(ctx context.Context, tx *ent.Tx, req *langcrud.Req) error {
 	lockKey := fmt.Sprintf(
 		"%v:%v",
 		basetypes.Prefix_PrefixCreateLang,
 		*req.Lang,
 	)
 	if err := redis2.TryLock(lockKey, 0); err != nil {
-		return nil, err
+		return err
 	}
 	defer func() {
 		_ = redis2.Unlock(lockKey)
 	}()
+
+	_id, ok := h.langIDs[*req.Lang]
+	if ok {
+		h.EntID = _id
+		return nil
+	}
 
 	h.Conds = &langcrud.Conds{
 		Lang: &cruder.Cond{Op: cruder.EQ, Val: *req.Lang},
@@ -40,10 +47,12 @@ func (h *createHandler) createLang(ctx context.Context, tx *ent.Tx, req *langcru
 	h.Limit = 2
 	infos, _, err := h.GetLangs(ctx)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if infos != nil {
-		return infos[0], nil
+		id := uuid.MustParse(infos[0].EntID)
+		h.EntID = &id
+		return nil
 	}
 
 	id := uuid.New()
@@ -62,18 +71,20 @@ func (h *createHandler) createLang(ctx context.Context, tx *ent.Tx, req *langcru
 		},
 	).Save(ctx)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	h.ID = &info.ID
 	h.EntID = &info.EntID
+	h.langIDs[*req.Lang] = h.EntID
 
-	return nil, nil
+	return nil
 }
 
 func (h *Handler) CreateLang(ctx context.Context) (*npool.Lang, error) {
 	handler := &createHandler{
 		Handler: h,
+		langIDs: map[string]*uuid.UUID{},
 	}
 	h.Conds = &langcrud.Conds{
 		Lang: &cruder.Cond{Op: cruder.EQ, Val: *h.Lang},
@@ -94,16 +105,8 @@ func (h *Handler) CreateLang(ctx context.Context) (*npool.Lang, error) {
 			Name:  h.Name,
 			Short: h.Short,
 		}
-		info, err := handler.createLang(ctx, tx, req)
-		if err != nil {
+		if err := handler.createLang(ctx, tx, req); err != nil {
 			return err
-		}
-		if info != nil {
-			id, err := uuid.Parse(info.GetEntID())
-			if err != nil {
-				return err
-			}
-			h.EntID = &id
 		}
 		return nil
 	})
@@ -117,22 +120,15 @@ func (h *Handler) CreateLang(ctx context.Context) (*npool.Lang, error) {
 func (h *Handler) CreateLangs(ctx context.Context) ([]*npool.Lang, error) {
 	handler := &createHandler{
 		Handler: h,
+		langIDs: map[string]*uuid.UUID{},
 	}
 
 	ids := []uuid.UUID{}
 
 	err := db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		for _, req := range h.Reqs {
-			info, err := handler.createLang(ctx, tx, req)
-			if err != nil {
+			if err := handler.createLang(ctx, tx, req); err != nil {
 				return err
-			}
-			if info != nil {
-				id, err := uuid.Parse(info.GetEntID())
-				if err != nil {
-					return err
-				}
-				h.EntID = &id
 			}
 			ids = append(ids, *h.EntID)
 		}

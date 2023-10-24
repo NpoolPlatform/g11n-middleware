@@ -28,6 +28,8 @@ func (h *queryHandler) selectCountry(stm *ent.CountryQuery) {
 		entcountry.FieldFlag,
 		entcountry.FieldCode,
 		entcountry.FieldShort,
+		entcountry.FieldCreatedAt,
+		entcountry.FieldUpdatedAt,
 	)
 }
 

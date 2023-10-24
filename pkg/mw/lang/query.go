@@ -28,6 +28,8 @@ func (h *queryHandler) selectLang(stm *ent.LangQuery) {
 		entlang.FieldLogo,
 		entlang.FieldName,
 		entlang.FieldShort,
+		entlang.FieldCreatedAt,
+		entlang.FieldUpdatedAt,
 	)
 }
 

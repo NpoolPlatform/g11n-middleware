@@ -8,6 +8,8 @@ import (
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db/ent"
 
 	applangcrud "github.com/NpoolPlatform/g11n-middleware/pkg/crud/applang"
+	langcrud "github.com/NpoolPlatform/g11n-middleware/pkg/crud/lang"
+	langmw "github.com/NpoolPlatform/g11n-middleware/pkg/mw/lang"
 	redis2 "github.com/NpoolPlatform/go-service-framework/pkg/redis"
 	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/applang"
@@ -21,7 +23,7 @@ type createHandler struct {
 	*Handler
 }
 
-func (h createHandler) checkReqMainCount() error {
+func (h *createHandler) checkReqMainCount() error {
 	mainMap := map[uuid.UUID]*uuid.UUID{}
 	for _, req := range h.Reqs {
 		if req.Main != nil && *req.Main {
@@ -31,6 +33,18 @@ func (h createHandler) checkReqMainCount() error {
 			}
 			mainMap[*req.AppID] = req.AppID
 		}
+	}
+	return nil
+}
+
+func (h *createHandler) checkRepeat() error {
+	countryMap := map[string]*uuid.UUID{}
+	for _, req := range h.Reqs {
+		_, ok := countryMap[req.AppID.String()+req.LangID.String()]
+		if ok {
+			return fmt.Errorf("duplicate langid")
+		}
+		countryMap[req.AppID.String()+req.LangID.String()] = req.LangID
 	}
 	return nil
 }
@@ -48,6 +62,23 @@ func (h *createHandler) createLang(ctx context.Context, tx *ent.Tx, req *applang
 	defer func() {
 		_ = redis2.Unlock(lockKey)
 	}()
+
+	handler, err := langmw.NewHandler(
+		ctx,
+	)
+	if err != nil {
+		return err
+	}
+	handler.Conds = &langcrud.Conds{
+		EntID: &cruder.Cond{Op: cruder.EQ, Val: *req.LangID},
+	}
+	existLang, err := handler.ExistLangConds(ctx)
+	if err != nil {
+		return err
+	}
+	if !existLang {
+		return fmt.Errorf("lang not exist")
+	}
 
 	h.Conds = &applangcrud.Conds{
 		AppID:  &cruder.Cond{Op: cruder.EQ, Val: *req.AppID},
@@ -132,6 +163,9 @@ func (h *Handler) CreateLangs(ctx context.Context) ([]*npool.Lang, error) {
 
 	err := db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		if err := handler.checkReqMainCount(); err != nil {
+			return err
+		}
+		if err := handler.checkRepeat(); err != nil {
 			return err
 		}
 		for _, req := range h.Reqs {
