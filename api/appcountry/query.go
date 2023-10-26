@@ -12,34 +12,6 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s *Server) GetCountryOnly(ctx context.Context, in *npool.GetCountryOnlyRequest) (*npool.GetCountryOnlyResponse, error) {
-	handler, err := appcountry1.NewHandler(
-		ctx,
-		appcountry1.WithConds(in.Conds),
-	)
-	if err != nil {
-		logger.Sugar().Errorw(
-			"GetCountryOnly",
-			"In", in,
-			"Error", err,
-		)
-		return &npool.GetCountryOnlyResponse{}, status.Error(codes.Aborted, err.Error())
-	}
-	info, err := handler.GetCountryOnly(ctx)
-	if err != nil {
-		logger.Sugar().Errorw(
-			"GetCountryOnly",
-			"In", in,
-			"Error", err,
-		)
-		return &npool.GetCountryOnlyResponse{}, status.Error(codes.Aborted, err.Error())
-	}
-
-	return &npool.GetCountryOnlyResponse{
-		Info: info,
-	}, nil
-}
-
 func (s *Server) GetCountries(ctx context.Context, in *npool.GetCountriesRequest) (*npool.GetCountriesResponse, error) {
 	handler, err := appcountry1.NewHandler(
 		ctx,

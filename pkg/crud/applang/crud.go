@@ -11,7 +11,7 @@ import (
 )
 
 type Req struct {
-	ID        *uuid.UUID
+	EntID     *uuid.UUID
 	AppID     *uuid.UUID
 	LangID    *uuid.UUID
 	Main      *bool
@@ -19,8 +19,8 @@ type Req struct {
 }
 
 func CreateSet(c *ent.AppLangCreate, req *Req) *ent.AppLangCreate {
-	if req.ID != nil {
-		c.SetID(*req.ID)
+	if req.EntID != nil {
+		c.SetEntID(*req.EntID)
 	}
 	if req.AppID != nil {
 		c.SetAppID(*req.AppID)
@@ -46,7 +46,8 @@ func UpdateSet(u *ent.AppLangUpdateOne, req *Req) *ent.AppLangUpdateOne {
 
 type Conds struct {
 	ID      *cruder.Cond
-	IDs     *cruder.Cond
+	EntID   *cruder.Cond
+	EntIDs  *cruder.Cond
 	AppID   *cruder.Cond
 	LangID  *cruder.Cond
 	AppIDs  *cruder.Cond
@@ -60,7 +61,7 @@ func SetQueryConds(q *ent.AppLangQuery, conds *Conds) (*ent.AppLangQuery, error)
 		return q, nil
 	}
 	if conds.ID != nil {
-		id, ok := conds.ID.Val.(uuid.UUID)
+		id, ok := conds.ID.Val.(uint32)
 		if !ok {
 			return nil, fmt.Errorf("invalid id")
 		}
@@ -79,19 +80,39 @@ func SetQueryConds(q *ent.AppLangQuery, conds *Conds) (*ent.AppLangQuery, error)
 			return nil, fmt.Errorf("invalid id field")
 		}
 	}
-	if conds.IDs != nil {
-		ids, ok := conds.IDs.Val.([]uuid.UUID)
+	if conds.EntID != nil {
+		id, ok := conds.EntID.Val.(uuid.UUID)
 		if !ok {
-			return nil, fmt.Errorf("invalid ids")
+			return nil, fmt.Errorf("invalid entid")
 		}
-		switch conds.IDs.Op {
-		case cruder.IN:
+		switch conds.EntID.Op {
+		case cruder.EQ:
 			q.Where(
-				entapplang.IDIn(ids...),
+				entapplang.EntID(id),
+				entapplang.DeletedAt(0),
+			)
+		case cruder.NEQ:
+			q.Where(
+				entapplang.EntIDNEQ(id),
 				entapplang.DeletedAt(0),
 			)
 		default:
-			return nil, fmt.Errorf("invalid ids field")
+			return nil, fmt.Errorf("invalid entid field")
+		}
+	}
+	if conds.EntIDs != nil {
+		ids, ok := conds.EntIDs.Val.([]uuid.UUID)
+		if !ok {
+			return nil, fmt.Errorf("invalid entids")
+		}
+		switch conds.EntIDs.Op {
+		case cruder.IN:
+			q.Where(
+				entapplang.EntIDIn(ids...),
+				entapplang.DeletedAt(0),
+			)
+		default:
+			return nil, fmt.Errorf("invalid entids field")
 		}
 	}
 	if conds.AppID != nil {

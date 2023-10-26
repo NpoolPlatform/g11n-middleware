@@ -33,7 +33,7 @@ func init() {
 
 var (
 	ret = npool.Country{
-		ID:      uuid.NewString(),
+		EntID:   uuid.NewString(),
 		Country: "test country" + uuid.NewString(),
 		Flag:    "test flag" + uuid.NewString(),
 		Code:    "test code" + uuid.NewString(),
@@ -43,7 +43,7 @@ var (
 
 func createCountry(t *testing.T) {
 	req := npool.CountryReq{
-		ID:      &ret.ID,
+		EntID:   &ret.EntID,
 		Country: &ret.Country,
 		Flag:    &ret.Flag,
 		Code:    &ret.Code,
@@ -53,6 +53,7 @@ func createCountry(t *testing.T) {
 	if assert.Nil(t, err) {
 		ret.CreatedAt = info.CreatedAt
 		ret.UpdatedAt = info.UpdatedAt
+		ret.ID = info.ID
 		assert.Equal(t, info, &ret)
 	}
 }
@@ -71,12 +72,13 @@ func updateCountry(t *testing.T) {
 	}
 	info, err := UpdateCountry(context.Background(), &req)
 	if assert.Nil(t, err) {
+		ret.UpdatedAt = info.UpdatedAt
 		assert.Equal(t, info, &ret)
 	}
 }
 
 func getCountry(t *testing.T) {
-	info, err := GetCountry(context.Background(), ret.ID)
+	info, err := GetCountry(context.Background(), ret.EntID)
 	if assert.Nil(t, err) {
 		assert.Equal(t, info, &ret)
 	}
@@ -84,7 +86,7 @@ func getCountry(t *testing.T) {
 
 func getCountries(t *testing.T) {
 	_, total, err := GetCountries(context.Background(), &npool.Conds{
-		ID: &basetypes.StringVal{Op: cruder.EQ, Value: ret.ID},
+		EntID: &basetypes.StringVal{Op: cruder.EQ, Value: ret.EntID},
 	}, 0, 1)
 	if assert.Nil(t, err) {
 		assert.NotEqual(t, total, 0)
@@ -99,7 +101,7 @@ func deleteCountry(t *testing.T) {
 		assert.Equal(t, info, &ret)
 	}
 
-	info, err = GetCountry(context.Background(), ret.ID)
+	info, err = GetCountry(context.Background(), ret.EntID)
 	assert.Nil(t, err)
 	assert.Nil(t, info)
 }

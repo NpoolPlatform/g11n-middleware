@@ -14,10 +14,16 @@ import (
 
 func (s *Server) DeleteCountry(ctx context.Context, in *npool.DeleteCountryRequest) (*npool.DeleteCountryResponse, error) {
 	req := in.GetInfo()
+	if req == nil {
+		logger.Sugar().Errorw(
+			"DeleteCountry",
+			"In", in,
+		)
+		return &npool.DeleteCountryResponse{}, status.Error(codes.InvalidArgument, "Info is empty")
+	}
 	handler, err := appcountry1.NewHandler(
 		ctx,
-		appcountry1.WithID(req.ID),
-		appcountry1.WithAppID(req.AppID),
+		appcountry1.WithID(req.ID, true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

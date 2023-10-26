@@ -14,7 +14,8 @@ import (
 )
 
 type Handler struct {
-	ID     *uuid.UUID
+	ID     *uint32
+	EntID  *uuid.UUID
 	Lang   *string
 	Name   *string
 	Logo   *string
@@ -35,23 +36,42 @@ func NewHandler(ctx context.Context, options ...func(context.Context, *Handler) 
 	return handler, nil
 }
 
-func WithID(id *string) func(context.Context, *Handler) error {
+func WithID(u *uint32, must bool) func(context.Context, *Handler) error {
+	return func(ctx context.Context, h *Handler) error {
+		if u == nil {
+			if must {
+				return fmt.Errorf("invalid id")
+			}
+			return nil
+		}
+		h.ID = u
+		return nil
+	}
+}
+
+func WithEntID(id *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
+			if must {
+				return fmt.Errorf("invalid entid")
+			}
 			return nil
 		}
 		_id, err := uuid.Parse(*id)
 		if err != nil {
 			return err
 		}
-		h.ID = &_id
+		h.EntID = &_id
 		return nil
 	}
 }
 
-func WithLang(lang *string) func(context.Context, *Handler) error {
+func WithLang(lang *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if lang == nil {
+			if must {
+				return fmt.Errorf("invalid lang")
+			}
 			return nil
 		}
 		if *lang == "" {
@@ -62,9 +82,12 @@ func WithLang(lang *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithName(name *string) func(context.Context, *Handler) error {
+func WithName(name *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if name == nil {
+			if must {
+				return fmt.Errorf("invalid name")
+			}
 			return nil
 		}
 		if *name == "" {
@@ -75,9 +98,12 @@ func WithName(name *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithLogo(logo *string) func(context.Context, *Handler) error {
+func WithLogo(logo *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if logo == nil {
+			if must {
+				return fmt.Errorf("invalid logo")
+			}
 			return nil
 		}
 		if *logo == "" {
@@ -88,9 +114,12 @@ func WithLogo(logo *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithShort(short *string) func(context.Context, *Handler) error {
+func WithShort(short *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if short == nil {
+			if must {
+				return fmt.Errorf("invalid short")
+			}
 			return nil
 		}
 		if *short == "" {
@@ -108,11 +137,14 @@ func WithConds(conds *npool.Conds) func(context.Context, *Handler) error {
 			return nil
 		}
 		if conds.ID != nil {
-			id, err := uuid.Parse(conds.GetID().GetValue())
+			h.Conds.ID = &cruder.Cond{Op: conds.GetID().GetOp(), Val: conds.GetID().GetValue()}
+		}
+		if conds.EntID != nil {
+			id, err := uuid.Parse(conds.GetEntID().GetValue())
 			if err != nil {
 				return err
 			}
-			h.Conds.ID = &cruder.Cond{Op: conds.GetID().GetOp(), Val: id}
+			h.Conds.EntID = &cruder.Cond{Op: conds.GetEntID().GetOp(), Val: id}
 		}
 		if conds.Lang != nil {
 			h.Conds.Lang = &cruder.Cond{Op: conds.GetLang().GetOp(), Val: conds.GetLang().GetValue()}
@@ -147,28 +179,55 @@ func WithLimit(limit int32) func(context.Context, *Handler) error {
 	}
 }
 
-func WithReqs(reqs []*npool.LangReq) func(context.Context, *Handler) error {
+//nolint:gocyclo
+func WithReqs(reqs []*npool.LangReq, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		_reqs := []*langcrud.Req{}
 		for _, req := range reqs {
+			if must {
+				if req.Lang == nil {
+					return fmt.Errorf("invalid lang")
+				}
+				if req.Name == nil {
+					return fmt.Errorf("invalid name")
+				}
+				if req.Logo == nil {
+					return fmt.Errorf("invalid logo")
+				}
+				if req.Short == nil {
+					return fmt.Errorf("invalid short")
+				}
+			}
 			_req := &langcrud.Req{}
-			if req.ID != nil {
-				id, err := uuid.Parse(*req.ID)
+			if req.EntID != nil {
+				id, err := uuid.Parse(*req.EntID)
 				if err != nil {
 					return err
 				}
-				_req.ID = &id
+				_req.EntID = &id
 			}
 			if req.Lang != nil {
+				if *req.Lang == "" {
+					return fmt.Errorf("invalid lang")
+				}
 				_req.Lang = req.Lang
 			}
 			if req.Name != nil {
+				if *req.Name == "" {
+					return fmt.Errorf("invalid name")
+				}
 				_req.Name = req.Name
 			}
 			if req.Logo != nil {
+				if *req.Logo == "" {
+					return fmt.Errorf("invalid logo")
+				}
 				_req.Logo = req.Logo
 			}
 			if req.Short != nil {
+				if *req.Short == "" {
+					return fmt.Errorf("invalid short")
+				}
 				_req.Short = req.Short
 			}
 			_reqs = append(_reqs, _req)

@@ -14,7 +14,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db/ent/appcountry"
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db/ent/predicate"
-	"github.com/google/uuid"
 )
 
 // AppCountryQuery is the builder for querying AppCountry entities.
@@ -87,8 +86,8 @@ func (acq *AppCountryQuery) FirstX(ctx context.Context) *AppCountry {
 
 // FirstID returns the first AppCountry ID from the query.
 // Returns a *NotFoundError when no AppCountry ID was found.
-func (acq *AppCountryQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
+func (acq *AppCountryQuery) FirstID(ctx context.Context) (id uint32, err error) {
+	var ids []uint32
 	if ids, err = acq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -100,7 +99,7 @@ func (acq *AppCountryQuery) FirstID(ctx context.Context) (id uuid.UUID, err erro
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (acq *AppCountryQuery) FirstIDX(ctx context.Context) uuid.UUID {
+func (acq *AppCountryQuery) FirstIDX(ctx context.Context) uint32 {
 	id, err := acq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -138,8 +137,8 @@ func (acq *AppCountryQuery) OnlyX(ctx context.Context) *AppCountry {
 // OnlyID is like Only, but returns the only AppCountry ID in the query.
 // Returns a *NotSingularError when more than one AppCountry ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (acq *AppCountryQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
+func (acq *AppCountryQuery) OnlyID(ctx context.Context) (id uint32, err error) {
+	var ids []uint32
 	if ids, err = acq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -155,7 +154,7 @@ func (acq *AppCountryQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (acq *AppCountryQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+func (acq *AppCountryQuery) OnlyIDX(ctx context.Context) uint32 {
 	id, err := acq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -181,8 +180,8 @@ func (acq *AppCountryQuery) AllX(ctx context.Context) []*AppCountry {
 }
 
 // IDs executes the query and returns a list of AppCountry IDs.
-func (acq *AppCountryQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
+func (acq *AppCountryQuery) IDs(ctx context.Context) ([]uint32, error) {
+	var ids []uint32
 	if err := acq.Select(appcountry.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -190,7 +189,7 @@ func (acq *AppCountryQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (acq *AppCountryQuery) IDsX(ctx context.Context) []uuid.UUID {
+func (acq *AppCountryQuery) IDsX(ctx context.Context) []uint32 {
 	ids, err := acq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -377,7 +376,7 @@ func (acq *AppCountryQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   appcountry.Table,
 			Columns: appcountry.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: appcountry.FieldID,
 			},
 		},

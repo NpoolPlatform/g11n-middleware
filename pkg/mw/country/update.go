@@ -6,7 +6,6 @@ import (
 
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db"
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db/ent"
-	entcountry "github.com/NpoolPlatform/g11n-middleware/pkg/db/ent/country"
 
 	countrycrud "github.com/NpoolPlatform/g11n-middleware/pkg/crud/country"
 	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
@@ -14,11 +13,15 @@ import (
 )
 
 func (h *Handler) UpdateCountry(ctx context.Context) (*npool.Country, error) {
-	if h.ID == nil {
-		return nil, fmt.Errorf("invalid id")
+	info, err := h.GetCountry(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if info == nil {
+		return nil, fmt.Errorf("country not exist")
 	}
 
-	err := db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
+	err = db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		if h.Country != nil {
 			h.Conds = &countrycrud.Conds{
 				ID:      &cruder.Cond{Op: cruder.NEQ, Val: *h.ID},
@@ -32,23 +35,10 @@ func (h *Handler) UpdateCountry(ctx context.Context) (*npool.Country, error) {
 				return fmt.Errorf("country is exist")
 			}
 		}
-		info, err := tx.
-			Country.
-			Query().
-			Where(
-				entcountry.ID(*h.ID),
-				entcountry.DeletedAt(0),
-			).
-			ForUpdate().
-			Only(_ctx)
-		if err != nil {
-			return err
-		}
 
 		if _, err := countrycrud.UpdateSet(
-			info.Update(),
+			tx.Country.UpdateOneID(*h.ID),
 			&countrycrud.Req{
-				ID:      h.ID,
 				Country: h.Country,
 				Flag:    h.Flag,
 				Code:    h.Code,

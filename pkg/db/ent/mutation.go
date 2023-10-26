@@ -40,13 +40,14 @@ type AppCountryMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *uuid.UUID
+	id            *uint32
 	created_at    *uint32
 	addcreated_at *int32
 	updated_at    *uint32
 	addupdated_at *int32
 	deleted_at    *uint32
 	adddeleted_at *int32
+	ent_id        *uuid.UUID
 	app_id        *uuid.UUID
 	country_id    *uuid.UUID
 	clearedFields map[string]struct{}
@@ -75,7 +76,7 @@ func newAppCountryMutation(c config, op Op, opts ...appcountryOption) *AppCountr
 }
 
 // withAppCountryID sets the ID field of the mutation.
-func withAppCountryID(id uuid.UUID) appcountryOption {
+func withAppCountryID(id uint32) appcountryOption {
 	return func(m *AppCountryMutation) {
 		var (
 			err   error
@@ -127,13 +128,13 @@ func (m AppCountryMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of AppCountry entities.
-func (m *AppCountryMutation) SetID(id uuid.UUID) {
+func (m *AppCountryMutation) SetID(id uint32) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *AppCountryMutation) ID() (id uuid.UUID, exists bool) {
+func (m *AppCountryMutation) ID() (id uint32, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -144,12 +145,12 @@ func (m *AppCountryMutation) ID() (id uuid.UUID, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *AppCountryMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+func (m *AppCountryMutation) IDs(ctx context.Context) ([]uint32, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []uuid.UUID{id}, nil
+			return []uint32{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -327,6 +328,42 @@ func (m *AppCountryMutation) ResetDeletedAt() {
 	m.adddeleted_at = nil
 }
 
+// SetEntID sets the "ent_id" field.
+func (m *AppCountryMutation) SetEntID(u uuid.UUID) {
+	m.ent_id = &u
+}
+
+// EntID returns the value of the "ent_id" field in the mutation.
+func (m *AppCountryMutation) EntID() (r uuid.UUID, exists bool) {
+	v := m.ent_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEntID returns the old "ent_id" field's value of the AppCountry entity.
+// If the AppCountry object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AppCountryMutation) OldEntID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEntID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEntID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEntID: %w", err)
+	}
+	return oldValue.EntID, nil
+}
+
+// ResetEntID resets all changes to the "ent_id" field.
+func (m *AppCountryMutation) ResetEntID() {
+	m.ent_id = nil
+}
+
 // SetAppID sets the "app_id" field.
 func (m *AppCountryMutation) SetAppID(u uuid.UUID) {
 	m.app_id = &u
@@ -444,7 +481,7 @@ func (m *AppCountryMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AppCountryMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.created_at != nil {
 		fields = append(fields, appcountry.FieldCreatedAt)
 	}
@@ -453,6 +490,9 @@ func (m *AppCountryMutation) Fields() []string {
 	}
 	if m.deleted_at != nil {
 		fields = append(fields, appcountry.FieldDeletedAt)
+	}
+	if m.ent_id != nil {
+		fields = append(fields, appcountry.FieldEntID)
 	}
 	if m.app_id != nil {
 		fields = append(fields, appcountry.FieldAppID)
@@ -474,6 +514,8 @@ func (m *AppCountryMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case appcountry.FieldDeletedAt:
 		return m.DeletedAt()
+	case appcountry.FieldEntID:
+		return m.EntID()
 	case appcountry.FieldAppID:
 		return m.AppID()
 	case appcountry.FieldCountryID:
@@ -493,6 +535,8 @@ func (m *AppCountryMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldUpdatedAt(ctx)
 	case appcountry.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
+	case appcountry.FieldEntID:
+		return m.OldEntID(ctx)
 	case appcountry.FieldAppID:
 		return m.OldAppID(ctx)
 	case appcountry.FieldCountryID:
@@ -526,6 +570,13 @@ func (m *AppCountryMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDeletedAt(v)
+		return nil
+	case appcountry.FieldEntID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEntID(v)
 		return nil
 	case appcountry.FieldAppID:
 		v, ok := value.(uuid.UUID)
@@ -653,6 +704,9 @@ func (m *AppCountryMutation) ResetField(name string) error {
 	case appcountry.FieldDeletedAt:
 		m.ResetDeletedAt()
 		return nil
+	case appcountry.FieldEntID:
+		m.ResetEntID()
+		return nil
 	case appcountry.FieldAppID:
 		m.ResetAppID()
 		return nil
@@ -716,13 +770,14 @@ type AppLangMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *uuid.UUID
+	id            *uint32
 	created_at    *uint32
 	addcreated_at *int32
 	updated_at    *uint32
 	addupdated_at *int32
 	deleted_at    *uint32
 	adddeleted_at *int32
+	ent_id        *uuid.UUID
 	app_id        *uuid.UUID
 	lang_id       *uuid.UUID
 	main          *bool
@@ -752,7 +807,7 @@ func newAppLangMutation(c config, op Op, opts ...applangOption) *AppLangMutation
 }
 
 // withAppLangID sets the ID field of the mutation.
-func withAppLangID(id uuid.UUID) applangOption {
+func withAppLangID(id uint32) applangOption {
 	return func(m *AppLangMutation) {
 		var (
 			err   error
@@ -804,13 +859,13 @@ func (m AppLangMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of AppLang entities.
-func (m *AppLangMutation) SetID(id uuid.UUID) {
+func (m *AppLangMutation) SetID(id uint32) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *AppLangMutation) ID() (id uuid.UUID, exists bool) {
+func (m *AppLangMutation) ID() (id uint32, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -821,12 +876,12 @@ func (m *AppLangMutation) ID() (id uuid.UUID, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *AppLangMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+func (m *AppLangMutation) IDs(ctx context.Context) ([]uint32, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []uuid.UUID{id}, nil
+			return []uint32{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -1004,6 +1059,42 @@ func (m *AppLangMutation) ResetDeletedAt() {
 	m.adddeleted_at = nil
 }
 
+// SetEntID sets the "ent_id" field.
+func (m *AppLangMutation) SetEntID(u uuid.UUID) {
+	m.ent_id = &u
+}
+
+// EntID returns the value of the "ent_id" field in the mutation.
+func (m *AppLangMutation) EntID() (r uuid.UUID, exists bool) {
+	v := m.ent_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEntID returns the old "ent_id" field's value of the AppLang entity.
+// If the AppLang object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *AppLangMutation) OldEntID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEntID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEntID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEntID: %w", err)
+	}
+	return oldValue.EntID, nil
+}
+
+// ResetEntID resets all changes to the "ent_id" field.
+func (m *AppLangMutation) ResetEntID() {
+	m.ent_id = nil
+}
+
 // SetAppID sets the "app_id" field.
 func (m *AppLangMutation) SetAppID(u uuid.UUID) {
 	m.app_id = &u
@@ -1170,7 +1261,7 @@ func (m *AppLangMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AppLangMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
 	if m.created_at != nil {
 		fields = append(fields, applang.FieldCreatedAt)
 	}
@@ -1179,6 +1270,9 @@ func (m *AppLangMutation) Fields() []string {
 	}
 	if m.deleted_at != nil {
 		fields = append(fields, applang.FieldDeletedAt)
+	}
+	if m.ent_id != nil {
+		fields = append(fields, applang.FieldEntID)
 	}
 	if m.app_id != nil {
 		fields = append(fields, applang.FieldAppID)
@@ -1203,6 +1297,8 @@ func (m *AppLangMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case applang.FieldDeletedAt:
 		return m.DeletedAt()
+	case applang.FieldEntID:
+		return m.EntID()
 	case applang.FieldAppID:
 		return m.AppID()
 	case applang.FieldLangID:
@@ -1224,6 +1320,8 @@ func (m *AppLangMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldUpdatedAt(ctx)
 	case applang.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
+	case applang.FieldEntID:
+		return m.OldEntID(ctx)
 	case applang.FieldAppID:
 		return m.OldAppID(ctx)
 	case applang.FieldLangID:
@@ -1259,6 +1357,13 @@ func (m *AppLangMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDeletedAt(v)
+		return nil
+	case applang.FieldEntID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEntID(v)
 		return nil
 	case applang.FieldAppID:
 		v, ok := value.(uuid.UUID)
@@ -1399,6 +1504,9 @@ func (m *AppLangMutation) ResetField(name string) error {
 	case applang.FieldDeletedAt:
 		m.ResetDeletedAt()
 		return nil
+	case applang.FieldEntID:
+		m.ResetEntID()
+		return nil
 	case applang.FieldAppID:
 		m.ResetAppID()
 		return nil
@@ -1465,13 +1573,14 @@ type CountryMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *uuid.UUID
+	id            *uint32
 	created_at    *uint32
 	addcreated_at *int32
 	updated_at    *uint32
 	addupdated_at *int32
 	deleted_at    *uint32
 	adddeleted_at *int32
+	ent_id        *uuid.UUID
 	country       *string
 	flag          *string
 	code          *string
@@ -1502,7 +1611,7 @@ func newCountryMutation(c config, op Op, opts ...countryOption) *CountryMutation
 }
 
 // withCountryID sets the ID field of the mutation.
-func withCountryID(id uuid.UUID) countryOption {
+func withCountryID(id uint32) countryOption {
 	return func(m *CountryMutation) {
 		var (
 			err   error
@@ -1554,13 +1663,13 @@ func (m CountryMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of Country entities.
-func (m *CountryMutation) SetID(id uuid.UUID) {
+func (m *CountryMutation) SetID(id uint32) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *CountryMutation) ID() (id uuid.UUID, exists bool) {
+func (m *CountryMutation) ID() (id uint32, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -1571,12 +1680,12 @@ func (m *CountryMutation) ID() (id uuid.UUID, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *CountryMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+func (m *CountryMutation) IDs(ctx context.Context) ([]uint32, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []uuid.UUID{id}, nil
+			return []uint32{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -1752,6 +1861,42 @@ func (m *CountryMutation) AddedDeletedAt() (r int32, exists bool) {
 func (m *CountryMutation) ResetDeletedAt() {
 	m.deleted_at = nil
 	m.adddeleted_at = nil
+}
+
+// SetEntID sets the "ent_id" field.
+func (m *CountryMutation) SetEntID(u uuid.UUID) {
+	m.ent_id = &u
+}
+
+// EntID returns the value of the "ent_id" field in the mutation.
+func (m *CountryMutation) EntID() (r uuid.UUID, exists bool) {
+	v := m.ent_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEntID returns the old "ent_id" field's value of the Country entity.
+// If the Country object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CountryMutation) OldEntID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEntID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEntID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEntID: %w", err)
+	}
+	return oldValue.EntID, nil
+}
+
+// ResetEntID resets all changes to the "ent_id" field.
+func (m *CountryMutation) ResetEntID() {
+	m.ent_id = nil
 }
 
 // SetCountry sets the "country" field.
@@ -1969,7 +2114,7 @@ func (m *CountryMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CountryMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
 	if m.created_at != nil {
 		fields = append(fields, country.FieldCreatedAt)
 	}
@@ -1978,6 +2123,9 @@ func (m *CountryMutation) Fields() []string {
 	}
 	if m.deleted_at != nil {
 		fields = append(fields, country.FieldDeletedAt)
+	}
+	if m.ent_id != nil {
+		fields = append(fields, country.FieldEntID)
 	}
 	if m.country != nil {
 		fields = append(fields, country.FieldCountry)
@@ -2005,6 +2153,8 @@ func (m *CountryMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case country.FieldDeletedAt:
 		return m.DeletedAt()
+	case country.FieldEntID:
+		return m.EntID()
 	case country.FieldCountry:
 		return m.Country()
 	case country.FieldFlag:
@@ -2028,6 +2178,8 @@ func (m *CountryMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldUpdatedAt(ctx)
 	case country.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
+	case country.FieldEntID:
+		return m.OldEntID(ctx)
 	case country.FieldCountry:
 		return m.OldCountry(ctx)
 	case country.FieldFlag:
@@ -2065,6 +2217,13 @@ func (m *CountryMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDeletedAt(v)
+		return nil
+	case country.FieldEntID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEntID(v)
 		return nil
 	case country.FieldCountry:
 		v, ok := value.(string)
@@ -2218,6 +2377,9 @@ func (m *CountryMutation) ResetField(name string) error {
 	case country.FieldDeletedAt:
 		m.ResetDeletedAt()
 		return nil
+	case country.FieldEntID:
+		m.ResetEntID()
+		return nil
 	case country.FieldCountry:
 		m.ResetCountry()
 		return nil
@@ -2287,13 +2449,14 @@ type LangMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *uuid.UUID
+	id            *uint32
 	created_at    *uint32
 	addcreated_at *int32
 	updated_at    *uint32
 	addupdated_at *int32
 	deleted_at    *uint32
 	adddeleted_at *int32
+	ent_id        *uuid.UUID
 	lang          *string
 	logo          *string
 	name          *string
@@ -2324,7 +2487,7 @@ func newLangMutation(c config, op Op, opts ...langOption) *LangMutation {
 }
 
 // withLangID sets the ID field of the mutation.
-func withLangID(id uuid.UUID) langOption {
+func withLangID(id uint32) langOption {
 	return func(m *LangMutation) {
 		var (
 			err   error
@@ -2376,13 +2539,13 @@ func (m LangMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of Lang entities.
-func (m *LangMutation) SetID(id uuid.UUID) {
+func (m *LangMutation) SetID(id uint32) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *LangMutation) ID() (id uuid.UUID, exists bool) {
+func (m *LangMutation) ID() (id uint32, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -2393,12 +2556,12 @@ func (m *LangMutation) ID() (id uuid.UUID, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *LangMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+func (m *LangMutation) IDs(ctx context.Context) ([]uint32, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []uuid.UUID{id}, nil
+			return []uint32{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -2574,6 +2737,42 @@ func (m *LangMutation) AddedDeletedAt() (r int32, exists bool) {
 func (m *LangMutation) ResetDeletedAt() {
 	m.deleted_at = nil
 	m.adddeleted_at = nil
+}
+
+// SetEntID sets the "ent_id" field.
+func (m *LangMutation) SetEntID(u uuid.UUID) {
+	m.ent_id = &u
+}
+
+// EntID returns the value of the "ent_id" field in the mutation.
+func (m *LangMutation) EntID() (r uuid.UUID, exists bool) {
+	v := m.ent_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEntID returns the old "ent_id" field's value of the Lang entity.
+// If the Lang object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LangMutation) OldEntID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEntID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEntID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEntID: %w", err)
+	}
+	return oldValue.EntID, nil
+}
+
+// ResetEntID resets all changes to the "ent_id" field.
+func (m *LangMutation) ResetEntID() {
+	m.ent_id = nil
 }
 
 // SetLang sets the "lang" field.
@@ -2791,7 +2990,7 @@ func (m *LangMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *LangMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
 	if m.created_at != nil {
 		fields = append(fields, lang.FieldCreatedAt)
 	}
@@ -2800,6 +2999,9 @@ func (m *LangMutation) Fields() []string {
 	}
 	if m.deleted_at != nil {
 		fields = append(fields, lang.FieldDeletedAt)
+	}
+	if m.ent_id != nil {
+		fields = append(fields, lang.FieldEntID)
 	}
 	if m.lang != nil {
 		fields = append(fields, lang.FieldLang)
@@ -2827,6 +3029,8 @@ func (m *LangMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case lang.FieldDeletedAt:
 		return m.DeletedAt()
+	case lang.FieldEntID:
+		return m.EntID()
 	case lang.FieldLang:
 		return m.Lang()
 	case lang.FieldLogo:
@@ -2850,6 +3054,8 @@ func (m *LangMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldUpdatedAt(ctx)
 	case lang.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
+	case lang.FieldEntID:
+		return m.OldEntID(ctx)
 	case lang.FieldLang:
 		return m.OldLang(ctx)
 	case lang.FieldLogo:
@@ -2887,6 +3093,13 @@ func (m *LangMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDeletedAt(v)
+		return nil
+	case lang.FieldEntID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEntID(v)
 		return nil
 	case lang.FieldLang:
 		v, ok := value.(string)
@@ -3040,6 +3253,9 @@ func (m *LangMutation) ResetField(name string) error {
 	case lang.FieldDeletedAt:
 		m.ResetDeletedAt()
 		return nil
+	case lang.FieldEntID:
+		m.ResetEntID()
+		return nil
 	case lang.FieldLang:
 		m.ResetLang()
 		return nil
@@ -3109,13 +3325,14 @@ type MessageMutation struct {
 	config
 	op            Op
 	typ           string
-	id            *uuid.UUID
+	id            *uint32
 	created_at    *uint32
 	addcreated_at *int32
 	updated_at    *uint32
 	addupdated_at *int32
 	deleted_at    *uint32
 	adddeleted_at *int32
+	ent_id        *uuid.UUID
 	app_id        *uuid.UUID
 	lang_id       *uuid.UUID
 	message_id    *string
@@ -3150,7 +3367,7 @@ func newMessageMutation(c config, op Op, opts ...messageOption) *MessageMutation
 }
 
 // withMessageID sets the ID field of the mutation.
-func withMessageID(id uuid.UUID) messageOption {
+func withMessageID(id uint32) messageOption {
 	return func(m *MessageMutation) {
 		var (
 			err   error
@@ -3202,13 +3419,13 @@ func (m MessageMutation) Tx() (*Tx, error) {
 
 // SetID sets the value of the id field. Note that this
 // operation is only accepted on creation of Message entities.
-func (m *MessageMutation) SetID(id uuid.UUID) {
+func (m *MessageMutation) SetID(id uint32) {
 	m.id = &id
 }
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *MessageMutation) ID() (id uuid.UUID, exists bool) {
+func (m *MessageMutation) ID() (id uint32, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -3219,12 +3436,12 @@ func (m *MessageMutation) ID() (id uuid.UUID, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *MessageMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
+func (m *MessageMutation) IDs(ctx context.Context) ([]uint32, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []uuid.UUID{id}, nil
+			return []uint32{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -3400,6 +3617,42 @@ func (m *MessageMutation) AddedDeletedAt() (r int32, exists bool) {
 func (m *MessageMutation) ResetDeletedAt() {
 	m.deleted_at = nil
 	m.adddeleted_at = nil
+}
+
+// SetEntID sets the "ent_id" field.
+func (m *MessageMutation) SetEntID(u uuid.UUID) {
+	m.ent_id = &u
+}
+
+// EntID returns the value of the "ent_id" field in the mutation.
+func (m *MessageMutation) EntID() (r uuid.UUID, exists bool) {
+	v := m.ent_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEntID returns the old "ent_id" field's value of the Message entity.
+// If the Message object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MessageMutation) OldEntID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEntID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEntID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEntID: %w", err)
+	}
+	return oldValue.EntID, nil
+}
+
+// ResetEntID resets all changes to the "ent_id" field.
+func (m *MessageMutation) ResetEntID() {
+	m.ent_id = nil
 }
 
 // SetAppID sets the "app_id" field.
@@ -3785,7 +4038,7 @@ func (m *MessageMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MessageMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m.created_at != nil {
 		fields = append(fields, message.FieldCreatedAt)
 	}
@@ -3794,6 +4047,9 @@ func (m *MessageMutation) Fields() []string {
 	}
 	if m.deleted_at != nil {
 		fields = append(fields, message.FieldDeletedAt)
+	}
+	if m.ent_id != nil {
+		fields = append(fields, message.FieldEntID)
 	}
 	if m.app_id != nil {
 		fields = append(fields, message.FieldAppID)
@@ -3830,6 +4086,8 @@ func (m *MessageMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedAt()
 	case message.FieldDeletedAt:
 		return m.DeletedAt()
+	case message.FieldEntID:
+		return m.EntID()
 	case message.FieldAppID:
 		return m.AppID()
 	case message.FieldLangID:
@@ -3859,6 +4117,8 @@ func (m *MessageMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldUpdatedAt(ctx)
 	case message.FieldDeletedAt:
 		return m.OldDeletedAt(ctx)
+	case message.FieldEntID:
+		return m.OldEntID(ctx)
 	case message.FieldAppID:
 		return m.OldAppID(ctx)
 	case message.FieldLangID:
@@ -3902,6 +4162,13 @@ func (m *MessageMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDeletedAt(v)
+		return nil
+	case message.FieldEntID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEntID(v)
 		return nil
 	case message.FieldAppID:
 		v, ok := value.(uuid.UUID)
@@ -4105,6 +4372,9 @@ func (m *MessageMutation) ResetField(name string) error {
 		return nil
 	case message.FieldDeletedAt:
 		m.ResetDeletedAt()
+		return nil
+	case message.FieldEntID:
+		m.ResetEntID()
 		return nil
 	case message.FieldAppID:
 		m.ResetAppID()

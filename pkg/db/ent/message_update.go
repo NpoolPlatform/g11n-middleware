@@ -84,6 +84,20 @@ func (mu *MessageUpdate) AddDeletedAt(u int32) *MessageUpdate {
 	return mu
 }
 
+// SetEntID sets the "ent_id" field.
+func (mu *MessageUpdate) SetEntID(u uuid.UUID) *MessageUpdate {
+	mu.mutation.SetEntID(u)
+	return mu
+}
+
+// SetNillableEntID sets the "ent_id" field if the given value is not nil.
+func (mu *MessageUpdate) SetNillableEntID(u *uuid.UUID) *MessageUpdate {
+	if u != nil {
+		mu.SetEntID(*u)
+	}
+	return mu
+}
+
 // SetAppID sets the "app_id" field.
 func (mu *MessageUpdate) SetAppID(u uuid.UUID) *MessageUpdate {
 	mu.mutation.SetAppID(u)
@@ -317,7 +331,7 @@ func (mu *MessageUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   message.Table,
 			Columns: message.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: message.FieldID,
 			},
 		},
@@ -369,6 +383,13 @@ func (mu *MessageUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeUint32,
 			Value:  value,
 			Column: message.FieldDeletedAt,
+		})
+	}
+	if value, ok := mu.mutation.EntID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: message.FieldEntID,
 		})
 	}
 	if value, ok := mu.mutation.AppID(); ok {
@@ -542,6 +563,20 @@ func (muo *MessageUpdateOne) SetNillableDeletedAt(u *uint32) *MessageUpdateOne {
 // AddDeletedAt adds u to the "deleted_at" field.
 func (muo *MessageUpdateOne) AddDeletedAt(u int32) *MessageUpdateOne {
 	muo.mutation.AddDeletedAt(u)
+	return muo
+}
+
+// SetEntID sets the "ent_id" field.
+func (muo *MessageUpdateOne) SetEntID(u uuid.UUID) *MessageUpdateOne {
+	muo.mutation.SetEntID(u)
+	return muo
+}
+
+// SetNillableEntID sets the "ent_id" field if the given value is not nil.
+func (muo *MessageUpdateOne) SetNillableEntID(u *uuid.UUID) *MessageUpdateOne {
+	if u != nil {
+		muo.SetEntID(*u)
+	}
 	return muo
 }
 
@@ -791,7 +826,7 @@ func (muo *MessageUpdateOne) sqlSave(ctx context.Context) (_node *Message, err e
 			Table:   message.Table,
 			Columns: message.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: message.FieldID,
 			},
 		},
@@ -860,6 +895,13 @@ func (muo *MessageUpdateOne) sqlSave(ctx context.Context) (_node *Message, err e
 			Type:   field.TypeUint32,
 			Value:  value,
 			Column: message.FieldDeletedAt,
+		})
+	}
+	if value, ok := muo.mutation.EntID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: message.FieldEntID,
 		})
 	}
 	if value, ok := muo.mutation.AppID(); ok {

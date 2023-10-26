@@ -14,11 +14,18 @@ import (
 
 func (s *Server) CreateCountry(ctx context.Context, in *npool.CreateCountryRequest) (*npool.CreateCountryResponse, error) {
 	req := in.GetInfo()
+	if req == nil {
+		logger.Sugar().Errorw(
+			"CreateCountry",
+			"In", in,
+		)
+		return &npool.CreateCountryResponse{}, status.Error(codes.InvalidArgument, "Info is empty")
+	}
 	handler, err := appcountry1.NewHandler(
 		ctx,
-		appcountry1.WithID(req.ID),
-		appcountry1.WithAppID(req.AppID),
-		appcountry1.WithCountryID(req.CountryID),
+		appcountry1.WithEntID(req.EntID, false),
+		appcountry1.WithAppID(req.AppID, true),
+		appcountry1.WithCountryID(req.CountryID, true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(
@@ -45,7 +52,7 @@ func (s *Server) CreateCountry(ctx context.Context, in *npool.CreateCountryReque
 func (s *Server) CreateCountries(ctx context.Context, in *npool.CreateCountriesRequest) (*npool.CreateCountriesResponse, error) {
 	handler, err := appcountry1.NewHandler(
 		ctx,
-		appcountry1.WithReqs(in.GetInfos()),
+		appcountry1.WithReqs(in.GetInfos(), true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

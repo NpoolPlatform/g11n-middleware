@@ -80,7 +80,7 @@ func UpdateLang(ctx context.Context, req *npool.LangReq) (*npool.Lang, error) {
 func GetLang(ctx context.Context, id string) (*npool.Lang, error) {
 	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.GetLang(ctx, &npool.GetLangRequest{
-			ID: id,
+			EntID: id,
 		})
 		if err != nil {
 			return nil, err

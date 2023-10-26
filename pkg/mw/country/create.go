@@ -19,101 +19,94 @@ import (
 
 type createHandler struct {
 	*Handler
+	countryIDs map[string]*uuid.UUID
 }
 
-func (h *createHandler) validate() error {
-	if h.Country == nil || *h.Country == "" {
-		return fmt.Errorf("invalid country")
-	}
-	if h.Flag == nil || *h.Flag == "" {
-		return fmt.Errorf("invalid flag")
-	}
-	if h.Code == nil || *h.Code == "" {
-		return fmt.Errorf("invalid code")
-	}
-	if h.Short == nil || *h.Short == "" {
-		return fmt.Errorf("invalid short")
-	}
-	return nil
-}
-
-func (h *createHandler) createCountry(ctx context.Context, cli *ent.Client) (*npool.Country, error) {
+func (h *createHandler) createCountry(ctx context.Context, tx *ent.Tx, req *countrycrud.Req) error {
 	lockKey := fmt.Sprintf(
 		"%v:%v",
 		basetypes.Prefix_PrefixCreateCountry,
-		*h.Country,
+		*req.Country,
 	)
 	if err := redis2.TryLock(lockKey, 0); err != nil {
-		return nil, err
+		return err
 	}
 	defer func() {
 		_ = redis2.Unlock(lockKey)
 	}()
 
+	_id, ok := h.countryIDs[*req.Country]
+	if ok {
+		h.EntID = _id
+		return nil
+	}
+
 	h.Conds = &countrycrud.Conds{
-		Country: &cruder.Cond{Op: cruder.EQ, Val: *h.Country},
+		Country: &cruder.Cond{Op: cruder.EQ, Val: *req.Country},
 	}
 	h.Limit = 2
-	exist, _, err := h.GetCountries(ctx)
+	infos, _, err := h.GetCountries(ctx)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	if exist != nil {
-		return exist[0], nil
+	if infos != nil {
+		id := uuid.MustParse(infos[0].EntID)
+		h.EntID = &id
+		return nil
 	}
 
 	id := uuid.New()
-	if h.ID == nil {
-		h.ID = &id
+	if req.EntID == nil {
+		req.EntID = &id
 	}
 
 	info, err := countrycrud.CreateSet(
-		cli.Country.Create(),
+		tx.Country.Create(),
 		&countrycrud.Req{
-			ID:      h.ID,
-			Country: h.Country,
-			Flag:    h.Flag,
-			Code:    h.Code,
-			Short:   h.Short,
+			EntID:   req.EntID,
+			Country: req.Country,
+			Flag:    req.Flag,
+			Code:    req.Code,
+			Short:   req.Short,
 		},
 	).Save(ctx)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	h.ID = &info.ID
+	h.EntID = &info.EntID
+	h.countryIDs[*req.Country] = h.EntID
 
-	return nil, nil
+	return nil
 }
 
 func (h *Handler) CreateCountry(ctx context.Context) (*npool.Country, error) {
 	handler := &createHandler{
-		Handler: h,
+		Handler:    h,
+		countryIDs: map[string]*uuid.UUID{},
 	}
-	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		if err := handler.validate(); err != nil {
+	h.Conds = &countrycrud.Conds{
+		Country: &cruder.Cond{Op: cruder.EQ, Val: *h.Country},
+	}
+	exist, err := h.ExistCountryConds(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if exist {
+		return nil, fmt.Errorf("country exist")
+	}
+
+	err = db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
+		req := &countrycrud.Req{
+			EntID:   h.EntID,
+			Country: h.Country,
+			Flag:    h.Flag,
+			Code:    h.Code,
+			Short:   h.Short,
+		}
+		if err := handler.createCountry(ctx, tx, req); err != nil {
 			return err
-		}
-		h.Conds = &countrycrud.Conds{
-			Country: &cruder.Cond{Op: cruder.EQ, Val: *h.Country},
-		}
-		exist, err := h.ExistCountryConds(ctx)
-		if err != nil {
-			return err
-		}
-		if exist {
-			return fmt.Errorf("country exist")
-		}
-		info, err := handler.createCountry(ctx, cli)
-		if err != nil {
-			return err
-		}
-		if info != nil {
-			id, err := uuid.Parse(info.GetID())
-			if err != nil {
-				return err
-			}
-			h.ID = &id
 		}
 		return nil
 	})
@@ -126,33 +119,18 @@ func (h *Handler) CreateCountry(ctx context.Context) (*npool.Country, error) {
 
 func (h *Handler) CreateCountries(ctx context.Context) ([]*npool.Country, error) {
 	handler := &createHandler{
-		Handler: h,
+		Handler:    h,
+		countryIDs: map[string]*uuid.UUID{},
 	}
 
 	ids := []uuid.UUID{}
 
-	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
+	err := db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		for _, req := range h.Reqs {
-			handler.ID = nil
-			handler.Country = req.Country
-			handler.Flag = req.Flag
-			handler.Code = req.Code
-			handler.Short = req.Short
-			if err := handler.validate(); err != nil {
+			if err := handler.createCountry(ctx, tx, req); err != nil {
 				return err
 			}
-			info, err := handler.createCountry(ctx, cli)
-			if err != nil {
-				return err
-			}
-			if info != nil {
-				id, err := uuid.Parse(info.GetID())
-				if err != nil {
-					return err
-				}
-				h.ID = &id
-			}
-			ids = append(ids, *h.ID)
+			ids = append(ids, *h.EntID)
 		}
 		return nil
 	})
@@ -161,7 +139,7 @@ func (h *Handler) CreateCountries(ctx context.Context) ([]*npool.Country, error)
 	}
 
 	h.Conds = &countrycrud.Conds{
-		IDs: &cruder.Cond{Op: cruder.IN, Val: ids},
+		EntIDs: &cruder.Cond{Op: cruder.IN, Val: ids},
 	}
 	h.Offset = 0
 	h.Limit = int32(len(ids))

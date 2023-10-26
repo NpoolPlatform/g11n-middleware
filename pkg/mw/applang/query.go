@@ -25,6 +25,7 @@ type queryHandler struct {
 func (h *queryHandler) selectAppLang(stm *ent.AppLangQuery) {
 	h.stm = stm.Select(
 		entapplang.FieldID,
+		entapplang.FieldEntID,
 		entapplang.FieldAppID,
 		entapplang.FieldLangID,
 		entapplang.FieldMain,
@@ -34,18 +35,17 @@ func (h *queryHandler) selectAppLang(stm *ent.AppLangQuery) {
 }
 
 func (h *queryHandler) queryAppLang(cli *ent.Client) error {
-	if h.ID == nil {
-		return fmt.Errorf("invalid applangid")
+	if h.ID == nil && h.EntID == nil {
+		return fmt.Errorf("invalid id")
 	}
-
-	h.selectAppLang(
-		cli.AppLang.
-			Query().
-			Where(
-				entapplang.ID(*h.ID),
-				entapplang.DeletedAt(0),
-			),
-	)
+	stm := cli.AppLang.Query().Where(entapplang.DeletedAt(0))
+	if h.ID != nil {
+		stm.Where(entapplang.ID(*h.ID))
+	}
+	if h.EntID != nil {
+		stm.Where(entapplang.EntID(*h.EntID))
+	}
+	h.selectAppLang(stm)
 	return nil
 }
 
@@ -68,7 +68,10 @@ func (h *queryHandler) queryJoinLang(s *sql.Selector) {
 	s.LeftJoin(t).
 		On(
 			s.C(entapplang.FieldLangID),
-			t.C(entlang.FieldID),
+			t.C(entlang.FieldEntID),
+		).
+		OnP(
+			sql.EQ(t.C(entlang.FieldDeletedAt), 0),
 		).
 		AppendSelect(
 			sql.As(t.C(entlang.FieldLang), "lang"),

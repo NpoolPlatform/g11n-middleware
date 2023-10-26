@@ -14,7 +14,7 @@ import (
 func (s *Server) GetLang(ctx context.Context, in *npool.GetLangRequest) (*npool.GetLangResponse, error) {
 	handler, err := lang1.NewHandler(
 		ctx,
-		lang1.WithID(&in.ID),
+		lang1.WithEntID(&in.EntID, true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(
@@ -35,34 +35,6 @@ func (s *Server) GetLang(ctx context.Context, in *npool.GetLangRequest) (*npool.
 	}
 
 	return &npool.GetLangResponse{
-		Info: info,
-	}, nil
-}
-
-func (s *Server) GetLangOnly(ctx context.Context, in *npool.GetLangOnlyRequest) (*npool.GetLangOnlyResponse, error) {
-	handler, err := lang1.NewHandler(
-		ctx,
-		lang1.WithConds(in.Conds),
-	)
-	if err != nil {
-		logger.Sugar().Errorw(
-			"GetLangOnly",
-			"In", in,
-			"Error", err,
-		)
-		return &npool.GetLangOnlyResponse{}, status.Error(codes.Aborted, err.Error())
-	}
-	info, err := handler.GetLangOnly(ctx)
-	if err != nil {
-		logger.Sugar().Errorw(
-			"GetLangOnly",
-			"In", in,
-			"Error", err,
-		)
-		return &npool.GetLangOnlyResponse{}, status.Error(codes.Aborted, err.Error())
-	}
-
-	return &npool.GetLangOnlyResponse{
 		Info: info,
 	}, nil
 }

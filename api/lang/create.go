@@ -14,13 +14,20 @@ import (
 
 func (s *Server) CreateLang(ctx context.Context, in *npool.CreateLangRequest) (*npool.CreateLangResponse, error) {
 	req := in.GetInfo()
+	if req == nil {
+		logger.Sugar().Errorw(
+			"CreateLang",
+			"In", in,
+		)
+		return &npool.CreateLangResponse{}, status.Error(codes.InvalidArgument, "Info is empty")
+	}
 	handler, err := lang1.NewHandler(
 		ctx,
-		lang1.WithID(req.ID),
-		lang1.WithLang(req.Lang),
-		lang1.WithLogo(req.Logo),
-		lang1.WithName(req.Name),
-		lang1.WithShort(req.Short),
+		lang1.WithEntID(req.EntID, false),
+		lang1.WithLang(req.Lang, true),
+		lang1.WithLogo(req.Logo, true),
+		lang1.WithName(req.Name, true),
+		lang1.WithShort(req.Short, true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(
@@ -47,7 +54,7 @@ func (s *Server) CreateLang(ctx context.Context, in *npool.CreateLangRequest) (*
 func (s *Server) CreateLangs(ctx context.Context, in *npool.CreateLangsRequest) (*npool.CreateLangsResponse, error) {
 	handler, err := lang1.NewHandler(
 		ctx,
-		lang1.WithReqs(in.GetInfos()),
+		lang1.WithReqs(in.GetInfos(), true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

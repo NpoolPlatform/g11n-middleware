@@ -14,7 +14,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db/ent/applang"
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db/ent/predicate"
-	"github.com/google/uuid"
 )
 
 // AppLangQuery is the builder for querying AppLang entities.
@@ -87,8 +86,8 @@ func (alq *AppLangQuery) FirstX(ctx context.Context) *AppLang {
 
 // FirstID returns the first AppLang ID from the query.
 // Returns a *NotFoundError when no AppLang ID was found.
-func (alq *AppLangQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
+func (alq *AppLangQuery) FirstID(ctx context.Context) (id uint32, err error) {
+	var ids []uint32
 	if ids, err = alq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -100,7 +99,7 @@ func (alq *AppLangQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) 
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (alq *AppLangQuery) FirstIDX(ctx context.Context) uuid.UUID {
+func (alq *AppLangQuery) FirstIDX(ctx context.Context) uint32 {
 	id, err := alq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -138,8 +137,8 @@ func (alq *AppLangQuery) OnlyX(ctx context.Context) *AppLang {
 // OnlyID is like Only, but returns the only AppLang ID in the query.
 // Returns a *NotSingularError when more than one AppLang ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (alq *AppLangQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
+func (alq *AppLangQuery) OnlyID(ctx context.Context) (id uint32, err error) {
+	var ids []uint32
 	if ids, err = alq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -155,7 +154,7 @@ func (alq *AppLangQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (alq *AppLangQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+func (alq *AppLangQuery) OnlyIDX(ctx context.Context) uint32 {
 	id, err := alq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -181,8 +180,8 @@ func (alq *AppLangQuery) AllX(ctx context.Context) []*AppLang {
 }
 
 // IDs executes the query and returns a list of AppLang IDs.
-func (alq *AppLangQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
+func (alq *AppLangQuery) IDs(ctx context.Context) ([]uint32, error) {
+	var ids []uint32
 	if err := alq.Select(applang.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -190,7 +189,7 @@ func (alq *AppLangQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (alq *AppLangQuery) IDsX(ctx context.Context) []uuid.UUID {
+func (alq *AppLangQuery) IDsX(ctx context.Context) []uint32 {
 	ids, err := alq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -377,7 +376,7 @@ func (alq *AppLangQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   applang.Table,
 			Columns: applang.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: applang.FieldID,
 			},
 		},

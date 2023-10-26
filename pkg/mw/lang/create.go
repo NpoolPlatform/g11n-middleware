@@ -19,101 +19,94 @@ import (
 
 type createHandler struct {
 	*Handler
+	langIDs map[string]*uuid.UUID
 }
 
-func (h *createHandler) validate() error {
-	if h.Lang == nil || *h.Lang == "" {
-		return fmt.Errorf("invalid lang")
-	}
-	if h.Logo == nil || *h.Logo == "" {
-		return fmt.Errorf("invalid logo")
-	}
-	if h.Name == nil || *h.Name == "" {
-		return fmt.Errorf("invalid name")
-	}
-	if h.Short == nil || *h.Short == "" {
-		return fmt.Errorf("invalid short")
-	}
-	return nil
-}
-
-func (h *createHandler) createLang(ctx context.Context, cli *ent.Client) (*npool.Lang, error) {
+func (h *createHandler) createLang(ctx context.Context, tx *ent.Tx, req *langcrud.Req) error {
 	lockKey := fmt.Sprintf(
 		"%v:%v",
 		basetypes.Prefix_PrefixCreateLang,
-		*h.Lang,
+		*req.Lang,
 	)
 	if err := redis2.TryLock(lockKey, 0); err != nil {
-		return nil, err
+		return err
 	}
 	defer func() {
 		_ = redis2.Unlock(lockKey)
 	}()
 
+	_id, ok := h.langIDs[*req.Lang]
+	if ok {
+		h.EntID = _id
+		return nil
+	}
+
 	h.Conds = &langcrud.Conds{
-		Lang: &cruder.Cond{Op: cruder.EQ, Val: *h.Lang},
+		Lang: &cruder.Cond{Op: cruder.EQ, Val: *req.Lang},
 	}
 	h.Limit = 2
-	exist, _, err := h.GetLangs(ctx)
+	infos, _, err := h.GetLangs(ctx)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	if exist != nil {
-		return exist[0], nil
+	if infos != nil {
+		id := uuid.MustParse(infos[0].EntID)
+		h.EntID = &id
+		return nil
 	}
 
 	id := uuid.New()
-	if h.ID == nil {
-		h.ID = &id
+	if req.EntID == nil {
+		req.EntID = &id
 	}
 
 	info, err := langcrud.CreateSet(
-		cli.Lang.Create(),
+		tx.Lang.Create(),
 		&langcrud.Req{
-			ID:    h.ID,
-			Lang:  h.Lang,
-			Logo:  h.Logo,
-			Name:  h.Name,
-			Short: h.Short,
+			EntID: req.EntID,
+			Lang:  req.Lang,
+			Logo:  req.Logo,
+			Name:  req.Name,
+			Short: req.Short,
 		},
 	).Save(ctx)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	h.ID = &info.ID
+	h.EntID = &info.EntID
+	h.langIDs[*req.Lang] = h.EntID
 
-	return nil, nil
+	return nil
 }
 
 func (h *Handler) CreateLang(ctx context.Context) (*npool.Lang, error) {
 	handler := &createHandler{
 		Handler: h,
+		langIDs: map[string]*uuid.UUID{},
 	}
-	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		if err := handler.validate(); err != nil {
+	h.Conds = &langcrud.Conds{
+		Lang: &cruder.Cond{Op: cruder.EQ, Val: *h.Lang},
+	}
+	exist, err := h.ExistLangConds(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if exist {
+		return nil, fmt.Errorf("lang exist")
+	}
+
+	err = db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
+		req := &langcrud.Req{
+			EntID: h.EntID,
+			Lang:  h.Lang,
+			Logo:  h.Logo,
+			Name:  h.Name,
+			Short: h.Short,
+		}
+		if err := handler.createLang(ctx, tx, req); err != nil {
 			return err
-		}
-		h.Conds = &langcrud.Conds{
-			Lang: &cruder.Cond{Op: cruder.EQ, Val: *h.Lang},
-		}
-		exist, err := h.ExistLangConds(ctx)
-		if err != nil {
-			return err
-		}
-		if exist {
-			return fmt.Errorf("lang exist")
-		}
-		info, err := handler.createLang(ctx, cli)
-		if err != nil {
-			return err
-		}
-		if info != nil {
-			id, err := uuid.Parse(info.GetID())
-			if err != nil {
-				return err
-			}
-			h.ID = &id
 		}
 		return nil
 	})
@@ -127,32 +120,17 @@ func (h *Handler) CreateLang(ctx context.Context) (*npool.Lang, error) {
 func (h *Handler) CreateLangs(ctx context.Context) ([]*npool.Lang, error) {
 	handler := &createHandler{
 		Handler: h,
+		langIDs: map[string]*uuid.UUID{},
 	}
 
 	ids := []uuid.UUID{}
 
-	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
+	err := db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		for _, req := range h.Reqs {
-			handler.ID = nil
-			handler.Lang = req.Lang
-			handler.Logo = req.Logo
-			handler.Name = req.Name
-			handler.Short = req.Short
-			if err := handler.validate(); err != nil {
+			if err := handler.createLang(ctx, tx, req); err != nil {
 				return err
 			}
-			info, err := handler.createLang(ctx, cli)
-			if err != nil {
-				return err
-			}
-			if info != nil {
-				id, err := uuid.Parse(info.GetID())
-				if err != nil {
-					return err
-				}
-				h.ID = &id
-			}
-			ids = append(ids, *h.ID)
+			ids = append(ids, *h.EntID)
 		}
 		return nil
 	})
@@ -161,7 +139,7 @@ func (h *Handler) CreateLangs(ctx context.Context) ([]*npool.Lang, error) {
 	}
 
 	h.Conds = &langcrud.Conds{
-		IDs: &cruder.Cond{Op: cruder.IN, Val: ids},
+		EntIDs: &cruder.Cond{Op: cruder.IN, Val: ids},
 	}
 	h.Offset = 0
 	h.Limit = int32(len(ids))

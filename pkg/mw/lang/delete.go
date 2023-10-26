@@ -16,13 +16,15 @@ func (h *Handler) DeleteLang(ctx context.Context) (*npool.Lang, error) {
 	if err != nil {
 		return nil, err
 	}
+	if info == nil {
+		return nil, nil
+	}
 
 	err = db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
 		now := uint32(time.Now().Unix())
 		if _, err := langcrud.UpdateSet(
 			cli.Lang.UpdateOneID(*h.ID),
 			&langcrud.Req{
-				ID:        h.ID,
 				DeletedAt: &now,
 			},
 		).Save(ctx); err != nil {

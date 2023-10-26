@@ -14,7 +14,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db/ent/lang"
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db/ent/predicate"
-	"github.com/google/uuid"
 )
 
 // LangQuery is the builder for querying Lang entities.
@@ -87,8 +86,8 @@ func (lq *LangQuery) FirstX(ctx context.Context) *Lang {
 
 // FirstID returns the first Lang ID from the query.
 // Returns a *NotFoundError when no Lang ID was found.
-func (lq *LangQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
+func (lq *LangQuery) FirstID(ctx context.Context) (id uint32, err error) {
+	var ids []uint32
 	if ids, err = lq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -100,7 +99,7 @@ func (lq *LangQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (lq *LangQuery) FirstIDX(ctx context.Context) uuid.UUID {
+func (lq *LangQuery) FirstIDX(ctx context.Context) uint32 {
 	id, err := lq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -138,8 +137,8 @@ func (lq *LangQuery) OnlyX(ctx context.Context) *Lang {
 // OnlyID is like Only, but returns the only Lang ID in the query.
 // Returns a *NotSingularError when more than one Lang ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (lq *LangQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
+func (lq *LangQuery) OnlyID(ctx context.Context) (id uint32, err error) {
+	var ids []uint32
 	if ids, err = lq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -155,7 +154,7 @@ func (lq *LangQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (lq *LangQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+func (lq *LangQuery) OnlyIDX(ctx context.Context) uint32 {
 	id, err := lq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -181,8 +180,8 @@ func (lq *LangQuery) AllX(ctx context.Context) []*Lang {
 }
 
 // IDs executes the query and returns a list of Lang IDs.
-func (lq *LangQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
+func (lq *LangQuery) IDs(ctx context.Context) ([]uint32, error) {
+	var ids []uint32
 	if err := lq.Select(lang.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -190,7 +189,7 @@ func (lq *LangQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (lq *LangQuery) IDsX(ctx context.Context) []uuid.UUID {
+func (lq *LangQuery) IDsX(ctx context.Context) []uint32 {
 	ids, err := lq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -377,7 +376,7 @@ func (lq *LangQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   lang.Table,
 			Columns: lang.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: lang.FieldID,
 			},
 		},

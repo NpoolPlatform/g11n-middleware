@@ -28,7 +28,7 @@ func init() {
 
 var (
 	ret = npool.Country{
-		ID:      uuid.NewString(),
+		EntID:   uuid.NewString(),
 		Country: uuid.NewString(),
 		Flag:    uuid.NewString(),
 		Code:    uuid.NewString(),
@@ -36,14 +36,14 @@ var (
 	}
 )
 
-func creatCountry(t *testing.T) {
+func createCountry(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
-		WithID(&ret.ID),
-		WithCountry(&ret.Country),
-		WithFlag(&ret.Flag),
-		WithCode(&ret.Code),
-		WithShort(&ret.Short),
+		WithEntID(&ret.EntID, true),
+		WithCountry(&ret.Country, true),
+		WithFlag(&ret.Flag, true),
+		WithCode(&ret.Code, true),
+		WithShort(&ret.Short, true),
 	)
 	assert.Nil(t, err)
 
@@ -51,6 +51,7 @@ func creatCountry(t *testing.T) {
 	if assert.Nil(t, err) {
 		ret.CreatedAt = info.CreatedAt
 		ret.UpdatedAt = info.UpdatedAt
+		ret.ID = info.ID
 		assert.Equal(t, info, &ret)
 	}
 }
@@ -62,20 +63,17 @@ func updateCountry(t *testing.T) {
 	ret.Short = uuid.NewString()
 	handler, err := NewHandler(
 		context.Background(),
-		WithID(&ret.ID),
-		WithCountry(&ret.Country),
-		WithFlag(&ret.Flag),
-		WithCode(&ret.Code),
-		WithShort(&ret.Short),
+		WithID(&ret.ID, true),
+		WithCountry(&ret.Country, false),
+		WithFlag(&ret.Flag, false),
+		WithCode(&ret.Code, false),
+		WithShort(&ret.Short, false),
 	)
 	assert.Nil(t, err)
 
 	info, err := handler.UpdateCountry(context.Background())
 	if assert.Nil(t, err) {
-		ret.Country = info.Country
-		ret.Flag = info.Flag
-		ret.Code = info.Code
-		ret.Short = info.Short
+		ret.UpdatedAt = info.UpdatedAt
 		assert.Equal(t, info, &ret)
 	}
 }
@@ -83,7 +81,7 @@ func updateCountry(t *testing.T) {
 func getCountry(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
-		WithID(&ret.ID),
+		WithEntID(&ret.EntID, true),
 	)
 	assert.Nil(t, err)
 
@@ -95,7 +93,7 @@ func getCountry(t *testing.T) {
 
 func getCountries(t *testing.T) {
 	conds := &npool.Conds{
-		ID: &basetypes.StringVal{Op: cruder.EQ, Value: ret.ID},
+		EntID: &basetypes.StringVal{Op: cruder.EQ, Value: ret.EntID},
 	}
 
 	handler, err := NewHandler(
@@ -115,7 +113,7 @@ func getCountries(t *testing.T) {
 func deleteCountry(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
-		WithID(&ret.ID),
+		WithID(&ret.ID, true),
 	)
 	assert.Nil(t, err)
 
@@ -134,7 +132,7 @@ func TestCountry(t *testing.T) {
 		return
 	}
 
-	t.Run("creatCountry", creatCountry)
+	t.Run("createCountry", createCountry)
 	t.Run("updateCountry", updateCountry)
 	t.Run("getCountry", getCountry)
 	t.Run("getCountries", getCountries)

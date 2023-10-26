@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 
-	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -61,6 +60,20 @@ func (mc *MessageCreate) SetDeletedAt(u uint32) *MessageCreate {
 func (mc *MessageCreate) SetNillableDeletedAt(u *uint32) *MessageCreate {
 	if u != nil {
 		mc.SetDeletedAt(*u)
+	}
+	return mc
+}
+
+// SetEntID sets the "ent_id" field.
+func (mc *MessageCreate) SetEntID(u uuid.UUID) *MessageCreate {
+	mc.mutation.SetEntID(u)
+	return mc
+}
+
+// SetNillableEntID sets the "ent_id" field if the given value is not nil.
+func (mc *MessageCreate) SetNillableEntID(u *uuid.UUID) *MessageCreate {
+	if u != nil {
+		mc.SetEntID(*u)
 	}
 	return mc
 }
@@ -164,16 +177,8 @@ func (mc *MessageCreate) SetNillableShort(s *string) *MessageCreate {
 }
 
 // SetID sets the "id" field.
-func (mc *MessageCreate) SetID(u uuid.UUID) *MessageCreate {
+func (mc *MessageCreate) SetID(u uint32) *MessageCreate {
 	mc.mutation.SetID(u)
-	return mc
-}
-
-// SetNillableID sets the "id" field if the given value is not nil.
-func (mc *MessageCreate) SetNillableID(u *uuid.UUID) *MessageCreate {
-	if u != nil {
-		mc.SetID(*u)
-	}
 	return mc
 }
 
@@ -277,6 +282,13 @@ func (mc *MessageCreate) defaults() error {
 		v := message.DefaultDeletedAt()
 		mc.mutation.SetDeletedAt(v)
 	}
+	if _, ok := mc.mutation.EntID(); !ok {
+		if message.DefaultEntID == nil {
+			return fmt.Errorf("ent: uninitialized message.DefaultEntID (forgotten import ent/runtime?)")
+		}
+		v := message.DefaultEntID()
+		mc.mutation.SetEntID(v)
+	}
 	if _, ok := mc.mutation.AppID(); !ok {
 		if message.DefaultAppID == nil {
 			return fmt.Errorf("ent: uninitialized message.DefaultAppID (forgotten import ent/runtime?)")
@@ -311,13 +323,6 @@ func (mc *MessageCreate) defaults() error {
 		v := message.DefaultShort
 		mc.mutation.SetShort(v)
 	}
-	if _, ok := mc.mutation.ID(); !ok {
-		if message.DefaultID == nil {
-			return fmt.Errorf("ent: uninitialized message.DefaultID (forgotten import ent/runtime?)")
-		}
-		v := message.DefaultID()
-		mc.mutation.SetID(v)
-	}
 	return nil
 }
 
@@ -332,6 +337,9 @@ func (mc *MessageCreate) check() error {
 	if _, ok := mc.mutation.DeletedAt(); !ok {
 		return &ValidationError{Name: "deleted_at", err: errors.New(`ent: missing required field "Message.deleted_at"`)}
 	}
+	if _, ok := mc.mutation.EntID(); !ok {
+		return &ValidationError{Name: "ent_id", err: errors.New(`ent: missing required field "Message.ent_id"`)}
+	}
 	return nil
 }
 
@@ -343,12 +351,9 @@ func (mc *MessageCreate) sqlSave(ctx context.Context) (*Message, error) {
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
-			_node.ID = *id
-		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
-			return nil, err
-		}
+	if _spec.ID.Value != _node.ID {
+		id := _spec.ID.Value.(int64)
+		_node.ID = uint32(id)
 	}
 	return _node, nil
 }
@@ -359,7 +364,7 @@ func (mc *MessageCreate) createSpec() (*Message, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: message.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: message.FieldID,
 			},
 		}
@@ -367,7 +372,7 @@ func (mc *MessageCreate) createSpec() (*Message, *sqlgraph.CreateSpec) {
 	_spec.OnConflict = mc.conflict
 	if id, ok := mc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = &id
+		_spec.ID.Value = id
 	}
 	if value, ok := mc.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -392,6 +397,14 @@ func (mc *MessageCreate) createSpec() (*Message, *sqlgraph.CreateSpec) {
 			Column: message.FieldDeletedAt,
 		})
 		_node.DeletedAt = value
+	}
+	if value, ok := mc.mutation.EntID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: message.FieldEntID,
+		})
+		_node.EntID = value
 	}
 	if value, ok := mc.mutation.AppID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -554,6 +567,18 @@ func (u *MessageUpsert) UpdateDeletedAt() *MessageUpsert {
 // AddDeletedAt adds v to the "deleted_at" field.
 func (u *MessageUpsert) AddDeletedAt(v uint32) *MessageUpsert {
 	u.Add(message.FieldDeletedAt, v)
+	return u
+}
+
+// SetEntID sets the "ent_id" field.
+func (u *MessageUpsert) SetEntID(v uuid.UUID) *MessageUpsert {
+	u.Set(message.FieldEntID, v)
+	return u
+}
+
+// UpdateEntID sets the "ent_id" field to the value that was provided on create.
+func (u *MessageUpsert) UpdateEntID() *MessageUpsert {
+	u.SetExcluded(message.FieldEntID)
 	return u
 }
 
@@ -802,6 +827,20 @@ func (u *MessageUpsertOne) UpdateDeletedAt() *MessageUpsertOne {
 	})
 }
 
+// SetEntID sets the "ent_id" field.
+func (u *MessageUpsertOne) SetEntID(v uuid.UUID) *MessageUpsertOne {
+	return u.Update(func(s *MessageUpsert) {
+		s.SetEntID(v)
+	})
+}
+
+// UpdateEntID sets the "ent_id" field to the value that was provided on create.
+func (u *MessageUpsertOne) UpdateEntID() *MessageUpsertOne {
+	return u.Update(func(s *MessageUpsert) {
+		s.UpdateEntID()
+	})
+}
+
 // SetAppID sets the "app_id" field.
 func (u *MessageUpsertOne) SetAppID(v uuid.UUID) *MessageUpsertOne {
 	return u.Update(func(s *MessageUpsert) {
@@ -972,12 +1011,7 @@ func (u *MessageUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *MessageUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
-	if u.create.driver.Dialect() == dialect.MySQL {
-		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
-		// fields from the database since MySQL does not support the RETURNING clause.
-		return id, errors.New("ent: MessageUpsertOne.ID is not supported by MySQL driver. Use MessageUpsertOne.Exec instead")
-	}
+func (u *MessageUpsertOne) ID(ctx context.Context) (id uint32, err error) {
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -986,7 +1020,7 @@ func (u *MessageUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *MessageUpsertOne) IDX(ctx context.Context) uuid.UUID {
+func (u *MessageUpsertOne) IDX(ctx context.Context) uint32 {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -1037,6 +1071,10 @@ func (mcb *MessageCreateBulk) Save(ctx context.Context) ([]*Message, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
+				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = uint32(id)
+				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -1232,6 +1270,20 @@ func (u *MessageUpsertBulk) AddDeletedAt(v uint32) *MessageUpsertBulk {
 func (u *MessageUpsertBulk) UpdateDeletedAt() *MessageUpsertBulk {
 	return u.Update(func(s *MessageUpsert) {
 		s.UpdateDeletedAt()
+	})
+}
+
+// SetEntID sets the "ent_id" field.
+func (u *MessageUpsertBulk) SetEntID(v uuid.UUID) *MessageUpsertBulk {
+	return u.Update(func(s *MessageUpsert) {
+		s.SetEntID(v)
+	})
+}
+
+// UpdateEntID sets the "ent_id" field to the value that was provided on create.
+func (u *MessageUpsertBulk) UpdateEntID() *MessageUpsertBulk {
+	return u.Update(func(s *MessageUpsert) {
+		s.UpdateEntID()
 	})
 }
 

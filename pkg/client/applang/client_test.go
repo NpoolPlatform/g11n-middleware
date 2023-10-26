@@ -34,7 +34,7 @@ func init() {
 
 var (
 	ret = npool.Lang{
-		ID:     uuid.NewString(),
+		EntID:  uuid.NewString(),
 		AppID:  uuid.NewString(),
 		LangID: uuid.NewString(),
 		Lang:   "test Lang" + uuid.NewString(),
@@ -48,11 +48,11 @@ var (
 func setupLang(t *testing.T) func(*testing.T) {
 	lh, err := lang.NewHandler(
 		context.Background(),
-		lang.WithID(&ret.LangID),
-		lang.WithLang(&ret.Lang),
-		lang.WithName(&ret.Name),
-		lang.WithLogo(&ret.Logo),
-		lang.WithShort(&ret.Short),
+		lang.WithEntID(&ret.LangID, true),
+		lang.WithLang(&ret.Lang, true),
+		lang.WithName(&ret.Name, true),
+		lang.WithLogo(&ret.Logo, true),
+		lang.WithShort(&ret.Short, true),
 	)
 	assert.Nil(t, err)
 	assert.NotNil(t, lh)
@@ -67,7 +67,7 @@ func setupLang(t *testing.T) func(*testing.T) {
 
 func createLang(t *testing.T) {
 	req := npool.LangReq{
-		ID:     &ret.ID,
+		EntID:  &ret.EntID,
 		AppID:  &ret.AppID,
 		LangID: &ret.LangID,
 		Main:   &ret.Main,
@@ -76,6 +76,7 @@ func createLang(t *testing.T) {
 	if assert.Nil(t, err) {
 		ret.CreatedAt = info.CreatedAt
 		ret.UpdatedAt = info.UpdatedAt
+		ret.ID = info.ID
 		assert.Equal(t, info, &ret)
 	}
 }
@@ -95,7 +96,7 @@ func updateLang(t *testing.T) {
 
 func getLang(t *testing.T) {
 	info, err := GetLangOnly(context.Background(), &npool.Conds{
-		ID: &basetypes.StringVal{Op: cruder.EQ, Value: ret.ID},
+		EntID: &basetypes.StringVal{Op: cruder.EQ, Value: ret.EntID},
 	})
 	if assert.Nil(t, err) {
 		assert.Equal(t, info, &ret)
@@ -113,15 +114,14 @@ func getLangs(t *testing.T) {
 
 func deleteLang(t *testing.T) {
 	info, err := DeleteLang(context.Background(), &npool.LangReq{
-		ID:    &ret.ID,
-		AppID: &ret.AppID,
+		ID: &ret.ID,
 	})
 	if assert.Nil(t, err) {
 		assert.Equal(t, info, &ret)
 	}
 
 	info, err = GetLangOnly(context.Background(), &npool.Conds{
-		ID: &basetypes.StringVal{Op: cruder.EQ, Value: ret.ID},
+		EntID: &basetypes.StringVal{Op: cruder.EQ, Value: ret.EntID},
 	})
 	assert.Nil(t, err)
 	assert.Nil(t, info)

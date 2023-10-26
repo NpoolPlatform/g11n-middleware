@@ -28,7 +28,7 @@ func init() {
 
 var (
 	ret = npool.Lang{
-		ID:    uuid.NewString(),
+		EntID: uuid.NewString(),
 		Lang:  uuid.NewString(),
 		Logo:  uuid.NewString(),
 		Name:  uuid.NewString(),
@@ -36,14 +36,14 @@ var (
 	}
 )
 
-func creatLang(t *testing.T) {
+func createLang(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
-		WithID(&ret.ID),
-		WithLang(&ret.Lang),
-		WithLogo(&ret.Logo),
-		WithName(&ret.Name),
-		WithShort(&ret.Short),
+		WithEntID(&ret.EntID, true),
+		WithLang(&ret.Lang, true),
+		WithLogo(&ret.Logo, true),
+		WithName(&ret.Name, true),
+		WithShort(&ret.Short, true),
 	)
 	assert.Nil(t, err)
 
@@ -51,6 +51,7 @@ func creatLang(t *testing.T) {
 	if assert.Nil(t, err) {
 		ret.CreatedAt = info.CreatedAt
 		ret.UpdatedAt = info.UpdatedAt
+		ret.ID = info.ID
 		assert.Equal(t, info, &ret)
 	}
 }
@@ -62,16 +63,17 @@ func updateLang(t *testing.T) {
 	ret.Short = uuid.NewString()
 	handler, err := NewHandler(
 		context.Background(),
-		WithID(&ret.ID),
-		WithLang(&ret.Lang),
-		WithLogo(&ret.Logo),
-		WithName(&ret.Name),
-		WithShort(&ret.Short),
+		WithID(&ret.ID, true),
+		WithLang(&ret.Lang, false),
+		WithLogo(&ret.Logo, false),
+		WithName(&ret.Name, false),
+		WithShort(&ret.Short, false),
 	)
 	assert.Nil(t, err)
 
 	info, err := handler.UpdateLang(context.Background())
 	if assert.Nil(t, err) {
+		ret.UpdatedAt = info.UpdatedAt
 		assert.Equal(t, info, &ret)
 	}
 }
@@ -79,7 +81,7 @@ func updateLang(t *testing.T) {
 func getLang(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
-		WithID(&ret.ID),
+		WithEntID(&ret.EntID, true),
 	)
 	assert.Nil(t, err)
 
@@ -91,7 +93,7 @@ func getLang(t *testing.T) {
 
 func getLangs(t *testing.T) {
 	conds := &npool.Conds{
-		ID: &basetypes.StringVal{Op: cruder.EQ, Value: ret.ID},
+		EntID: &basetypes.StringVal{Op: cruder.EQ, Value: ret.EntID},
 	}
 
 	handler, err := NewHandler(
@@ -111,7 +113,7 @@ func getLangs(t *testing.T) {
 func deleteLang(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
-		WithID(&ret.ID),
+		WithID(&ret.ID, true),
 	)
 	assert.Nil(t, err)
 
@@ -130,7 +132,7 @@ func TestLang(t *testing.T) {
 		return
 	}
 
-	t.Run("creatLang", creatLang)
+	t.Run("createLang", createLang)
 	t.Run("updateLang", updateLang)
 	t.Run("getLang", getLang)
 	t.Run("getLangs", getLangs)

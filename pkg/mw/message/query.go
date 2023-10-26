@@ -4,10 +4,12 @@ import (
 	"context"
 	"fmt"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db"
 	"github.com/NpoolPlatform/g11n-middleware/pkg/db/ent"
 
 	messagecrud "github.com/NpoolPlatform/g11n-middleware/pkg/crud/message"
+	entlang "github.com/NpoolPlatform/g11n-middleware/pkg/db/ent/lang"
 	entmessage "github.com/NpoolPlatform/g11n-middleware/pkg/db/ent/message"
 	npool "github.com/NpoolPlatform/message/npool/g11n/mw/v1/message"
 )
@@ -22,28 +24,30 @@ type queryHandler struct {
 func (h *queryHandler) selectMessage(stm *ent.MessageQuery) {
 	h.stm = stm.Select(
 		entmessage.FieldID,
+		entmessage.FieldEntID,
 		entmessage.FieldAppID,
 		entmessage.FieldLangID,
 		entmessage.FieldMessageID,
 		entmessage.FieldMessage,
 		entmessage.FieldGetIndex,
 		entmessage.FieldDisabled,
+		entmessage.FieldCreatedAt,
+		entmessage.FieldUpdatedAt,
 	)
 }
 
 func (h *queryHandler) queryMessage(cli *ent.Client) error {
-	if h.ID == nil {
-		return fmt.Errorf("invalid messageid")
+	if h.ID == nil && h.EntID == nil {
+		return fmt.Errorf("invalid id")
 	}
-	h.selectMessage(
-		cli.Message.
-			Query().
-			Where(
-				entmessage.ID(*h.ID),
-				entmessage.DeletedAt(0),
-			),
-	)
-
+	stm := cli.Message.Query().Where(entmessage.DeletedAt(0))
+	if h.ID != nil {
+		stm.Where(entmessage.ID(*h.ID))
+	}
+	if h.EntID != nil {
+		stm.Where(entmessage.EntID(*h.EntID))
+	}
+	h.selectMessage(stm)
 	return nil
 }
 
@@ -61,6 +65,28 @@ func (h *queryHandler) queryMessages(ctx context.Context, cli *ent.Client) error
 	return nil
 }
 
+func (h *queryHandler) queryJoinLang(s *sql.Selector) {
+	t := sql.Table(entlang.Table)
+	s.
+		LeftJoin(t).
+		On(
+			s.C(entmessage.FieldLangID),
+			t.C(entlang.FieldEntID),
+		).
+		OnP(
+			sql.EQ(t.C(entlang.FieldDeletedAt), 0),
+		).
+		AppendSelect(
+			sql.As(t.C(entlang.FieldLang), "lang"),
+		)
+}
+
+func (h *queryHandler) queryJoin() {
+	h.stm.Modify(func(s *sql.Selector) {
+		h.queryJoinLang(s)
+	})
+}
+
 func (h *queryHandler) scan(ctx context.Context) error {
 	return h.stm.Scan(ctx, &h.infos)
 }
@@ -74,6 +100,7 @@ func (h *Handler) GetMessage(ctx context.Context) (*npool.Message, error) {
 		if err := handler.queryMessage(cli); err != nil {
 			return err
 		}
+		handler.queryJoin()
 		if err := handler.scan(ctx); err != nil {
 			return err
 		}
@@ -101,6 +128,7 @@ func (h *Handler) GetMessages(ctx context.Context) ([]*npool.Message, uint32, er
 		if err := handler.queryMessages(_ctx, cli); err != nil {
 			return err
 		}
+		handler.queryJoin()
 		handler.stm.
 			Offset(int(h.Offset)).
 			Limit(int(h.Limit))
